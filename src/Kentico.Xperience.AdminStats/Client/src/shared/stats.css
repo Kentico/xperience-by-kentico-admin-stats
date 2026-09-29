@@ -129,3 +129,8 @@
 .AdminStats-tableScroll {
   overflow-x: auto;
 }
+
+/* Height is set inline from the item count. */
+.AdminStats-chart--ranked {
+  min-height: 160px;
+}

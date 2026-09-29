@@ -1,3 +1,5 @@
+import { StatsRankedCaptions, StatsRankedItem } from './types';
+
 export type CsvValue = string | number | null | undefined;
 
 function escapeCell(value: CsvValue): string {
@@ -21,6 +23,37 @@ export function toCsv(
   rows: readonly (readonly CsvValue[])[],
 ): string {
   return [header, ...rows].map((row) => row.map(escapeCell).join(',')).join('\r\n');
+}
+
+/**
+ * Builds CSV text for a ranked list: rank, label, optional secondary label, value,
+ * optional secondary value, share (%, one decimal) and URL.
+ */
+export function toRankedCsv(
+  items: readonly StatsRankedItem[],
+  captions: StatsRankedCaptions,
+): string {
+  const header: CsvValue[] = [
+    'Rank',
+    captions.label,
+    ...(captions.secondaryLabel ? [captions.secondaryLabel] : []),
+    captions.value,
+    ...(captions.secondaryValue ? [captions.secondaryValue] : []),
+    'Share (%)',
+    'URL',
+  ];
+
+  const rows = items.map((item): CsvValue[] => [
+    item.rank,
+    item.label,
+    ...(captions.secondaryLabel ? [item.secondaryLabel] : []),
+    item.value,
+    ...(captions.secondaryValue ? [item.secondaryValue] : []),
+    Math.round(item.share * 1000) / 10,
+    item.url,
+  ]);
+
+  return toCsv(header, rows);
 }
 
 /** Starts a browser download of CSV text. Adds a BOM so Excel reads UTF-8. */

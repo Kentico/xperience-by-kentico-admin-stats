@@ -27,7 +27,7 @@ internal sealed class ActivityCountsService(
     /// <summary>
     /// Cache expiry. Only this expiry or an explicit refresh drops cached data; data changes do not.
     /// </summary>
-    internal const double CacheMinutes = 5;
+    internal const double CacheMinutes = StatsCache.CacheMinutes;
 
     private readonly IActivityCountsRepository repository = repository;
     private readonly IProgressiveCache cache = cache;
@@ -37,32 +37,28 @@ internal sealed class ActivityCountsService(
     public async Task<ActivityCountsResult> GetReport(StatsQuery query, bool refresh, CancellationToken cancellationToken)
     {
         // Cache the daily aggregate (not the bucketed result) so switching grouping does not hit the database.
-        var dailyCountsSettings = new CacheSettings(
-            CacheMinutes,
-            StatsCache.ItemNamePrefix,
+        var dailyCountsSettings = StatsCache.CreateSettings(
             "activity-counts",
             query.From.DayNumber,
             query.To.DayNumber,
             query.ChannelId ?? 0);
 
-        var displayNamesSettings = new CacheSettings(CacheMinutes, StatsCache.ItemNamePrefix, "activity-type-names");
-
-        if (refresh)
-        {
-            cacheInvalidator.Remove(dailyCountsSettings);
-            cacheInvalidator.Remove(displayNamesSettings);
-        }
+        var displayNamesSettings = StatsCache.CreateSettings("activity-type-names");
 
         var dailyCounts = await cache.LoadAsync(
-            async (_, token) => new ActivityDailyCountsSnapshot(
+            cacheInvalidator,
+            dailyCountsSettings,
+            refresh,
+            async token => new ActivityDailyCountsSnapshot(
                 await repository.GetDailyCounts(query.From, query.To, query.ChannelId, token),
                 clock.GetUtcNow()),
-            dailyCountsSettings,
             cancellationToken);
 
         var displayNames = await cache.LoadAsync(
-            (_, token) => repository.GetActivityTypeDisplayNames(token),
+            cacheInvalidator,
             displayNamesSettings,
+            refresh,
+            repository.GetActivityTypeDisplayNames,
             cancellationToken);
 
         return ActivityCountsReportBuilder.Build(query, dailyCounts.Rows, displayNames) with { UpdatedAt = dailyCounts.ReadAt };

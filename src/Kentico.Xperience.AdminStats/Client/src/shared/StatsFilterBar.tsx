@@ -40,6 +40,8 @@ export interface StatsFilterBarProps {
   readonly isLoading?: boolean;
   /** ISO timestamp of when the shown data was read from the database. */
   readonly updatedAt?: string;
+  /** Shows the grouping control. Hide it for reports that use the range only (for example ranked lists). */
+  readonly showGrouping?: boolean;
 }
 
 const timeFormat = new Intl.DateTimeFormat(undefined, { timeStyle: 'short' });
@@ -73,6 +75,7 @@ export const StatsFilterBar = ({
   onRefresh,
   isLoading = false,
   updatedAt,
+  showGrouping = true,
 }: StatsFilterBarProps) => {
   const updatedText = updatedAt ? formatUpdatedAt(updatedAt) : null;
 
@@ -132,14 +135,16 @@ export const StatsFilterBar = ({
         </div>
       )}
 
-      <div className="AdminStats-filterItem">
-        <span className="AdminStats-label">Group by</span>
-        <NameToggleButtons
-          items={groupingItems}
-          selectedItemId={filter.grouping}
-          onChange={(id) => onChange({ ...filter, grouping: id as StatsGrouping })}
-        />
-      </div>
+      {showGrouping && (
+        <div className="AdminStats-filterItem">
+          <span className="AdminStats-label">Group by</span>
+          <NameToggleButtons
+            items={groupingItems}
+            selectedItemId={filter.grouping}
+            onChange={(id) => onChange({ ...filter, grouping: id as StatsGrouping })}
+          />
+        </div>
+      )}
 
       {channels.length > 0 && (
         <div className="AdminStats-filterItem AdminStats-filterItem--channel">

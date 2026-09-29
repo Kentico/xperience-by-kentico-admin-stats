@@ -26,7 +26,20 @@ Shows contact activities per activity type over time as a stacked column chart.
 - **Chart / table** - switch the tile to a table with the exact numbers.
 - **Export CSV** - downloads the table as a CSV file.
 
-Dates use the server date. Results are cached for 5 minutes, so new activities can take a few minutes to appear. Select **Refresh** to load the latest numbers.
+### Top pages
+
+Shows the 25 most visited page URLs in the range as a bar chart, largest on top.
+
+- **KPIs** - total page visits, number of distinct page URLs, and the top page.
+- **Filters** - date range and website channel (no grouping).
+- **Chart / table** - the table lists rank, URL (opens the page in a new tab), visits, unique contacts and share of all page visits in the range.
+- **Export CSV** - downloads the list as a CSV file.
+
+Visits are grouped by the logged URL with the query string and fragment removed, so `/page?utm_source=x` counts as `/page`. Other differences (host, trailing slash, letter case) count as different pages.
+
+### Dates and caching
+
+All reports: dates use the server date. Results are cached for 5 minutes, so new activities can take a few minutes to appear. Select **Refresh** to load the latest numbers.
 
 ## Data retention
 
