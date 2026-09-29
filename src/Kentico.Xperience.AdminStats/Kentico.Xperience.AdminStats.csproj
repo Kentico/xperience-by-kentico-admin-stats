@@ -41,6 +41,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AssemblyAttribute Include="CMS.AssemblyDiscoverableAttribute" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="Kentico.Xperience.AdminStats.Tests" />
   </ItemGroup>
 

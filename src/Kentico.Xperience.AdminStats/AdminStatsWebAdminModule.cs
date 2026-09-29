@@ -1,6 +1,5 @@
 using Kentico.Xperience.Admin.Base;
 
-[assembly: CMS.AssemblyDiscoverable]
 [assembly: CMS.RegisterModule(typeof(Kentico.Xperience.AdminStats.AdminStatsWebAdminModule))]
 
 namespace Kentico.Xperience.AdminStats;
