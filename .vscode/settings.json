@@ -35,7 +35,7 @@
   "dotnet.solution.autoOpen": "Kentico.Xperience.AdminStats.slnx",
 
   "eslint.workingDirectories": [
-    "./src/Kentico.Xperience.AdminStats.Admin/Client"
+    "./src/Kentico.Xperience.AdminStats/Client"
   ],
 
   "files.associations": {

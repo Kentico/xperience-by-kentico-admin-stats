@@ -9,8 +9,12 @@
     <PackageVersion Include="Kentico.Xperience.Admin" Version="31.9.0" />
     <PackageVersion Include="Kentico.Xperience.WebApp" Version="31.9.0" />
     <PackageVersion Include="kentico.xperience.azurestorage" Version="31.9.0" />
+    <PackageVersion Include="kentico.xperience.cloud" Version="31.9.0" />
     <PackageVersion Include="kentico.xperience.imageprocessing" Version="31.9.0" />
+    <PackageVersion Include="kentico.xperience.managementapi" Version="31.9.0" />
+    <PackageVersion Include="kentico.xperience.mjml" Version="31.9.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.23.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
     <PackageVersion Include="NUnit" Version="4.3.2" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.7.0" />

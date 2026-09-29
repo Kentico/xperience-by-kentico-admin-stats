@@ -15,7 +15,7 @@ The requirements to setup, develop, and build this project are listed below.
 
 - [Node.js](https://nodejs.org/en/download) LTS or newer
 - [NVM for Windows](https://github.com/coreybutler/nvm-windows) or [NVM for macOS](https://github.com/nvm-sh/nvm) to manage multiple installed versions of Node.js
-- See `engines` in the solution `package.json` for specific version requirements
+- Node.js 24 or newer; see `engines` in `src/Kentico.Xperience.AdminStats/Client/package.json`
 
 ### C# Editor
 
@@ -37,6 +37,8 @@ SQL Server 2019 or newer compatible database
 ## Sample Project
 
 ### Database Setup
+
+Build the Admin client first (`dotnet: build` needs `Client/dist`): run the `npm: install - Admin/Client` and `npm: build:dev - Admin/Client` VS Code tasks, then start `npm: watch - Admin/Client` alongside `dotnet: watch DancingGoat`.
 
 Running the sample project requires creating a new Xperience by Kentico database using the included template.
 
