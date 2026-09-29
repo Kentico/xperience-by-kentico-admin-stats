@@ -47,13 +47,14 @@ documentation on [creating a new database](https://docs.kentico.com/documentatio
 
 ### Admin Customization
 
-To run the Sample app Admin customization in development mode, add the following to your [User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-10.0&tabs=windows#secret-manager) for the application.
+`examples/DancingGoat/appsettings.Development.json` runs the Admin customization in Proxy mode, so the admin loads the client from the `npm: watch - Admin/Client` dev server. Keep that task running while DancingGoat runs, or the Stats (Labs) pages will not load. To use the built `Client/dist` bundle instead, remove this section (a rebuild and restart of DancingGoat is then needed to see client changes).
 
 ```json
 "CMSAdminClientModuleSettings": {
   "kentico-xperience-admin-stats": {
     "Mode": "Proxy",
-    "Port": 3009
+    "Port": 3009,
+    "UseSSL": true
   }
 }
 ```
