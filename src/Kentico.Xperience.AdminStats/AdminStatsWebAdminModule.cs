@@ -2,6 +2,7 @@ using CMS.Core;
 
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.AdminStats.Reports.ActivityCounts;
+using Kentico.Xperience.AdminStats.Reports.Consents;
 using Kentico.Xperience.AdminStats.Reports.ContentInventory;
 using Kentico.Xperience.AdminStats.Reports.Customers;
 using Kentico.Xperience.AdminStats.Reports.EventLog;
@@ -65,5 +66,7 @@ internal sealed class AdminStatsWebAdminModule : AdminModule
         services.TryAddTransient<ICustomersService, CustomersService>();
         services.TryAddTransient<IMembersRepository, MembersRepository>();
         services.TryAddTransient<IMembersService, MembersService>();
+        services.TryAddTransient<IConsentsRepository, ConsentsRepository>();
+        services.TryAddTransient<IConsentsService, ConsentsService>();
     }
 }

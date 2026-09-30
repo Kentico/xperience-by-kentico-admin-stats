@@ -1,5 +1,6 @@
 // Exposes components from the module. All added components need to be exported.
 import { ActivityCountsTemplate as ActivityCounts } from './activity-counts/ActivityCountsTemplate';
+import { ConsentsTemplate as Consents } from './consents/ConsentsTemplate';
 import { ContentInventoryTemplate as ContentInventory } from './content-inventory/ContentInventoryTemplate';
 import { CustomersTemplate as Customers } from './customers/CustomersTemplate';
 import { EventLogTemplate as EventLog } from './event-log/EventLogTemplate';
@@ -20,5 +21,6 @@ export const EventLogTemplate = withExportPermission(EventLog);
 export const OrdersRevenueTemplate = withExportPermission(OrdersRevenue);
 export const CustomersTemplate = withExportPermission(Customers);
 export const MembersTemplate = withExportPermission(Members);
+export const ConsentsTemplate = withExportPermission(Consents);
 
 export { NoReportsTemplate } from './no-reports/NoReportsTemplate';

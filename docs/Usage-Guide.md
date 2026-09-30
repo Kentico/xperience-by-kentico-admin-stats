@@ -13,12 +13,12 @@ The library adds the **Stats (Labs)** application to the **Digital marketing** c
 
 Reports are grouped into sections. Opening the application or a section opens its first report the role may see.
 
-| Section  | Reports                                                                          |
-| -------- | -------------------------------------------------------------------------------- |
-| Contacts | Activity counts, Top pages, New contacts, Form submissions, Member registrations |
-| Content  | Content inventory                                                                |
-| Commerce | Orders and revenue, Customers                                                    |
-| System   | Event log                                                                        |
+| Section  | Reports                                                                                    |
+| -------- | ------------------------------------------------------------------------------------------ |
+| Contacts | Activity counts, Top pages, New contacts, Form submissions, Member registrations, Consents |
+| Content  | Content inventory                                                                          |
+| Commerce | Orders and revenue, Customers                                                              |
+| System   | Event log                                                                                  |
 
 Sections have no permission of their own. A section is hidden when the role has no permission for any of its reports. A role with **View** but no report permission sees a **No reports available** message.
 
@@ -41,6 +41,7 @@ Sections have no permission of their own. A section is hidden when the role has 
 | Orders and revenue   | `Kentico.Xperience.AdminStats.OrdersRevenue`    |
 | Customers            | `Kentico.Xperience.AdminStats.Customers`        |
 | Member registrations | `Kentico.Xperience.AdminStats.Members`          |
+| Consents             | `Kentico.Xperience.AdminStats.Consents`         |
 | Export               | `Kentico.Xperience.AdminStats.Export`           |
 
 The **Export** permission only hides the buttons. The CSV is built in the browser from the data the report already shows, so a role that can see a report can still copy its numbers. It is not data protection.
@@ -111,6 +112,27 @@ Shows [members](https://docs.kentico.com/documentation/business-users/members) (
 - Each tile has its own CSV export.
 
 Deleted members are not counted. When the member tables do not exist, the report is empty.
+
+### Consents
+
+Shows [consent](https://docs.kentico.com/documentation/developers-and-admins/data-protection/consent-management) agreements and revocations over time, agreed contacts, all consents compared and which consent text agreed contacts agreed to.
+
+- **Definitions**
+  - **Agreement** / **revocation** - one agree or revoke action of a contact in the range. Agreeing again (for example to a new consent text) counts again.
+  - **Agreed contacts** (on a day) - contacts whose latest agreement or revocation of the consent on or before that day is an agreement (the same rule the product uses). With **All consents**, each contact who agrees to at least one consent is counted once (not the sum per consent), so the number means "contacts you may process data of".
+  - **Revocation rate** - revocations divided by agreements in the range ("–" without agreements; the change is in percentage points, "pp").
+  - **Older text** - agreed contacts whose latest agreement was given to an older consent text (its hash is not the consent's current hash).
+- **KPIs** - agreements, revocations, revocation rate and agreed contacts (on the last day of the range vs the last day of the previous period), each vs the previous period of the same length.
+- **Filters** - date range, grouping and consent (all consents or one; no channel).
+- **Tiles**
+  - "Agreements and revocations" - stacked columns per period, or a table.
+  - "Agreed contacts over time" - agreed contacts at the end of each period as a line, or a table (no total column; the values are counts on a day and do not add up).
+  - "Consent text version" - per consent, agreed contacts on the current text vs an older text. Contacts on an older text may need to agree again.
+  - "Consents" - all consents (the consent filter does not apply, so consents can be compared): agreed contacts on the last day of the range with the previous period value and change, and agreements and revocations in the range. A contact can agree to several consents, so shares are of all agreed contacts and do not add up to 100%. Click a consent to open its **Consent agreements** in the native **Data protection** application.
+- **Open data protection** - opens the consents of the native **Data protection** application.
+- Each tile has its own CSV export.
+
+The report reads the stored agreements only and compares consent texts by hash, not by content. Deleting a contact also deletes its consent agreements, also for past days, so numbers can be lower than they were. Revoking can trigger data erasure in projects that handle it. When the consent tables do not exist, the report is empty.
 
 ### Content inventory
 
@@ -187,7 +209,7 @@ The event log keeps at most the number of events in **Settings → System → Ev
 
 ### Dates and caching
 
-Time-based reports use the server date. Results of all reports are cached for 5 minutes, so new activities, contacts, submissions, content changes, events, orders, customers and members can take a few minutes to appear. Select **Refresh** to load the latest numbers.
+Time-based reports use the server date. Results of all reports are cached for 5 minutes, so new activities, contacts, submissions, content changes, events, orders, customers, members and consent agreements can take a few minutes to appear. Select **Refresh** to load the latest numbers.
 
 ## Data retention
 

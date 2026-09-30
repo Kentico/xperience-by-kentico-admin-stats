@@ -13,7 +13,7 @@ using Kentico.Xperience.AdminStats.Admin;
 namespace Kentico.Xperience.AdminStats.Admin;
 
 /// <summary>
-/// Contact and activity reports: activity counts, top pages, new contacts, form submissions and member registrations.
+/// Contact and activity reports: activity counts, top pages, new contacts, form submissions, member registrations and consents.
 /// </summary>
 public sealed class StatsContactsSection(
     IUIPermissionEvaluator permissionEvaluator,

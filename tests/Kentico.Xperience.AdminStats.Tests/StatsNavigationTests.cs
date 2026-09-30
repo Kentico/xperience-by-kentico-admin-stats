@@ -16,6 +16,7 @@ public class StatsNavigationTests
         StatsPermissions.ORDERS_REVENUE,
         StatsPermissions.CUSTOMERS,
         StatsPermissions.MEMBERS,
+        StatsPermissions.CONSENTS,
     ];
 
     [Test]
@@ -32,7 +33,7 @@ public class StatsNavigationTests
         });
     }
 
-    [TestCase(typeof(StatsContactsSection), new[] { "activity-counts", "top-pages", "new-contacts", "form-submissions", "members" })]
+    [TestCase(typeof(StatsContactsSection), new[] { "activity-counts", "top-pages", "new-contacts", "form-submissions", "members", "consents" })]
     [TestCase(typeof(StatsContentSection), new[] { "content-inventory" })]
     [TestCase(typeof(StatsCommerceSection), new[] { "orders-revenue", "customers" })]
     [TestCase(typeof(StatsSystemSection), new[] { "event-log" })]
@@ -89,9 +90,25 @@ public class StatsNavigationTests
         Assert.Multiple(() =>
         {
             Assert.That(deniedSections, Is.EquivalentTo(new[] { "content", "commerce", "system" }));
-            Assert.That(deniedReports, Is.EquivalentTo(new[] { "activity-counts", "top-pages", "new-contacts", "form-submissions" }));
+            Assert.That(deniedReports, Is.EquivalentTo(new[] { "activity-counts", "top-pages", "new-contacts", "form-submissions", "consents" }));
             Assert.That(StatsNavigation.GetDefaultRoute(ChildRoutes(typeof(StatsApplicationPage)), deniedSections)?.Path, Is.EqualTo("contacts"));
             Assert.That(StatsNavigation.GetDefaultRoute(ChildRoutes(typeof(StatsContactsSection)), deniedReports)?.Path, Is.EqualTo("members"));
+        });
+    }
+
+    [Test]
+    public async Task OnlyConsents_ShowsContactsSection_AndOpensConsents()
+    {
+        var isGranted = Granted(StatsPermissions.CONSENTS);
+
+        var deniedSections = await StatsNavigation.GetDeniedChildSlugs(typeof(StatsApplicationPage), isGranted);
+        var deniedReports = await StatsNavigation.GetDeniedChildSlugs(typeof(StatsContactsSection), isGranted);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(deniedSections, Is.EquivalentTo(new[] { "content", "commerce", "system" }));
+            Assert.That(deniedReports, Is.EquivalentTo(new[] { "activity-counts", "top-pages", "new-contacts", "form-submissions", "members" }));
+            Assert.That(StatsNavigation.GetDefaultRoute(ChildRoutes(typeof(StatsContactsSection)), deniedReports)?.Path, Is.EqualTo("consents"));
         });
     }
 
