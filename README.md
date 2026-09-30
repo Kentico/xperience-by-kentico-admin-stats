@@ -9,6 +9,7 @@ This project is a Kentico Labs example that shows basic charts about your Xperie
 ### Screenshots
 
 ![Activity counts stats graph page](./docs/images/dancing-goat-activity-counts-stats.jpg)
+![New contacts stats graph page](./docs/images/dancing-goat-new-contacts-stats.jpg)
 
 ## Requirements
 
