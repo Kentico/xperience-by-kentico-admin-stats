@@ -9,7 +9,7 @@ import {
 } from '@kentico/xperience-admin-components';
 import React, { useMemo } from 'react';
 
-import { formatShare, numberFormat } from './format';
+import { formatItemChange, formatShare, numberFormat } from './format';
 import { column, stringCell } from './table';
 import { StatsRankedCaptions, StatsRankedItem } from './types';
 
@@ -25,13 +25,15 @@ export interface RankedTableProps {
 
 /**
  * Ranked list as a native admin table: rank, label (link when the item has a URL or admin link),
- * value, optional secondary value and share.
+ * value, optional secondary value, optional previous period value and change, and share.
  * Uses the same cell types as the other report tables (string cells, plus the admin link cell),
  * so rows keep the native single-line layout. The admin table has no column alignment option,
  * so numbers are left aligned like in other admin listings.
  */
 export const RankedTable = ({ items, captions, getAdminHref }: RankedTableProps) => {
   const showSecondaryValue = Boolean(captions.secondaryValue);
+  const showPreviousValue = Boolean(captions.previousValue);
+  const showChange = Boolean(captions.change);
 
   const columns = useMemo<TableColumn[]>(
     () => [
@@ -39,9 +41,11 @@ export const RankedTable = ({ items, captions, getAdminHref }: RankedTableProps)
       column('label', captions.label, 30, 100),
       column('value', captions.value, 10, 16),
       ...(showSecondaryValue ? [column('secondaryValue', captions.secondaryValue ?? '', 12, 20)] : []),
+      ...(showPreviousValue ? [column('previousValue', captions.previousValue ?? '', 12, 20)] : []),
+      ...(showChange ? [column('change', captions.change ?? '', 10, 14)] : []),
       column('share', 'Share', 10, 14),
     ],
-    [captions, showSecondaryValue],
+    [captions, showSecondaryValue, showPreviousValue, showChange],
   );
 
   const rows = useMemo<TableRow[]>(
@@ -61,10 +65,21 @@ export const RankedTable = ({ items, captions, getAdminHref }: RankedTableProps)
                 ),
               ]
             : []),
+          ...(showPreviousValue
+            ? [
+                stringCell(
+                  'previousValue',
+                  item.previousValue === null || item.previousValue === undefined
+                    ? '–'
+                    : numberFormat.format(item.previousValue),
+                ),
+              ]
+            : []),
+          ...(showChange ? [stringCell('change', formatItemChange(item))] : []),
           stringCell('share', formatShare(item.share)),
         ],
       })),
-    [items, showSecondaryValue, getAdminHref],
+    [items, showSecondaryValue, showPreviousValue, showChange, getAdminHref],
   );
 
   return (

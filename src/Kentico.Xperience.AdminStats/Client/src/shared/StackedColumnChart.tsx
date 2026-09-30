@@ -3,8 +3,9 @@ import am5ThemesAnimated from '@amcharts/amcharts5/themes/Animated';
 import * as am5xy from '@amcharts/amcharts5/xy';
 import React, { useId, useLayoutEffect, useMemo } from 'react';
 
-import { getChartTokens, getSeriesPalette, getXbkTheme } from './chartTheme';
+import { getChartTokens, getSeriesPalette, getXbkTheme, resolveToken } from './chartTheme';
 import { StatsPeriod, StatsSeries } from './types';
+import { useStableValue } from './useStableValue';
 
 export interface StackedColumnChartProps {
   readonly periods: readonly StatsPeriod[];
@@ -19,14 +20,15 @@ type ChartRow = Record<string, string | number>;
  * Stacked column chart (amCharts 5): one column per period, one stack segment per series.
  * The root is created in `useLayoutEffect` and disposed on unmount or data change.
  */
-export const StackedColumnChart = ({
+export const StackedColumnChart = React.memo(function StackedColumnChart({
   periods,
-  series,
+  series: seriesProp,
   ariaLabel,
-}: StackedColumnChartProps) => {
+}: StackedColumnChartProps) {
+  const series = useStableValue(seriesProp);
   const chartId = `stats-chart-${useId().replace(/:/g, '')}`;
 
-  const data = useMemo<ChartRow[]>(
+  const rows = useMemo<ChartRow[]>(
     () =>
       periods.map((period, index) => {
         const row: ChartRow = { category: period.label };
@@ -37,6 +39,8 @@ export const StackedColumnChart = ({
       }),
     [periods, series],
   );
+  // Rebuild the chart only when the rows change by content, not on every new prop identity.
+  const data = useStableValue(rows);
 
   useLayoutEffect(() => {
     const root = am5.Root.new(chartId);
@@ -118,6 +122,12 @@ export const StackedColumnChart = ({
           tooltip,
         }),
       );
+      // A fixed series color (for example error / warning / information) overrides the palette.
+      const fixedColor = item.color ? resolveToken(item.color) : undefined;
+      if (fixedColor) {
+        columnSeries.set('fill', am5.color(fixedColor));
+        columnSeries.set('stroke', am5.color(fixedColor));
+      }
       columnSeries.columns.template.setAll({
         tooltipText: '[bold]{name}[/]\n{categoryX}: {valueY}',
         width: am5.percent(90),
@@ -154,4 +164,4 @@ export const StackedColumnChart = ({
       className="AdminStats-chart"
     />
   );
-};
+});

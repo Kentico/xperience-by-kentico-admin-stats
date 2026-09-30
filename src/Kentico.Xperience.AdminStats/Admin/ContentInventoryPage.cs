@@ -1,5 +1,3 @@
-using CMS.Membership;
-
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.AdminStats.Admin;
 using Kentico.Xperience.AdminStats.Reports.ContentInventory;
@@ -19,7 +17,7 @@ namespace Kentico.Xperience.AdminStats.Admin;
 /// <summary>
 /// Current state of content items by content type, status and language.
 /// </summary>
-[UIEvaluatePermission(SystemPermissions.VIEW)]
+[UIEvaluatePermission(StatsPermissions.CONTENT_INVENTORY)]
 public sealed class ContentInventoryPage(
     IContentInventoryService contentInventoryService,
     IStatsChannelOptionsProvider channelOptionsProvider,
@@ -42,7 +40,7 @@ public sealed class ContentInventoryPage(
         return properties;
     }
 
-    [PageCommand(CommandName = "LOAD", Permission = SystemPermissions.VIEW)]
+    [PageCommand(CommandName = "LOAD", Permission = StatsPermissions.CONTENT_INVENTORY)]
     public async Task<ICommandResponse<ContentInventoryResult>> Load(StatsSnapshotLoadRequest request, CancellationToken cancellationToken)
     {
         // A channel that does not fit the kind (for example an email channel with pages) is dropped.

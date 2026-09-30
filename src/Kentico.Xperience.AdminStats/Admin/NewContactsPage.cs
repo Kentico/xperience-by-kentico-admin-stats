@@ -1,5 +1,3 @@
-using CMS.Membership;
-
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.AdminStats.Admin;
 using Kentico.Xperience.AdminStats.Reports.NewContacts;
@@ -19,7 +17,7 @@ namespace Kentico.Xperience.AdminStats.Admin;
 /// <summary>
 /// New contacts over time, identified vs anonymous.
 /// </summary>
-[UIEvaluatePermission(SystemPermissions.VIEW)]
+[UIEvaluatePermission(StatsPermissions.NEW_CONTACTS)]
 public sealed class NewContactsPage(
     INewContactsService newContactsService,
     TimeProvider clock) : Page<NewContactsClientProperties>
@@ -39,7 +37,7 @@ public sealed class NewContactsPage(
         return properties;
     }
 
-    [PageCommand(CommandName = "LOAD", Permission = SystemPermissions.VIEW)]
+    [PageCommand(CommandName = "LOAD", Permission = StatsPermissions.NEW_CONTACTS)]
     public async Task<ICommandResponse<NewContactsResult>> Load(StatsLoadRequest request, CancellationToken cancellationToken)
     {
         var query = (request?.Filter ?? new StatsFilter()).Normalize(GetToday());

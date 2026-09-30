@@ -1,5 +1,3 @@
-using CMS.Membership;
-
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.AdminStats.Admin;
 using Kentico.Xperience.AdminStats.Reports.FormSubmissions;
@@ -19,7 +17,7 @@ namespace Kentico.Xperience.AdminStats.Admin;
 /// <summary>
 /// Form submissions per form over time, most and least used forms.
 /// </summary>
-[UIEvaluatePermission(SystemPermissions.VIEW)]
+[UIEvaluatePermission(StatsPermissions.FORM_SUBMISSIONS)]
 public sealed class FormSubmissionsPage(
     IFormSubmissionsService formSubmissionsService,
     IPageLinkGenerator pageLinkGenerator,
@@ -42,7 +40,7 @@ public sealed class FormSubmissionsPage(
         return properties;
     }
 
-    [PageCommand(CommandName = "LOAD", Permission = SystemPermissions.VIEW)]
+    [PageCommand(CommandName = "LOAD", Permission = StatsPermissions.FORM_SUBMISSIONS)]
     public async Task<ICommandResponse<FormSubmissionsResult>> Load(StatsLoadRequest request, CancellationToken cancellationToken)
     {
         var query = (request?.Filter ?? new StatsFilter()).Normalize(GetToday());

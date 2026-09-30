@@ -1,5 +1,4 @@
 using CMS.ContentEngine;
-using CMS.Membership;
 
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.AdminStats.Admin;
@@ -20,7 +19,7 @@ namespace Kentico.Xperience.AdminStats.Admin;
 /// <summary>
 /// Most visited pages in a date range.
 /// </summary>
-[UIEvaluatePermission(SystemPermissions.VIEW)]
+[UIEvaluatePermission(StatsPermissions.TOP_PAGES)]
 public sealed class TopPagesPage(
     ITopPagesService topPagesService,
     IStatsChannelOptionsProvider channelOptionsProvider,
@@ -45,7 +44,7 @@ public sealed class TopPagesPage(
         return properties;
     }
 
-    [PageCommand(CommandName = "LOAD", Permission = SystemPermissions.VIEW)]
+    [PageCommand(CommandName = "LOAD", Permission = StatsPermissions.TOP_PAGES)]
     public async Task<ICommandResponse<StatsRankedResult>> Load(StatsLoadRequest request, CancellationToken cancellationToken)
     {
         var query = (request?.Filter ?? new StatsFilter()).Normalize(GetToday());

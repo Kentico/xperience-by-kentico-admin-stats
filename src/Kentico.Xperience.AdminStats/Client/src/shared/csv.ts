@@ -1,3 +1,4 @@
+import { formatItemChange } from './format';
 import { periodTotals } from './timeSeries';
 import {
   StatsAgedItem,
@@ -36,7 +37,7 @@ export function toCsv(
 
 /**
  * Builds CSV text for a ranked list: rank, label, optional secondary label, value,
- * optional secondary value, share (%, one decimal) and URL (the absolute URL, else the admin link
+ * optional secondary value, optional previous value and change (%, one decimal), share (%, one decimal) and URL (the absolute URL, else the admin link
  * from `getAdminHref` made absolute).
  */
 export function toRankedCsv(
@@ -50,6 +51,8 @@ export function toRankedCsv(
     ...(captions.secondaryLabel ? [captions.secondaryLabel] : []),
     captions.value,
     ...(captions.secondaryValue ? [captions.secondaryValue] : []),
+    ...(captions.previousValue ? [captions.previousValue] : []),
+    ...(captions.change ? [`${captions.change} (%)`] : []),
     'Share (%)',
     'URL',
   ];
@@ -60,6 +63,8 @@ export function toRankedCsv(
     ...(captions.secondaryLabel ? [item.secondaryLabel] : []),
     item.value,
     ...(captions.secondaryValue ? [item.secondaryValue] : []),
+    ...(captions.previousValue ? [item.previousValue] : []),
+    ...(captions.change ? [toChangeCsv(item)] : []),
     Math.round(item.share * 1000) / 10,
     item.url ?? toAbsoluteUrl(getAdminHref?.(item) ?? null),
   ]);
@@ -182,6 +187,14 @@ export function downloadCsv(fileName: string, csv: string): void {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+/** Change in % with one decimal; "New" or empty when there is no ratio (see `formatItemChange`). */
+function toChangeCsv(item: StatsRankedItem): CsvValue {
+  if (item.change !== null && item.change !== undefined) {
+    return Math.round(item.change * 1000) / 10;
+  }
+  return formatItemChange(item) === 'New' ? 'New' : null;
 }
 
 /** Makes a same-origin path absolute, so CSV links work outside the admin. */

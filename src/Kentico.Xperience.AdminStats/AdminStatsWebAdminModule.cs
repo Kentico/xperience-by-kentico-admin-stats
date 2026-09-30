@@ -3,6 +3,7 @@ using CMS.Core;
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.AdminStats.Reports.ActivityCounts;
 using Kentico.Xperience.AdminStats.Reports.ContentInventory;
+using Kentico.Xperience.AdminStats.Reports.EventLog;
 using Kentico.Xperience.AdminStats.Reports.FormSubmissions;
 using Kentico.Xperience.AdminStats.Reports.NewContacts;
 using Kentico.Xperience.AdminStats.Reports.TopPages;
@@ -52,5 +53,7 @@ internal sealed class AdminStatsWebAdminModule : AdminModule
         services.TryAddTransient<IFormSubmissionsService, FormSubmissionsService>();
         services.TryAddTransient<IContentInventoryRepository, ContentInventoryRepository>();
         services.TryAddTransient<IContentInventoryService, ContentInventoryService>();
+        services.TryAddTransient<IEventLogRepository, EventLogRepository>();
+        services.TryAddTransient<IEventLogReportService, EventLogReportService>();
     }
 }

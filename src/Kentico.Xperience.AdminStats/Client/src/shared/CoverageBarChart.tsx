@@ -7,6 +7,7 @@ import React, { useId, useLayoutEffect, useMemo } from 'react';
 import { getChartTokens, getSeriesPalette, getXbkTheme, resolveToken } from './chartTheme';
 import { formatShare, numberFormat } from './format';
 import { StatsCoverageItem } from './types';
+import { useStableValue } from './useStableValue';
 
 export interface CoverageCaptions {
   /** Caption of the covered part, for example "With variant". */
@@ -47,10 +48,10 @@ function escapeChartText(text: string): string {
  * series color and the missing part in the disabled background color (like an empty track).
  * The root is created in `useLayoutEffect` and disposed on unmount or data change.
  */
-export const CoverageBarChart = ({ items, captions, ariaLabel }: CoverageBarChartProps) => {
+export const CoverageBarChart = React.memo(function CoverageBarChart({ items, captions, ariaLabel }: CoverageBarChartProps) {
   const chartId = `stats-chart-${useId().replace(/:/g, '')}`;
 
-  const data = useMemo<ChartRow[]>(
+  const rows = useMemo<ChartRow[]>(
     () =>
       items.map((item) => ({
         key: item.key,
@@ -65,6 +66,8 @@ export const CoverageBarChart = ({ items, captions, ariaLabel }: CoverageBarChar
       })),
     [items, captions],
   );
+  // Rebuild the chart only when the rows change by content, not on every new prop identity.
+  const data = useStableValue(rows);
 
   const height = Math.max(minHeight, data.length * rowHeight + chartPadding);
 
@@ -211,4 +214,4 @@ export const CoverageBarChart = ({ items, captions, ariaLabel }: CoverageBarChar
       style={{ height }}
     />
   );
-};
+});

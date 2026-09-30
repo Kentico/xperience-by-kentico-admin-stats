@@ -41,3 +41,18 @@ export function formatComparison(comparison: StatsComparison, noun: string): str
     ? `No ${noun} in ${period}`
     : `${formatChange(comparison.change)} vs ${period}`;
 }
+
+/**
+ * Change of a ranked item vs the previous period, for example "+12%".
+ * "New" when the item had no events in the previous period, "–" when the item has no comparison.
+ */
+export function formatItemChange(item: {
+  readonly value: number;
+  readonly previousValue?: number | null;
+  readonly change?: number | null;
+}): string {
+  if (item.change !== null && item.change !== undefined) {
+    return formatChange(item.change);
+  }
+  return item.previousValue === 0 && item.value > 0 ? 'New' : '–';
+}

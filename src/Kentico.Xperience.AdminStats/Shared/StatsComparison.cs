@@ -32,8 +32,13 @@ public sealed record StatsComparison(int Current, int Previous, double? Change, 
     public static StatsComparison Create(StatsQuery query, int current, int previous)
     {
         var (from, to) = GetPreviousRange(query);
-        double? change = previous == 0 ? null : (double)(current - previous) / previous;
 
-        return new(current, previous, change, from, to);
+        return new(current, previous, GetChange(current, previous), from, to);
     }
+
+    /// <summary>
+    /// Returns the relative change as a ratio (0.12 = +12%, -0.5 = -50%), or <c>null</c> when <paramref name="previous"/> is 0.
+    /// </summary>
+    public static double? GetChange(int current, int previous) =>
+        previous == 0 ? null : (double)(current - previous) / previous;
 }

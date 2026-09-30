@@ -3,7 +3,7 @@ import {
   NameToggleButton,
   NameToggleButtons,
 } from '@kentico/xperience-admin-components';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 import { addDays, formatDateOnly, parseDateOnly, rangeLength } from './dates';
 import { ChannelSelect, RefreshControl } from './filterControls';
@@ -40,6 +40,10 @@ export interface StatsFilterBarProps {
   readonly showGrouping?: boolean;
   /** Shows the channel filter (when there are channel options). Hide it for data without a channel (for example contacts). */
   readonly showChannel?: boolean;
+  /** Report-specific filter items shown after the shared filters (for example an `OptionToggle`). */
+  readonly children?: ReactNode;
+  /** Extra buttons shown before the refresh button (for example a link to a native application). */
+  readonly actions?: ReactNode;
 }
 
 function getPresetId(filter: StatsFilter, today: string): string {
@@ -63,6 +67,8 @@ export const StatsFilterBar = ({
   updatedAt,
   showGrouping = true,
   showChannel = true,
+  children,
+  actions,
 }: StatsFilterBarProps) => {
   const [showCustom, setShowCustom] = React.useState(
     () => getPresetId(filter, today) === customPresetId,
@@ -134,8 +140,15 @@ export const StatsFilterBar = ({
         />
       )}
 
+      {children}
+
       {onRefresh && (
-        <RefreshControl onRefresh={onRefresh} isLoading={isLoading} updatedAt={updatedAt} />
+        <RefreshControl
+          onRefresh={onRefresh}
+          isLoading={isLoading}
+          updatedAt={updatedAt}
+          actions={actions}
+        />
       )}
     </div>
   );

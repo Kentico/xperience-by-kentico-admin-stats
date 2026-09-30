@@ -109,6 +109,43 @@ public class StatsRankedBuilderTests
     }
 
     [Test]
+    public void Build_WithoutPreviousValue_LeavesChangeEmpty()
+    {
+        var result = StatsRankedBuilder.Build(query, [Entry("a", 4)], total: 4, itemCount: 1, limit: 25);
+
+        Assert.That(result.Items.Single().PreviousValue, Is.Null);
+        Assert.That(result.Items.Single().Change, Is.Null);
+    }
+
+    [Test]
+    public void Build_WithPreviousValue_ComputesChange_NullWhenPreviousIsZero()
+    {
+        var result = StatsRankedBuilder.Build(
+            query,
+            [Entry("a", 14) with { PreviousValue = 10 }, Entry("b", 5) with { PreviousValue = 0 }, Entry("c", 2) with { PreviousValue = 4 }],
+            total: 21,
+            itemCount: 3,
+            limit: 25);
+
+        Assert.That(result.Items.Select(i => i.PreviousValue), Is.EqualTo(new int?[] { 10, 0, 4 }));
+        Assert.That(result.Items[0].Change, Is.EqualTo(0.4).Within(1e-9));
+        Assert.That(result.Items[1].Change, Is.Null);
+        Assert.That(result.Items[2].Change, Is.EqualTo(-0.5).Within(1e-9));
+    }
+
+    [Test]
+    public void RankedItem_LeavesOutComparisonFields_FromJson_WhenNull()
+    {
+        var item = new StatsRankedItem(1, "a", "A", null, 1, null, 1, null);
+
+        string json = System.Text.Json.JsonSerializer.Serialize(item);
+
+        Assert.That(json, Does.Not.Contain("PreviousValue"));
+        Assert.That(json, Does.Not.Contain("Change"));
+        Assert.That(System.Text.Json.JsonSerializer.Serialize(item with { PreviousValue = 0 }), Does.Contain("\"PreviousValue\":0"));
+    }
+
+    [Test]
     public void BuildSnapshot_HasNoRange_AndSortsByValue()
     {
         var result = StatsRankedBuilder.BuildSnapshot(2, [Entry("a", 1), Entry("b", 3)], total: 4, itemCount: 2, limit: 25);

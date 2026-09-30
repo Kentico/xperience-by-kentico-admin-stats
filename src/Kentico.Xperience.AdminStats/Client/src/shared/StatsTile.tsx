@@ -23,6 +23,8 @@ export interface StatsTileProps {
   readonly renderTable: () => ReactNode;
   /** Called by the CSV button. Omit to hide the button. */
   readonly onExportCsv?: () => void;
+  /** Tile-level controls shown before the chart/table toggle (for example a toggle that switches the list). */
+  readonly headerControls?: ReactNode;
 }
 
 const viewItems = [
@@ -41,6 +43,7 @@ export const StatsTile = ({
   renderChart,
   renderTable,
   onExportCsv,
+  headerControls,
 }: StatsTileProps) => {
   const [view, setView] = useState<StatsTileView>('chart');
 
@@ -63,6 +66,7 @@ export const StatsTile = ({
         <div className="AdminStats-tileHeader">
           <Headline size={HeadlineSize.M}>{headline}</Headline>
           <div className="AdminStats-tileActions">
+            {headerControls}
             <IconToggleButtons
               items={viewItems}
               selectedItemId={view}

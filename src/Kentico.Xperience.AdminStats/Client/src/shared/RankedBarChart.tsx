@@ -5,8 +5,9 @@ import { Colors } from '@kentico/xperience-admin-components';
 import React, { useId, useLayoutEffect, useMemo } from 'react';
 
 import { getChartTokens, getSeriesPalette, getXbkTheme, resolveToken } from './chartTheme';
-import { formatShare, numberFormat } from './format';
+import { formatItemChange, formatShare, numberFormat } from './format';
 import { StatsRankedCaptions, StatsRankedItem } from './types';
+import { useStableValue } from './useStableValue';
 
 export interface RankedBarChartProps {
   readonly items: readonly StatsRankedItem[];
@@ -48,17 +49,17 @@ function escapeChartText(text: string): string {
  * value labels at bar ends. Long labels are truncated; the full text shows in the tooltip.
  * The root is created in `useLayoutEffect` and disposed on unmount or data change.
  */
-export const RankedBarChart = ({
+export const RankedBarChart = React.memo(function RankedBarChart({
   items,
   captions,
   ariaLabel,
   getHref,
   showShare = true,
   highlightFrom,
-}: RankedBarChartProps) => {
+}: RankedBarChartProps) {
   const chartId = `stats-chart-${useId().replace(/:/g, '')}`;
 
-  const data = useMemo<ChartRow[]>(
+  const rows = useMemo<ChartRow[]>(
     () =>
       items.map((item) => {
         const lines = [
@@ -70,6 +71,10 @@ export const RankedBarChart = ({
           ...(captions.secondaryValue && item.secondaryValue !== null
             ? [`${captions.secondaryValue}: ${numberFormat.format(item.secondaryValue)}`]
             : []),
+          ...(captions.previousValue && item.previousValue !== null && item.previousValue !== undefined
+            ? [`${captions.previousValue}: ${numberFormat.format(item.previousValue)}`]
+            : []),
+          ...(captions.change ? [`${captions.change}: ${formatItemChange(item)}`] : []),
         ];
         return {
           key: item.key,
@@ -82,6 +87,8 @@ export const RankedBarChart = ({
       }),
     [items, captions, getHref, showShare, highlightFrom],
   );
+  // Rebuild the chart only when the rows change by content, not on every new prop identity.
+  const data = useStableValue(rows);
 
   const height = Math.max(minHeight, data.length * rowHeight + chartPadding);
 
@@ -255,4 +262,4 @@ export const RankedBarChart = ({
       style={{ height }}
     />
   );
-};
+});

@@ -1,5 +1,12 @@
-import { Button, ButtonColor, MenuItem, Select } from '@kentico/xperience-admin-components';
-import React from 'react';
+import {
+  Button,
+  ButtonColor,
+  MenuItem,
+  NameToggleButton,
+  NameToggleButtons,
+  Select,
+} from '@kentico/xperience-admin-components';
+import React, { ReactNode } from 'react';
 
 import { StatsChannelOption } from './types';
 
@@ -51,6 +58,31 @@ export const ChannelSelect = ({ channels, channelId, onChange }: ChannelSelectPr
   );
 };
 
+/** Toggle item id that stands for "all" (`null` value). */
+export const allOptionId = 'all';
+
+export interface OptionToggleProps {
+  /** Label above the toggle, for example "Event type". */
+  readonly label: string;
+  /** Toggle items. Use `allOptionId` for the item that clears the value. */
+  readonly items: readonly NameToggleButton[];
+  /** Selected item id, `null` for the `allOptionId` item. */
+  readonly value: string | null;
+  readonly onChange: (value: string | null) => void;
+}
+
+/** Filter bar item with a labeled option toggle, for example a kind or type filter with an "All" item. */
+export const OptionToggle = ({ label, items, value, onChange }: OptionToggleProps) => (
+  <div className="AdminStats-filterItem">
+    <span className="AdminStats-label">{label}</span>
+    <NameToggleButtons
+      items={[...items]}
+      selectedItemId={value ?? allOptionId}
+      onChange={(id) => onChange(id === allOptionId ? null : id)}
+    />
+  </div>
+);
+
 export interface RefreshControlProps {
   /** Reloads the current filter bypassing the server cache. */
   readonly onRefresh: () => void;
@@ -58,15 +90,18 @@ export interface RefreshControlProps {
   readonly isLoading: boolean;
   /** ISO timestamp of when the shown data was read from the database. */
   readonly updatedAt?: string;
+  /** Extra buttons shown before the refresh button (for example a link to a native application). */
+  readonly actions?: ReactNode;
 }
 
-/** Filter bar item at the end of the bar: "Updated <time>" and the refresh button. */
-export const RefreshControl = ({ onRefresh, isLoading, updatedAt }: RefreshControlProps) => {
+/** Filter bar item at the end of the bar: "Updated <time>", optional actions and the refresh button. */
+export const RefreshControl = ({ onRefresh, isLoading, updatedAt, actions }: RefreshControlProps) => {
   const updatedText = updatedAt ? formatUpdatedAt(updatedAt) : null;
 
   return (
     <div className="AdminStats-filterItem AdminStats-filterItem--refresh">
       {updatedText && <span className="AdminStats-updated">Updated {updatedText}</span>}
+      {actions}
       <Button
         label="Refresh"
         icon="xp-rotate-right"

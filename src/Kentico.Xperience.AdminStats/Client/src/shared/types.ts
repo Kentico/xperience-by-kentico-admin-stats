@@ -1,3 +1,5 @@
+import type { Colors } from '@kentico/xperience-admin-components';
+
 /** Mirrors `Kentico.Xperience.AdminStats.Shared.StatsGrouping`. */
 export type StatsGrouping = 'Day' | 'Week' | 'Month';
 
@@ -61,6 +63,15 @@ export interface StatsRankedItem {
    * Opened in the same tab. `null` or missing when the report has no admin links.
    */
   readonly adminPath?: string | null;
+  /**
+   * Value in the previous period of the same length. Missing when the report does not compare periods.
+   */
+  readonly previousValue?: number | null;
+  /**
+   * Change vs `previousValue` as a ratio (0.12 = +12%). Missing when the report does not compare periods
+   * or `previousValue` is 0.
+   */
+  readonly change?: number | null;
 }
 
 /** Mirrors `StatsRankedResult`: ranked list for one range and channel. */
@@ -88,6 +99,13 @@ export interface StatsRankedCaptions {
   readonly value: string;
   /** Caption of the secondary value, for example "Unique contacts". Omit to hide it. */
   readonly secondaryValue?: string;
+  /**
+   * Caption of the previous period value, for example "Previous 30 days". Set it (with `change`) for lists
+   * that compare periods; omit to hide both columns.
+   */
+  readonly previousValue?: string;
+  /** Caption of the change column, for example "Change". Omit to hide it. */
+  readonly change?: string;
 }
 
 /** One chart series. `values` aligns with the period axis. */
@@ -95,6 +113,8 @@ export interface StatsSeries {
   readonly key: string;
   readonly name: string;
   readonly values: readonly number[];
+  /** Fixed color token (for example for severities). Omit to use the next palette color. */
+  readonly color?: Colors;
 }
 
 /** Mirrors `StatsTimeSeries`: one series of a time series report. */

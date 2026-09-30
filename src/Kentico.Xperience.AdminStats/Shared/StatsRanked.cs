@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Kentico.Xperience.AdminStats.Shared;
 
 /// <summary>
@@ -26,6 +28,21 @@ public sealed record StatsRankedItem(
     /// Path relative to the admin root, see <see cref="StatsAdminLinks"/>. Opened in the same tab.
     /// </summary>
     public string? AdminPath { get; init; }
+
+    /// <summary>
+    /// Optional value of the item in the previous period (see <see cref="StatsComparison.GetPreviousRange"/>).
+    /// <c>null</c> when the report does not compare periods. Left out of the JSON when <c>null</c>,
+    /// so reports without a comparison send the same data as before.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? PreviousValue { get; init; }
+
+    /// <summary>
+    /// Relative change of <see cref="Value"/> vs <see cref="PreviousValue"/> as a ratio (0.12 = +12%), see <see cref="StatsComparison.GetChange"/>.
+    /// <c>null</c> (left out of the JSON) when the report does not compare periods or the previous value is 0.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? Change { get; init; }
 }
 
 /// <summary>
@@ -64,6 +81,12 @@ public sealed record StatsRankedEntry(
 {
     /// <inheritdoc cref="StatsRankedItem.AdminPath"/>
     public string? AdminPath { get; init; }
+
+    /// <summary>
+    /// Optional value in the previous period. When set, the ranked item gets <see cref="StatsRankedItem.PreviousValue"/>
+    /// and <see cref="StatsRankedItem.Change"/>. <c>null</c> (default) leaves both empty.
+    /// </summary>
+    public int? PreviousValue { get; init; }
 }
 
 /// <summary>
@@ -158,6 +181,8 @@ public static class StatsRankedBuilder
                 e.Url)
             {
                 AdminPath = e.AdminPath,
+                PreviousValue = e.PreviousValue,
+                Change = e.PreviousValue is int previous ? StatsComparison.GetChange(e.Value, previous) : null,
             })
             .ToList();
 

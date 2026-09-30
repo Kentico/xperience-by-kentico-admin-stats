@@ -1,11 +1,11 @@
-import { NameToggleButton, NameToggleButtons } from '@kentico/xperience-admin-components';
+import { NameToggleButton } from '@kentico/xperience-admin-components';
 import React from 'react';
 
-import { ChannelSelect, RefreshControl } from './filterControls';
+import { allOptionId, ChannelSelect, OptionToggle, RefreshControl } from './filterControls';
 import { StatsChannelOption, StatsSnapshotFilter } from './types';
 
 /** Toggle item id that stands for "all" (`kind: null`). */
-export const allKindsId = 'all';
+export const allKindsId = allOptionId;
 
 export interface SnapshotKindOptions {
   /** Label above the toggle, for example "Content type type". */
@@ -44,14 +44,12 @@ export const SnapshotFilterBar = ({
 }: SnapshotFilterBarProps) => (
   <div className="AdminStats-filterBar">
     {kinds && (
-      <div className="AdminStats-filterItem">
-        <span className="AdminStats-label">{kinds.label}</span>
-        <NameToggleButtons
-          items={[...kinds.items]}
-          selectedItemId={filter.kind ?? allKindsId}
-          onChange={(id) => onChange({ ...filter, kind: id === allKindsId ? null : id })}
-        />
-      </div>
+      <OptionToggle
+        label={kinds.label}
+        items={kinds.items}
+        value={filter.kind}
+        onChange={(kind) => onChange({ ...filter, kind })}
+      />
     )}
 
     {channels.length > 0 && (

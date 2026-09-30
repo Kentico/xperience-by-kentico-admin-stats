@@ -5,6 +5,7 @@ import React, { useId, useLayoutEffect, useMemo } from 'react';
 
 import { getChartTokens, getSeriesPalette, getXbkTheme } from './chartTheme';
 import { StatsShareSlice } from './types';
+import { useStableValue } from './useStableValue';
 
 export interface DonutChartProps {
   /** Slices in display order. Colors follow the series palette in this order. */
@@ -34,15 +35,15 @@ function escapeChartText(text: string): string {
  * Slice colors follow the series palette in order, so they match `StackedColumnChart` series colors.
  * The root is created in `useLayoutEffect` and disposed on unmount or data change.
  */
-export const DonutChart = ({
+export const DonutChart = React.memo(function DonutChart({
   slices,
   centerValue,
   centerCaption,
   ariaLabel,
-}: DonutChartProps) => {
+}: DonutChartProps) {
   const chartId = `stats-chart-${useId().replace(/:/g, '')}`;
 
-  const data = useMemo<ChartRow[]>(() => {
+  const rows = useMemo<ChartRow[]>(() => {
     const palette = getSeriesPalette();
     return slices.map((slice, index) => ({
       category: escapeChartText(slice.name),
@@ -50,6 +51,8 @@ export const DonutChart = ({
       ...(palette.length > 0 ? { fill: palette[index % palette.length] } : {}),
     }));
   }, [slices]);
+  // Rebuild the chart only when the rows change by content, not on every new prop identity.
+  const data = useStableValue(rows);
 
   useLayoutEffect(() => {
     const root = am5.Root.new(chartId);
@@ -139,4 +142,4 @@ export const DonutChart = ({
       className="AdminStats-chart AdminStats-chart--donut"
     />
   );
-};
+});

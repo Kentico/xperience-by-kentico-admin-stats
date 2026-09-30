@@ -1,5 +1,3 @@
-using CMS.Membership;
-
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.AdminStats.Admin;
 using Kentico.Xperience.AdminStats.Reports.ActivityCounts;
@@ -19,7 +17,7 @@ namespace Kentico.Xperience.AdminStats.Admin;
 /// <summary>
 /// Activity counts by type over time.
 /// </summary>
-[UIEvaluatePermission(SystemPermissions.VIEW)]
+[UIEvaluatePermission(StatsPermissions.ACTIVITY_COUNTS)]
 public sealed class ActivityCountsPage(
     IActivityCountsService activityCountsService,
     IStatsChannelOptionsProvider channelOptionsProvider,
@@ -42,10 +40,10 @@ public sealed class ActivityCountsPage(
         return properties;
     }
 
-    [PageCommand(CommandName = "LOAD", Permission = SystemPermissions.VIEW)]
+    [PageCommand(CommandName = "LOAD", Permission = StatsPermissions.ACTIVITY_COUNTS)]
     public async Task<ICommandResponse<ActivityCountsResult>> Load(StatsLoadRequest request, CancellationToken cancellationToken)
     {
-        // Refresh re-runs one aggregate query per click. The command requires the View permission.
+        // Refresh re-runs one aggregate query per click. The command requires the Activity counts permission.
         var query = (request?.Filter ?? new StatsFilter()).Normalize(GetToday());
         var report = await activityCountsService.GetReport(query, request?.Refresh ?? false, cancellationToken);
 

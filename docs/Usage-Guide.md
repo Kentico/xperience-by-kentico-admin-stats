@@ -9,8 +9,19 @@
 
 The library adds the **Stats (Labs)** application to the **Digital marketing** category.
 
-- Administrators see it by default.
-- For other roles, open **Role management**, select the role, and give it the **View** permission for **Stats (Labs)**.
+- Administrators see it and all reports by default.
+- For other roles, open **Role management**, select the role, and edit its permissions for **Stats (Labs)**:
+  - **View** - opens the application.
+  - One permission per report. The role sees only the reports it has a permission for. Other reports are hidden from the navigation and return an error if opened by URL.
+
+| Permission        | Code name                                       |
+| ----------------- | ----------------------------------------------- |
+| Activity counts   | `Kentico.Xperience.AdminStats.ActivityCounts`   |
+| Top pages         | `Kentico.Xperience.AdminStats.TopPages`         |
+| New contacts      | `Kentico.Xperience.AdminStats.NewContacts`      |
+| Form submissions  | `Kentico.Xperience.AdminStats.FormSubmissions`  |
+| Content inventory | `Kentico.Xperience.AdminStats.ContentInventory` |
+| Event log         | `Kentico.Xperience.AdminStats.EventLog`         |
 
 ## Reports
 
@@ -76,9 +87,25 @@ Shows the current state of content items (no date range, not a trend): items by 
 
 Page folders are not counted. Items in all workspaces are counted. "Last change" is the modified time of the language variant's latest version. Items open where they are edited: reusable items in the **Content hub**, pages, emails and headless items in their channel application.
 
+### Event log
+
+Shows events of the system [event log](https://docs.kentico.com/documentation/developers-and-admins/configuration/event-log) per type over time, and the sources, event codes and users with the most events.
+
+- **KPIs** - all events, errors, warnings and information events in the range, each with the change vs the previous period of the same length (for example "+40% vs previous 30 days"). The change is shown as text only; a rise in errors or warnings is not colored.
+- **Filters** - date range, grouping and **Event type** (all, errors, warnings or information). The event type filter applies to the tiles, not to the KPIs.
+- **Tiles**
+  - "Events over time" - stacked column chart or table, one series per type with fixed colors, stacked from the bottom: information, warnings, errors.
+  - "Top sources" and "Top event codes" - the 10 sources and event codes with the most events, with their count in the previous period and the change ("New" when there were none).
+    - "Top sources" has a toggle: **All**, **Xperience** (sources logged by the product: starting with `CMS.` or `Kentico.`, plus `WebFarmMonitor`) or **Custom** (all other sources, usually logged by project code). The CSV export has the selected list.
+  - "Top users" - the 10 users with the most events, with the same previous period count and change. Events logged without a user (for example by background tasks) are one **System** row. Click a user to open it in the **Users** application.
+- **Open event log** - opens the native **Event log** application to see single events.
+- Each tile has its own CSV export.
+
+The event log keeps at most the number of events in **Settings → System → Event log → Event log size**. When the log is full, the oldest events are deleted, so long ranges can show fewer events in older periods than really happened. The report shows the current limit.
+
 ### Dates and caching
 
-Time-based reports use the server date. Results of all reports are cached for 5 minutes, so new activities, contacts, submissions and content changes can take a few minutes to appear. Select **Refresh** to load the latest numbers.
+Time-based reports use the server date. Results of all reports are cached for 5 minutes, so new activities, contacts, submissions, content changes and events can take a few minutes to appear. Select **Refresh** to load the latest numbers.
 
 ## Data retention
 
