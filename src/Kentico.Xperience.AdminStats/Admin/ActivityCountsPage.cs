@@ -5,7 +5,7 @@ using Kentico.Xperience.AdminStats.Shared;
 
 [assembly: UIPage(
     uiPageType: typeof(ActivityCountsPage),
-    parentType: typeof(StatsApplicationPage),
+    parentType: typeof(StatsContactsSection),
     slug: "activity-counts",
     name: "Activity counts",
     templateName: ActivityCountsPage.TEMPLATE_NAME,
@@ -21,7 +21,8 @@ namespace Kentico.Xperience.AdminStats.Admin;
 public sealed class ActivityCountsPage(
     IActivityCountsService activityCountsService,
     IStatsChannelOptionsProvider channelOptionsProvider,
-    TimeProvider clock) : Page<ActivityCountsClientProperties>
+    TimeProvider clock,
+    IUIPermissionEvaluator permissionEvaluator) : StatsReportPage<ActivityCountsClientProperties>(permissionEvaluator)
 {
     public const string TEMPLATE_NAME = "@kentico/xperience-admin-stats/ActivityCounts";
 
@@ -29,7 +30,7 @@ public sealed class ActivityCountsPage(
     private readonly IStatsChannelOptionsProvider channelOptionsProvider = channelOptionsProvider;
     private readonly TimeProvider clock = clock;
 
-    public override async Task<ActivityCountsClientProperties> ConfigureTemplateProperties(ActivityCountsClientProperties properties)
+    protected override async Task<ActivityCountsClientProperties> ConfigureReportProperties(ActivityCountsClientProperties properties)
     {
         var query = new StatsFilter().Normalize(GetToday());
 
@@ -54,7 +55,7 @@ public sealed class ActivityCountsPage(
     private DateOnly GetToday() => DateOnly.FromDateTime(clock.GetLocalNow().DateTime);
 }
 
-public sealed class ActivityCountsClientProperties : TemplateClientProperties
+public sealed class ActivityCountsClientProperties : StatsReportClientProperties
 {
     public ActivityCountsResult? Report { get; set; }
 

@@ -14,7 +14,10 @@ public enum StatsValueKind
     /// <summary>Money amount as stored (no currency). Rounded to <see cref="StatsValues.AmountDecimals"/> decimals.</summary>
     Amount,
 
-    /// <summary>Ratio (0.25 = 25%), for example a rate.</summary>
+    /// <summary>
+    /// Ratio (0.25 = 25%), for example a rate or share. Rounded to <see cref="StatsValues.RatioDecimals"/> decimals.
+    /// Comparisons of ratios change in percentage points, see <see cref="StatsValueComparison.Change"/>.
+    /// </summary>
     Ratio,
 }
 
@@ -29,11 +32,22 @@ public static class StatsValues
     public const int AmountDecimals = 2;
 
     /// <summary>
-    /// Rounds amounts to <see cref="AmountDecimals"/> decimals (midpoint away from zero, like prices).
-    /// Counts and ratios are returned as they are.
+    /// Decimals of <see cref="StatsValueKind.Ratio"/> values (0.1234 = 12.34%).
+    /// </summary>
+    public const int RatioDecimals = 4;
+
+    /// <summary>
+    /// Rounds amounts to <see cref="AmountDecimals"/> decimals (midpoint away from zero, like prices)
+    /// and ratios to <see cref="RatioDecimals"/> decimals. Counts are returned as they are.
     /// </summary>
     public static decimal Round(decimal value, StatsValueKind kind) =>
-        kind == StatsValueKind.Amount ? Math.Round(value, AmountDecimals, MidpointRounding.AwayFromZero) : value;
+        kind switch
+        {
+            StatsValueKind.Amount => Math.Round(value, AmountDecimals, MidpointRounding.AwayFromZero),
+            StatsValueKind.Ratio => Math.Round(value, RatioDecimals, MidpointRounding.AwayFromZero),
+            StatsValueKind.Count => value,
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
+        };
 
     /// <inheritdoc cref="Round(decimal, StatsValueKind)"/>
     public static decimal? Round(decimal? value, StatsValueKind kind) =>
@@ -56,6 +70,9 @@ public static class StatsValues
 /// <param name="Previous">Value in the previous period. <c>null</c> when it cannot be computed.</param>
 /// <param name="Change">
 /// Relative change as a ratio (0.12 = +12%) of the rounded values. <c>null</c> when a value is <c>null</c> or <paramref name="Previous"/> is 0.
+/// For <see cref="StatsValueKind.Ratio"/> values it is the difference in ratio points instead (0.05 = +5 percentage points):
+/// a relative change of a rate reads wrongly (20% to 30% would be "+50%") and cannot be computed when the previous rate is 0.
+/// Then it is <c>null</c> only when a value is <c>null</c>.
 /// </param>
 /// <param name="PreviousFrom">First day of the previous period (inclusive).</param>
 /// <param name="PreviousTo">Last day of the previous period (inclusive).</param>
@@ -90,7 +107,12 @@ public sealed record StatsValueComparison(
         decimal? roundedCurrent = StatsValues.Round(current, kind);
         decimal? roundedPrevious = StatsValues.Round(previous, kind);
 
-        double? change = roundedCurrent is decimal c && roundedPrevious is decimal p ? StatsComparison.GetChange(c, p) : null;
+        double? change = (roundedCurrent, roundedPrevious) switch
+        {
+            (decimal c, decimal p) when kind == StatsValueKind.Ratio => (double)(c - p),
+            (decimal c, decimal p) => StatsComparison.GetChange(c, p),
+            _ => null,
+        };
 
         return new(kind, roundedCurrent, roundedPrevious, change, from, to);
     }

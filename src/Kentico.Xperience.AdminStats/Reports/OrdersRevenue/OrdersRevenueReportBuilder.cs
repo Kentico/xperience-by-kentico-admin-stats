@@ -1,3 +1,4 @@
+using Kentico.Xperience.AdminStats.Reports.Commerce;
 using Kentico.Xperience.AdminStats.Shared;
 
 namespace Kentico.Xperience.AdminStats.Reports.OrdersRevenue;
@@ -27,7 +28,7 @@ internal static class OrdersRevenueReportBuilder
     /// <param name="query">Normalized filter with a status ID that exists (or <c>null</c>).</param>
     /// <param name="data">Data from the start of the previous period (see <see cref="StatsComparison.GetPreviousRange"/>) to the end of the range.</param>
     /// <param name="statuses">Order statuses for the status filter.</param>
-    public static OrdersRevenueResult Build(OrdersRevenueQuery query, OrdersRevenueReportData data, IReadOnlyList<OrdersRevenueStatusOption> statuses)
+    public static OrdersRevenueResult Build(OrdersRevenueQuery query, OrdersRevenueReportData data, IReadOnlyList<CommerceOrderStatusOption> statuses)
     {
         var range = query.Range with { ChannelId = null };
         var (previousFrom, previousTo) = StatsComparison.GetPreviousRange(range);

@@ -1,3 +1,4 @@
+using Kentico.Xperience.AdminStats.Reports.Commerce;
 using Kentico.Xperience.AdminStats.Shared;
 
 namespace Kentico.Xperience.AdminStats.Reports.OrdersRevenue;
@@ -52,11 +53,6 @@ public sealed record OrdersRevenueLoadRequest
 }
 
 /// <summary>
-/// Order status shown in the status filter, in the project's status order (<c>OrderStatusOrder</c>).
-/// </summary>
-public sealed record OrdersRevenueStatusOption(int Id, string DisplayName);
-
-/// <summary>
 /// KPIs of the range compared with the previous period. With a status filter, only orders in that status.
 /// </summary>
 /// <param name="Orders">Number of orders.</param>
@@ -94,7 +90,7 @@ public sealed record OrdersRevenueResult(
     DateOnly To,
     StatsGrouping Grouping,
     int? OrderStatusId,
-    IReadOnlyList<OrdersRevenueStatusOption> Statuses,
+    IReadOnlyList<CommerceOrderStatusOption> Statuses,
     IReadOnlyList<StatsPeriod> Periods,
     StatsValueSeries Orders,
     StatsValueSeries Revenue,

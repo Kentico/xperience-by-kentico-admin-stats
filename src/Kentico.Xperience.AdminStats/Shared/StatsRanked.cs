@@ -65,6 +65,19 @@ public sealed record StatsRankedItem(
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? PreviousValueText { get; init; }
+
+    /// <summary>
+    /// Optional third number (for example item quantity next to revenue and orders). See <see cref="StatsRankedResult.TertiaryValueKind"/>.
+    /// <c>null</c> (left out of the JSON) for lists with up to two values, so they send the same data as before.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public decimal? TertiaryValue { get; init; }
+
+    /// <summary>
+    /// <see cref="TertiaryValue"/> formatted like <see cref="ValueText"/> when it is an amount.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? TertiaryValueText { get; init; }
 }
 
 /// <summary>
@@ -98,6 +111,12 @@ public sealed record StatsRankedResult(
     public StatsValueKind? SecondaryValueKind { get; init; }
 
     /// <summary>
+    /// What <see cref="StatsRankedItem.TertiaryValue"/> measures. <c>null</c> (left out of the JSON) means <see cref="StatsValueKind.Count"/>.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public StatsValueKind? TertiaryValueKind { get; init; }
+
+    /// <summary>
     /// <see cref="Total"/> formatted by the project's price formatter when it is an amount. <c>null</c> (left out of the JSON) otherwise.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -128,6 +147,9 @@ public sealed record StatsRankedEntry(
     /// and <see cref="StatsRankedItem.Change"/>. <c>null</c> (default) leaves both empty.
     /// </summary>
     public decimal? PreviousValue { get; init; }
+
+    /// <inheritdoc cref="StatsRankedItem.TertiaryValue"/>
+    public decimal? TertiaryValue { get; init; }
 }
 
 /// <summary>
@@ -227,6 +249,7 @@ public static class StatsRankedBuilder
             {
                 AdminPath = e.AdminPath,
                 PreviousValue = e.PreviousValue,
+                TertiaryValue = e.TertiaryValue,
                 Change = e.PreviousValue is decimal previous ? StatsComparison.GetChange(e.Value, previous) : null,
             })
             .ToList();

@@ -72,6 +72,9 @@ export const RankedBarChart = React.memo(function RankedBarChart({
           ...(captions.secondaryValue && item.secondaryValue !== null
             ? [`${captions.secondaryValue}: ${escapeChartText(formatValue(item.secondaryValue, captions.secondaryValueKind, item.secondaryValueText))}`]
             : []),
+          ...(captions.tertiaryValue && item.tertiaryValue !== null && item.tertiaryValue !== undefined
+            ? [`${captions.tertiaryValue}: ${escapeChartText(formatValue(item.tertiaryValue, captions.tertiaryValueKind, item.tertiaryValueText))}`]
+            : []),
           ...(captions.previousValue && item.previousValue !== null && item.previousValue !== undefined
             ? [`${captions.previousValue}: ${escapeChartText(formatValue(item.previousValue, captions.valueKind, item.previousValueText))}`]
             : []),

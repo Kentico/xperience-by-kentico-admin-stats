@@ -3,17 +3,25 @@ import React, { useMemo, useState } from 'react';
 
 import { toAdminHref } from '../shared/adminLinks';
 import { ComboChart } from '../shared/ComboChart';
+import {
+  CommerceOrderStatusOption,
+  commerceDocsUrl,
+  OrderStatusSelect,
+  rawAmountNote,
+  toRawCsvSeries,
+} from '../shared/commerce';
 import { ComparisonInfoCard } from '../shared/ComparisonInfoCard';
 import { downloadCsv, toRankedCsv, toShareCsv, toTimeSeriesCsv } from '../shared/csv';
 import { DataRetentionNote } from '../shared/DataRetentionNote';
 import { DonutChart } from '../shared/DonutChart';
-import { IdSelect } from '../shared/filterControls';
+
 import { formatPreviousPeriod, formatValue } from '../shared/format';
 import { RankedBarChart } from '../shared/RankedBarChart';
 import { RankedTable } from '../shared/RankedTable';
 import { ShareTable } from '../shared/ShareTable';
 import { StatsFilterBar } from '../shared/StatsFilterBar';
 import { StatsTile } from '../shared/StatsTile';
+import { toValueSeries } from '../shared/timeSeries';
 import { TimeSeriesTable } from '../shared/TimeSeriesTable';
 import {
   StatsFilter,
@@ -21,7 +29,6 @@ import {
   StatsPeriod,
   StatsRankedCaptions,
   StatsRankedResult,
-  StatsSeries,
   StatsShareSlice,
   StatsValueComparison,
   StatsValueSeries,
@@ -29,11 +36,6 @@ import {
 import { useStatsCommand } from '../shared/useStatsCommand';
 import '../shared/stats.css';
 
-/** Mirrors `OrdersRevenueStatusOption`. */
-interface OrdersRevenueStatusOption {
-  readonly id: number;
-  readonly displayName: string;
-}
 
 /** Mirrors `OrdersRevenueTotals`. */
 interface OrdersRevenueTotals {
@@ -52,7 +54,7 @@ interface OrdersRevenueResult {
   /** Applied status filter, `null` for all statuses. */
   readonly orderStatusId: number | null;
   /** Statuses for the status filter, in status order. */
-  readonly statuses: readonly OrdersRevenueStatusOption[];
+  readonly statuses: readonly CommerceOrderStatusOption[];
   readonly periods: readonly StatsPeriod[];
   readonly orders: StatsValueSeries;
   readonly revenue: StatsValueSeries;
@@ -83,14 +85,6 @@ interface OrdersRevenueTemplateProps {
   readonly pagePath: string | null;
 }
 
-const commerceDocsUrl = 'https://docs.kentico.com/documentation/business-users/manage-commerce-stores';
-
-/** CSV headers of amount columns: values are raw numbers (dot decimal, no currency), not the formatted amounts. */
-const rawAmountNote = '(raw amount)';
-
-function toRawCsvSeries(series: StatsSeries): StatsSeries {
-  return series.kind === 'Amount' ? { ...series, name: `${series.name} ${rawAmountNote}` } : series;
-}
 
 function toFilter(report: OrdersRevenueResult): OrdersRevenueFilter {
   // Orders have no channel; the range filter type is shared with channel reports.
@@ -100,15 +94,6 @@ function toFilter(report: OrdersRevenueResult): OrdersRevenueFilter {
   };
 }
 
-function toSeries(series: StatsValueSeries): StatsSeries {
-  return {
-    key: series.key,
-    name: series.displayName,
-    values: series.values,
-    kind: series.kind,
-    ...(series.texts ? { texts: series.texts } : {}),
-  };
-}
 
 export const OrdersRevenueTemplate = (props: OrdersRevenueTemplateProps) => {
   const { data: report, isLoading, hasError, load } = useStatsCommand<
@@ -136,8 +121,8 @@ export const OrdersRevenueTemplate = (props: OrdersRevenueTemplateProps) => {
     ? 'Digital commerce tables were not found in this project, so there are no orders to show.'
     : `No orders${statusName ? ` in status ${statusName}` : ''} in the selected range. Try a longer range or another status.`;
 
-  const ordersSeries = useMemo(() => toSeries(report.orders), [report.orders]);
-  const revenueSeries = useMemo(() => toSeries(report.revenue), [report.revenue]);
+  const ordersSeries = useMemo(() => toValueSeries(report.orders), [report.orders]);
+  const revenueSeries = useMemo(() => toValueSeries(report.revenue), [report.revenue]);
   const trendSeries = useMemo(() => [ordersSeries, revenueSeries], [ordersSeries, revenueSeries]);
   const hasOrders = report.orders.total > 0;
 
@@ -216,15 +201,11 @@ export const OrdersRevenueTemplate = (props: OrdersRevenueTemplateProps) => {
           )
         }
       >
-        {report.statuses.length > 0 && (
-          <IdSelect
-            label="Order status"
-            allLabel="All statuses"
-            options={report.statuses.map((s) => ({ id: s.id, label: s.displayName }))}
-            value={filter.orderStatusId}
-            onChange={(orderStatusId) => handleFilterChange({ ...filter, orderStatusId })}
-          />
-        )}
+        <OrderStatusSelect
+          statuses={report.statuses}
+          value={filter.orderStatusId}
+          onChange={(orderStatusId) => handleFilterChange({ ...filter, orderStatusId })}
+        />
       </StatsFilterBar>
 
       <div className="AdminStats-kpis">

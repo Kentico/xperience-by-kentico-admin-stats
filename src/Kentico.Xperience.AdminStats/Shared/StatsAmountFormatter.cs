@@ -80,7 +80,8 @@ internal static class StatsAmountTexts
     {
         bool value = result.ValueKind == StatsValueKind.Amount;
         bool secondary = result.SecondaryValueKind == StatsValueKind.Amount;
-        if (!value && !secondary)
+        bool tertiary = result.TertiaryValueKind == StatsValueKind.Amount;
+        if (!value && !secondary && !tertiary)
         {
             return result;
         }
@@ -94,6 +95,7 @@ internal static class StatsAmountTexts
                 ValueText = FormatOptional(value, item.Value, item.ValueText),
                 PreviousValueText = FormatOptional(value, item.PreviousValue, item.PreviousValueText),
                 SecondaryValueText = FormatOptional(secondary, item.SecondaryValue, item.SecondaryValueText),
+                TertiaryValueText = FormatOptional(tertiary, item.TertiaryValue, item.TertiaryValueText),
             })
             .ToList();
 

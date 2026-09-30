@@ -78,6 +78,10 @@ export interface StatsRankedItem {
   readonly secondaryValueText?: string;
   /** `previousValue` formatted like `valueText`. */
   readonly previousValueText?: string;
+  /** Optional third number (for example item quantity next to revenue and orders). Missing for lists with up to two values. */
+  readonly tertiaryValue?: number | null;
+  /** `tertiaryValue` formatted like `valueText`. */
+  readonly tertiaryValueText?: string;
 }
 
 /** Mirrors `StatsRankedResult`: ranked list for one range and channel. */
@@ -97,6 +101,8 @@ export interface StatsRankedResult {
   readonly valueKind?: StatsValueKind;
   /** What `secondaryValue` measures. Missing means `Count`. */
   readonly secondaryValueKind?: StatsValueKind;
+  /** What `tertiaryValue` measures. Missing means `Count`. */
+  readonly tertiaryValueKind?: StatsValueKind;
   /** `total` formatted by the project's price formatter (amounts only). */
   readonly totalText?: string;
 }
@@ -111,6 +117,8 @@ export interface StatsRankedCaptions {
   readonly value: string;
   /** Caption of the secondary value, for example "Unique contacts". Omit to hide it. */
   readonly secondaryValue?: string;
+  /** Caption of the third value, for example "Items". Omit to hide it. */
+  readonly tertiaryValue?: string;
   /**
    * Caption of the previous period value, for example "Previous 30 days". Set it (with `change`) for lists
    * that compare periods; omit to hide both columns.
@@ -122,6 +130,8 @@ export interface StatsRankedCaptions {
   readonly valueKind?: StatsValueKind;
   /** Format of the secondary value. Default `Count`. */
   readonly secondaryValueKind?: StatsValueKind;
+  /** Format of the third value. Default `Count`. */
+  readonly tertiaryValueKind?: StatsValueKind;
 }
 
 /** One chart series. `values` aligns with the period axis. */
@@ -231,7 +241,10 @@ export interface StatsValueComparison {
   readonly kind: StatsValueKind;
   readonly current: number | null;
   readonly previous: number | null;
-  /** Relative change as a ratio (0.12 = +12%). `null` when a value is `null` or `previous` is 0. */
+  /**
+   * Relative change as a ratio (0.12 = +12%). `null` when a value is `null` or `previous` is 0.
+   * For `Ratio` values it is the difference in ratio points (0.05 = +5 percentage points), `null` only when a value is `null`.
+   */
   readonly change: number | null;
   /** First day of the previous period (`yyyy-MM-dd`). */
   readonly previousFrom: string;

@@ -16,9 +16,9 @@ using Kentico.Xperience.AdminStats.Admin;
 namespace Kentico.Xperience.AdminStats.Admin;
 
 /// <summary>
-/// "Stats (Labs)" admin application. Each report is a child page.
+/// "Stats (Labs)" admin application. Reports are grouped into <see cref="StatsSectionPage"/> sections.
 /// Assign the View permission to roles that may open the application,
-/// plus one <see cref="StatsPermissions"/> permission per report the role may see.
+/// plus one <see cref="StatsPermissions"/> permission per report the role may see, and optionally <see cref="StatsPermissions.EXPORT"/>.
 /// </summary>
 [UIPermission(SystemPermissions.VIEW)]
 [UIPermission(StatsPermissions.ACTIVITY_COUNTS, StatsPermissions.ACTIVITY_COUNTS_DISPLAY_NAME)]
@@ -28,7 +28,36 @@ namespace Kentico.Xperience.AdminStats.Admin;
 [UIPermission(StatsPermissions.CONTENT_INVENTORY, StatsPermissions.CONTENT_INVENTORY_DISPLAY_NAME)]
 [UIPermission(StatsPermissions.EVENT_LOG, StatsPermissions.EVENT_LOG_DISPLAY_NAME)]
 [UIPermission(StatsPermissions.ORDERS_REVENUE, StatsPermissions.ORDERS_REVENUE_DISPLAY_NAME)]
-public sealed class StatsApplicationPage : ApplicationPage
+[UIPermission(StatsPermissions.CUSTOMERS, StatsPermissions.CUSTOMERS_DISPLAY_NAME)]
+[UIPermission(StatsPermissions.EXPORT, StatsPermissions.EXPORT_DISPLAY_NAME)]
+public sealed class StatsApplicationPage(IUIPermissionEvaluator permissionEvaluator) : ApplicationPage
 {
     public const string IDENTIFIER = "Kentico.Xperience.AdminStats.Application";
+
+    private readonly IUIPermissionEvaluator permissionEvaluator = permissionEvaluator;
+
+    private IReadOnlySet<string> deniedSlugs = new HashSet<string>();
+
+    public override async Task ConfigurePage()
+    {
+        await base.ConfigurePage();
+
+        // Runs before the product builds routes and navigation, which are synchronous.
+        deniedSlugs = await StatsNavigation.GetDeniedChildSlugs(
+            GetType(),
+            async permission => (await permissionEvaluator.Evaluate(permission)).Succeeded);
+    }
+
+    public override Task<TemplateClientProperties> ConfigureTemplateProperties(TemplateClientProperties properties)
+    {
+        properties.Navigation.Items = StatsNavigation.FilterNavigation(properties.Navigation.Items, deniedSlugs);
+
+        return base.ConfigureTemplateProperties(properties);
+    }
+
+    /// <summary>
+    /// Opens the first section with a report the user may open. The section then opens that report.
+    /// </summary>
+    protected override Route GetDefaultRoute(IEnumerable<Route> routes) =>
+        StatsNavigation.GetDefaultRoute(routes, deniedSlugs)!;
 }

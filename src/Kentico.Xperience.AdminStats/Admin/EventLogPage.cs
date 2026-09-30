@@ -4,7 +4,7 @@ using Kentico.Xperience.AdminStats.Reports.EventLog;
 
 [assembly: UIPage(
     uiPageType: typeof(EventLogPage),
-    parentType: typeof(StatsApplicationPage),
+    parentType: typeof(StatsSystemSection),
     slug: "event-log",
     name: "Event log",
     templateName: EventLogPage.TEMPLATE_NAME,
@@ -20,7 +20,8 @@ namespace Kentico.Xperience.AdminStats.Admin;
 public sealed class EventLogPage(
     IEventLogReportService eventLogReportService,
     IPageLinkGenerator pageLinkGenerator,
-    TimeProvider clock) : Page<EventLogClientProperties>
+    TimeProvider clock,
+    IUIPermissionEvaluator permissionEvaluator) : StatsReportPage<EventLogClientProperties>(permissionEvaluator)
 {
     public const string TEMPLATE_NAME = "@kentico/xperience-admin-stats/EventLog";
 
@@ -28,7 +29,7 @@ public sealed class EventLogPage(
     private readonly IPageLinkGenerator pageLinkGenerator = pageLinkGenerator;
     private readonly TimeProvider clock = clock;
 
-    public override async Task<EventLogClientProperties> ConfigureTemplateProperties(EventLogClientProperties properties)
+    protected override async Task<EventLogClientProperties> ConfigureReportProperties(EventLogClientProperties properties)
     {
         var query = new EventLogFilter().Normalize(GetToday());
 
@@ -52,7 +53,7 @@ public sealed class EventLogPage(
     private DateOnly GetToday() => DateOnly.FromDateTime(clock.GetLocalNow().DateTime);
 }
 
-public sealed class EventLogClientProperties : TemplateClientProperties
+public sealed class EventLogClientProperties : StatsReportClientProperties
 {
     public EventLogResult? Report { get; set; }
 

@@ -7,7 +7,7 @@ using Kentico.Xperience.AdminStats.Shared;
 
 [assembly: UIPage(
     uiPageType: typeof(TopPagesPage),
-    parentType: typeof(StatsApplicationPage),
+    parentType: typeof(StatsContactsSection),
     slug: "top-pages",
     name: "Top pages",
     templateName: TopPagesPage.TEMPLATE_NAME,
@@ -23,7 +23,8 @@ namespace Kentico.Xperience.AdminStats.Admin;
 public sealed class TopPagesPage(
     ITopPagesService topPagesService,
     IStatsChannelOptionsProvider channelOptionsProvider,
-    TimeProvider clock) : Page<TopPagesClientProperties>
+    TimeProvider clock,
+    IUIPermissionEvaluator permissionEvaluator) : StatsReportPage<TopPagesClientProperties>(permissionEvaluator)
 {
     public const string TEMPLATE_NAME = "@kentico/xperience-admin-stats/TopPages";
 
@@ -31,7 +32,7 @@ public sealed class TopPagesPage(
     private readonly IStatsChannelOptionsProvider channelOptionsProvider = channelOptionsProvider;
     private readonly TimeProvider clock = clock;
 
-    public override async Task<TopPagesClientProperties> ConfigureTemplateProperties(TopPagesClientProperties properties)
+    protected override async Task<TopPagesClientProperties> ConfigureReportProperties(TopPagesClientProperties properties)
     {
         var query = new StatsFilter().Normalize(GetToday());
         var channels = await channelOptionsProvider.GetChannelOptions(CancellationToken.None);
@@ -57,7 +58,7 @@ public sealed class TopPagesPage(
     private DateOnly GetToday() => DateOnly.FromDateTime(clock.GetLocalNow().DateTime);
 }
 
-public sealed class TopPagesClientProperties : TemplateClientProperties
+public sealed class TopPagesClientProperties : StatsReportClientProperties
 {
     public StatsRankedResult? Report { get; set; }
 

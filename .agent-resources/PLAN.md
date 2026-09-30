@@ -106,7 +106,7 @@ Notes:
 | Feature                       | Details                                                                                              |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------- |
 | Chart and table toggle        | Each tile can switch between the chart and a table of the exact numbers.                             |
-| CSV export                    | Per report.                                                                                          |
+| CSV export                    | Per report. Guarded by one app-wide Export permission (see Implementation notes).                    |
 | Links to existing admin pages | For example, a form links to its submissions and an email links to its statistics.                   |
 | Permission per report         | Uses the standard XbK role and UI permission model, so marketers and admins can see different tiles. |
 | Show/hide tiles per user      | Stored in a small custom table. Moderate effort; optional for the first release.                     |
@@ -124,8 +124,14 @@ Notes:
   - Restrict each report page with `[UIEvaluatePermission("<name>")]`. It must be one of the permissions declared on the application, or it cannot be assigned to roles.
   - Set the same permission on each page's `LOAD` command (`[PageCommand(Permission = "<name>")]`) so the data can't be read without it.
   - Keep permission names as constants in one class (e.g. `StatsPermissions`), with a stable `Kentico.Xperience.AdminStats.` prefix.
-  - Verify: roles without a report permission get 403 on that page. The side navigation hides pages the user has no permission for automatically (confirmed by user), so no custom nav filtering is needed.
+  - Verify: roles without a report permission get 403 on that page. Reports are grouped in section pages (Contacts, Content, Commerce, System; `.agent-resources/NAV-SECTIONS.md`). Decompiled 31.9 code shows the product does not filter nav or default routes by permission, so `StatsNavigation` hides denied reports and empty sections and lands on the first allowed report, or on the hidden "No reports available" page. Verified in DancingGoat 2026-09-30 with test users: View only; View + New contacts; View + New contacts + Customers. Opening a denied report by URL shows the product's "Access Denied" page. Export permission hides "Export CSV" in all reports (verified same day).
   - Update `docs/Usage-Guide.md` with the permission list and how to assign them in Role management.
+  - **Export permission.** One app-wide permission guards "Export CSV" in every report, separate from the report permissions:
+    - `StatsPermissions.EXPORT` = `Kentico.Xperience.AdminStats.Export`, "Export", declared on `StatsApplicationPage` with `[UIPermission]`.
+    - Each report page checks it server side (`Page.UIPermissionEvaluator` / `IUIPermissionEvaluator.Evaluate(StatsPermissions.EXPORT)`) and sends a `CanExport` flag in its client properties. Put this in one shared place (base page class or helper), not per report.
+    - Client: `StatsTile` hides "Export CSV" when `CanExport` is false (shared, e.g. context or prop from each template). No disabled button; just hidden.
+    - Caveat: CSV is built client side from data the user can already see, so this is a UI guard, not data protection. Say so in `docs/Usage-Guide.md`. Server-side export (a page command returning CSV with `Permission = EXPORT`) only if we later need real protection.
+    - Tests: flag true/false per page; permission declared on the app. Usage guide permission table gets the row.
   - Reference: [UI page permission checks](https://docs.kentico.com/documentation/developers-and-admins/customization/extend-the-administration-interface/ui-pages/ui-page-permission-checks) (define with `UIPermission` on the `ApplicationPage`, evaluate with `UIEvaluatePermission`, `PageCommand.Permission`, `IUIPermissionEvaluator` for client-side flags).
 
 ## Out of scope

@@ -166,6 +166,49 @@ public static class StatsTimeSeriesBuilder
             StatsValues.Round(values.Sum(), kind));
     }
 
+    /// <summary>
+    /// Builds a running total ("total so far", a point-in-time level) on the query's period axis: each period is <paramref name="startValue"/>
+    /// plus the daily changes of all days of the range up to the end of that period (the range end for the last, partial period).
+    /// For example total customers per week from the customers created before the range and the new customers per day,
+    /// or active customers from the count before the range and the daily changes (which can be negative).
+    /// </summary>
+    /// <param name="query">Normalized filter.</param>
+    /// <param name="dailyValues">
+    /// Daily changes. Rows of other keys or outside the range are ignored; negative changes are kept (unlike <see cref="BuildValueSeries"/>).
+    /// </param>
+    /// <param name="definition">Key (compared case-insensitively) and display name of the series.</param>
+    /// <param name="kind">What the values measure.</param>
+    /// <param name="startValue">Level before the range starts (for example items created before the range). Negative values are treated as 0.</param>
+    /// <returns>
+    /// A series with the running total per period (rounded by <paramref name="kind"/>).
+    /// <see cref="StatsValueSeries.Total"/> is the value at the end of the range (not a sum of the periods).
+    /// </returns>
+    public static StatsValueSeries BuildCumulativeSeries(
+        StatsQuery query,
+        IEnumerable<StatsDailyValue> dailyValues,
+        StatsSeriesDefinition definition,
+        StatsValueKind kind,
+        decimal startValue)
+    {
+        var rows = dailyValues
+            .Where(row => string.Equals(row.SeriesKey, definition.Key, StringComparison.OrdinalIgnoreCase))
+            .Select(row => (row.SeriesKey, row.Date, row.Value));
+
+        var (periods, valuesByKey) = Bucket(query, rows, keepNegative: true);
+        decimal[] changes = valuesByKey.Values.FirstOrDefault() ?? new decimal[periods.Count];
+
+        decimal running = Math.Max(startValue, 0);
+        var values = new List<decimal>(changes.Length);
+        foreach (decimal change in changes)
+        {
+            // A level cannot go below 0 (for example when changes before the range were cut off).
+            running = Math.Max(running + change, 0);
+            values.Add(StatsValues.Round(running, kind));
+        }
+
+        return new(definition.Key, definition.DisplayName, kind, values, StatsValues.Round(running, kind));
+    }
+
     private static StatsTimeSeriesResult Create(StatsQuery query, IReadOnlyList<StatsPeriod> periods, IReadOnlyList<StatsTimeSeries> series) =>
         new(query.From, query.To, query.Grouping, query.ChannelId, periods, series, series.Sum(s => s.Total));
 
@@ -178,11 +221,13 @@ public static class StatsTimeSeriesBuilder
         Bucket(query, dailyCounts.Select(row => (row.SeriesKey, row.Date, row.Count)));
 
     /// <summary>
-    /// Shared by count (<c>int</c>) and value (<c>decimal</c>) series.
+    /// Shared by count (<c>int</c>) and value (<c>decimal</c>) series. With <paramref name="keepNegative"/>, only zero values are ignored
+    /// (for daily changes of a running total).
     /// </summary>
     private static (IReadOnlyList<StatsPeriod> Periods, Dictionary<string, T[]> ValuesByKey) Bucket<T>(
         StatsQuery query,
-        IEnumerable<(string SeriesKey, DateOnly Date, T Value)> rows)
+        IEnumerable<(string SeriesKey, DateOnly Date, T Value)> rows,
+        bool keepNegative = false)
         where T : struct, INumber<T>
     {
         var periods = StatsPeriods.Build(query.From, query.To, query.Grouping);
@@ -194,7 +239,7 @@ public static class StatsTimeSeriesBuilder
 
         foreach (var (SeriesKey, Date, Value) in rows)
         {
-            if (Date < query.From || Date > query.To || Value <= T.Zero)
+            if (Date < query.From || Date > query.To || Value == T.Zero || (Value < T.Zero && !keepNegative))
             {
                 continue;
             }

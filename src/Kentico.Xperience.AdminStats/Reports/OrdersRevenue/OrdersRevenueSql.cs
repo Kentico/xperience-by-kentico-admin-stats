@@ -1,3 +1,5 @@
+using Kentico.Xperience.AdminStats.Reports.Commerce;
+
 namespace Kentico.Xperience.AdminStats.Reports.OrdersRevenue;
 
 /// <summary>
@@ -28,19 +30,19 @@ internal static class OrdersRevenueSql
     public const string ToExclusiveParameter = "@ToExclusive";
 
     /// <summary>Order status ID of the status filter.</summary>
-    public const string OrderStatusIdParameter = "@OrderStatusId";
+    public const string OrderStatusIdParameter = CommerceSql.OrderStatusIdParameter;
 
     /// <summary>Maximum number of top products.</summary>
     public const string LimitParameter = "@Limit";
 
-    public const string AvailableColumn = "CommerceAvailable";
+    public const string AvailableColumn = CommerceSql.AvailableColumn;
     public const string DateColumn = "OrderDate";
     public const string OrdersColumn = "OrderCount";
     public const string RevenueColumn = "Revenue";
     public const string CurrentQuantityColumn = "CurrentQuantity";
     public const string PreviousQuantityColumn = "PreviousQuantity";
-    public const string StatusIdColumn = "OrderStatusID";
-    public const string StatusNameColumn = "OrderStatusDisplayName";
+    public const string StatusIdColumn = CommerceSql.StatusIdColumn;
+    public const string StatusNameColumn = CommerceSql.StatusNameColumn;
     public const string ProductKeyColumn = "ProductKey";
     public const string SkuColumn = "Sku";
     public const string NameColumn = "ProductName";
@@ -49,21 +51,8 @@ internal static class OrdersRevenueSql
     public const string GroupCountColumn = "GroupCount";
     public const string TotalRevenueColumn = "TotalRevenue";
 
-    private const string AvailabilityCheck = """
-        IF OBJECT_ID(N'[Commerce_Order]', N'U') IS NULL
-            OR OBJECT_ID(N'[Commerce_OrderItem]', N'U') IS NULL
-            OR OBJECT_ID(N'[Commerce_OrderStatus]', N'U') IS NULL
-        BEGIN
-            SELECT CAST(0 AS bit) AS [CommerceAvailable];
-            RETURN;
-        END;
-        SELECT CAST(1 AS bit) AS [CommerceAvailable];
-        """;
-
-    private const string StatusCondition = """
-
-            AND O.[OrderOrderStatusID] = @OrderStatusId
-        """;
+    private static readonly string availabilityCheck =
+        CommerceSql.BuildAvailabilityCheck("Commerce_Order", "Commerce_OrderItem", "Commerce_OrderStatus");
 
     // 1. Orders and revenue per day, previous period + range ({0} = status condition).
     private const string DailyQuery = """
@@ -145,24 +134,18 @@ internal static class OrdersRevenueSql
         ORDER BY [Revenue] DESC, P.[ProductKey];
         """;
 
-    private const string StatusesQuery = """
-        SELECT S.[OrderStatusID], S.[OrderStatusDisplayName]
-        FROM [Commerce_OrderStatus] S
-        ORDER BY S.[OrderStatusOrder], S.[OrderStatusID];
-        """;
-
     /// <summary>
     /// Builds the report batch. With <paramref name="filterByStatus"/>, all result sets except the status breakdown read only orders
     /// in <see cref="OrderStatusIdParameter"/>.
     /// </summary>
     public static string BuildReport(bool filterByStatus)
     {
-        string status = filterByStatus ? StatusCondition : string.Empty;
+        string status = filterByStatus ? CommerceSql.StatusCondition : string.Empty;
 
         return string.Join(
             Environment.NewLine,
             "SET NOCOUNT ON;",
-            AvailabilityCheck,
+            availabilityCheck,
             string.Format(DailyQuery, status),
             string.Format(ItemsSoldQuery, status),
             ByStatusQuery,
@@ -170,8 +153,7 @@ internal static class OrdersRevenueSql
     }
 
     /// <summary>
-    /// Builds the batch that reads the order statuses (for the status filter), in status order.
+    /// Builds the batch that reads the order statuses (for the status filter), in status order. Shared with the other commerce reports.
     /// </summary>
-    public static string BuildStatuses() =>
-        string.Join(Environment.NewLine, "SET NOCOUNT ON;", AvailabilityCheck, StatusesQuery);
+    public static string BuildStatuses() => CommerceSql.BuildStatuses();
 }

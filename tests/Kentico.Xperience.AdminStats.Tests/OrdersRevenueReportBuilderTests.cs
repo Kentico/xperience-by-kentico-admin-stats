@@ -1,3 +1,4 @@
+using Kentico.Xperience.AdminStats.Reports.Commerce;
 using Kentico.Xperience.AdminStats.Reports.OrdersRevenue;
 using Kentico.Xperience.AdminStats.Shared;
 
@@ -7,7 +8,7 @@ public class OrdersRevenueReportBuilderTests
 {
     private static readonly StatsQuery range = new(new(2026, 9, 1), new(2026, 9, 30), StatsGrouping.Day, null);
     private static readonly OrdersRevenueQuery query = new(range, null);
-    private static readonly OrdersRevenueStatusOption[] statuses = [new(4, "Pending"), new(1, "Fulfilled")];
+    private static readonly CommerceOrderStatusOption[] statuses = [new(4, "Pending"), new(1, "Fulfilled")];
 
     [Test]
     public void Build_NoOrders_EmptySeries_NullAverageAndChanges()

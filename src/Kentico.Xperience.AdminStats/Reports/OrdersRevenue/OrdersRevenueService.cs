@@ -1,6 +1,7 @@
 using CMS.Helpers;
 
 using Kentico.Xperience.Admin.DigitalCommerce.UIPages;
+using Kentico.Xperience.AdminStats.Reports.Commerce;
 using Kentico.Xperience.AdminStats.Shared;
 
 namespace Kentico.Xperience.AdminStats.Reports.OrdersRevenue;
@@ -39,12 +40,12 @@ internal sealed class OrdersRevenueService(
         // Statuses are editable per project, so the filter is checked against the current statuses (cached like the data).
         var statuses = await cache.LoadAsync(
             cacheInvalidator,
-            StatsCache.CreateSettings("orders-revenue-statuses"),
+            StatsCache.CreateSettings(CommerceOrderStatuses.CacheName),
             refresh,
             repository.GetStatuses,
             cancellationToken);
 
-        int? statusId = query.OrderStatusId is int id && statuses.Any(s => s.Id == id) ? id : null;
+        int? statusId = CommerceOrderStatuses.Resolve(statuses, query.OrderStatusId);
 
         // Orders have no channel, so the channel is dropped and does not split the cache key.
         var normalized = new OrdersRevenueQuery(query.Range with { ChannelId = null }, statusId);

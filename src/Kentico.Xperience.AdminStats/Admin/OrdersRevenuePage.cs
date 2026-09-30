@@ -4,7 +4,7 @@ using Kentico.Xperience.AdminStats.Reports.OrdersRevenue;
 
 [assembly: UIPage(
     uiPageType: typeof(OrdersRevenuePage),
-    parentType: typeof(StatsApplicationPage),
+    parentType: typeof(StatsCommerceSection),
     slug: "orders-revenue",
     name: "Orders and revenue",
     templateName: OrdersRevenuePage.TEMPLATE_NAME,
@@ -20,7 +20,8 @@ namespace Kentico.Xperience.AdminStats.Admin;
 public sealed class OrdersRevenuePage(
     IOrdersRevenueService ordersRevenueService,
     IPageLinkGenerator pageLinkGenerator,
-    TimeProvider clock) : Page<OrdersRevenueClientProperties>
+    TimeProvider clock,
+    IUIPermissionEvaluator permissionEvaluator) : StatsReportPage<OrdersRevenueClientProperties>(permissionEvaluator)
 {
     public const string TEMPLATE_NAME = "@kentico/xperience-admin-stats/OrdersRevenue";
 
@@ -28,7 +29,7 @@ public sealed class OrdersRevenuePage(
     private readonly IPageLinkGenerator pageLinkGenerator = pageLinkGenerator;
     private readonly TimeProvider clock = clock;
 
-    public override async Task<OrdersRevenueClientProperties> ConfigureTemplateProperties(OrdersRevenueClientProperties properties)
+    protected override async Task<OrdersRevenueClientProperties> ConfigureReportProperties(OrdersRevenueClientProperties properties)
     {
         var query = new OrdersRevenueFilter().Normalize(GetToday());
 
@@ -52,7 +53,7 @@ public sealed class OrdersRevenuePage(
     private DateOnly GetToday() => DateOnly.FromDateTime(clock.GetLocalNow().DateTime);
 }
 
-public sealed class OrdersRevenueClientProperties : TemplateClientProperties
+public sealed class OrdersRevenueClientProperties : StatsReportClientProperties
 {
     public OrdersRevenueResult? Report { get; set; }
 

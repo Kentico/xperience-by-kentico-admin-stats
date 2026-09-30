@@ -21,6 +21,12 @@ const changeFormat = new Intl.NumberFormat(undefined, {
   signDisplay: 'exceptZero',
 });
 
+/** Percentage points (change of a ratio), for example "+5.2". */
+const pointsFormat = new Intl.NumberFormat(undefined, {
+  maximumFractionDigits: 1,
+  signDisplay: 'exceptZero',
+});
+
 /** Formats a 0–1 share as a percentage with one decimal. */
 export function formatShare(share: number): string {
   return shareFormat.format(Number.isFinite(share) ? share : 0);
@@ -66,9 +72,14 @@ export function chartNumberFormat(kind: StatsValueKind = 'Count'): string {
   return kind === 'Ratio' ? '#.#%' : '#,###.##';
 }
 
-/** Formats a change ratio as a signed percentage, for example 0.12 as "+12%". */
-export function formatChange(change: number): string {
-  return changeFormat.format(Number.isFinite(change) ? change : 0);
+/**
+ * Formats a change ratio as a signed percentage, for example 0.12 as "+12%".
+ * Changes of `Ratio` values are differences in ratio points (see `StatsValueComparison.change`),
+ * shown as percentage points, for example 0.05 as "+5 pp".
+ */
+export function formatChange(change: number, kind: StatsValueKind = 'Count'): string {
+  const value = Number.isFinite(change) ? change : 0;
+  return kind === 'Ratio' ? `${pointsFormat.format(value * 100)} pp` : changeFormat.format(value);
 }
 
 /** The previous period of a comparison. */
@@ -88,13 +99,13 @@ export function formatPreviousPeriod(comparison: PreviousPeriod): string {
  * When there is no change ratio (the previous value is 0 or cannot be computed), returns "No {noun} in previous 30 days".
  */
 export function formatComparison(
-  comparison: PreviousPeriod & { readonly change: number | null },
+  comparison: PreviousPeriod & { readonly change: number | null; readonly kind?: StatsValueKind },
   noun: string,
 ): string {
   const period = formatPreviousPeriod(comparison);
   return comparison.change === null
     ? `No ${noun} in ${period}`
-    : `${formatChange(comparison.change)} vs ${period}`;
+    : `${formatChange(comparison.change, comparison.kind)} vs ${period}`;
 }
 
 /**
