@@ -4,7 +4,7 @@
 
 ## Description
 
-This project is a Kentico Labs example that shows basic charts about your Xperience by Kentico data in the administration. It is not Kentico's plan for reporting in Xperience by Kentico.
+This project is a Kentico Labs example that shows basic charts about your Xperience by Kentico data in the administration.
 
 ### Screenshots
 
