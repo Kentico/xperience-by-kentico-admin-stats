@@ -1,4 +1,11 @@
-import { StatsRankedCaptions, StatsRankedItem } from './types';
+import { periodTotals } from './timeSeries';
+import {
+  StatsPeriod,
+  StatsRankedCaptions,
+  StatsRankedItem,
+  StatsSeries,
+  StatsShareSlice,
+} from './types';
 
 export type CsvValue = string | number | null | undefined;
 
@@ -54,6 +61,42 @@ export function toRankedCsv(
   ]);
 
   return toCsv(header, rows);
+}
+
+/**
+ * Builds CSV text for a time series: period start, period label, one column per series, total.
+ */
+export function toTimeSeriesCsv(
+  periods: readonly StatsPeriod[],
+  series: readonly StatsSeries[],
+): string {
+  const totals = periodTotals(periods, series);
+  return toCsv(
+    ['Period start', 'Period', ...series.map((s) => s.name), 'Total'],
+    periods.map((period, index) => [
+      period.start,
+      period.label,
+      ...series.map((s) => s.values[index] ?? 0),
+      totals[index],
+    ]),
+  );
+}
+
+/** Builds CSV text for share slices: name, value, share (%, one decimal). */
+export function toShareCsv(
+  slices: readonly StatsShareSlice[],
+  labelCaption: string,
+  valueCaption: string,
+): string {
+  const total = slices.reduce((sum, s) => sum + s.value, 0);
+  return toCsv(
+    [labelCaption, valueCaption, 'Share (%)'],
+    slices.map((slice) => [
+      slice.name,
+      slice.value,
+      total > 0 ? Math.round((slice.value / total) * 1000) / 10 : 0,
+    ]),
+  );
 }
 
 /** Starts a browser download of CSV text. Adds a BOM so Excel reads UTF-8. */

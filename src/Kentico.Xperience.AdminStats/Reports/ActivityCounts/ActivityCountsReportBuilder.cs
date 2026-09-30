@@ -12,54 +12,20 @@ internal static class ActivityCountsReportBuilder
         IEnumerable<ActivityDailyCount> dailyCounts,
         IReadOnlyDictionary<string, string> displayNames)
     {
-        var periods = StatsPeriods.Build(query.From, query.To, query.Grouping);
-        var periodIndexes = periods
-            .Select((period, index) => (period.Start, index))
-            .ToDictionary(p => p.Start, p => p.index);
+        var timeSeries = StatsTimeSeriesBuilder.BuildByTotal(
+            query,
+            dailyCounts.Select(row => new StatsDailyCount(row.ActivityType ?? string.Empty, row.Date, row.Count)),
+            activityType => GetDisplayName(activityType, displayNames));
 
-        var valuesByType = new Dictionary<string, int[]>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var row in dailyCounts)
-        {
-            if (row.Date < query.From || row.Date > query.To || row.Count <= 0)
-            {
-                continue;
-            }
-
-            var periodStart = StatsPeriods.GetPeriodStart(row.Date, query.Grouping);
-            if (!periodIndexes.TryGetValue(periodStart, out int index))
-            {
-                continue;
-            }
-
-            string activityType = row.ActivityType ?? string.Empty;
-            if (!valuesByType.TryGetValue(activityType, out int[]? values))
-            {
-                values = new int[periods.Count];
-                valuesByType[activityType] = values;
-            }
-
-            values[index] += row.Count;
-        }
-
-        var series = valuesByType
-            .Select(pair => new ActivityCountsSeries(
-                pair.Key,
-                GetDisplayName(pair.Key, displayNames),
-                pair.Value,
-                pair.Value.Sum()))
-            .OrderByDescending(s => s.Total)
-            .ThenBy(s => s.DisplayName, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
+        // Same JSON shape as before the shared builder existed (series use "activityType").
         return new(
-            query.From,
-            query.To,
-            query.Grouping,
-            query.ChannelId,
-            periods,
-            series,
-            series.Sum(s => s.Total));
+            timeSeries.From,
+            timeSeries.To,
+            timeSeries.Grouping,
+            timeSeries.ChannelId,
+            timeSeries.Periods,
+            [.. timeSeries.Series.Select(s => new ActivityCountsSeries(s.Key, s.DisplayName, s.Values, s.Total))],
+            timeSeries.Total);
     }
 
     private static string GetDisplayName(string activityType, IReadOnlyDictionary<string, string> displayNames)

@@ -37,9 +37,20 @@ Shows the 25 most visited page URLs in the range as a bar chart, largest on top.
 
 Visits are grouped by the logged URL with the query string and fragment removed, so `/page?utm_source=x` counts as `/page`. Other differences (host, trailing slash, letter case) count as different pages.
 
+### New contacts
+
+Shows contacts created per period, stacked by identified and anonymous, and the share of each.
+
+- **Identified** - the contact has an email address. **Anonymous** - no email address (for example, a site visitor who has not submitted a form).
+- **KPIs** - new contacts in the range, identified (count and share) and anonymous (count and share).
+- **Filters** - date range and grouping (no channel; contacts have no channel).
+- **Tiles** - "New contacts over time" (stacked column chart or table) and "Identified vs anonymous" (donut chart or table). Each has its own CSV export.
+
+Counts only include contacts that still exist. Contacts deleted by cleanup and contacts removed when merged into another contact are not counted. A contact that gets an email address later counts as identified in the period it was created.
+
 ### Dates and caching
 
-All reports: dates use the server date. Results are cached for 5 minutes, so new activities can take a few minutes to appear. Select **Refresh** to load the latest numbers.
+All reports: dates use the server date. Results are cached for 5 minutes, so new activities and contacts can take a few minutes to appear. Select **Refresh** to load the latest numbers.
 
 ## Data retention
 

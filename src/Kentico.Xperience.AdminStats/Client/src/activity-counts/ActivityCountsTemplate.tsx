@@ -1,18 +1,13 @@
-import {
-  CellType,
-  ColumnContentType,
-  InfoCard,
-  Table,
-  TableColumn,
-  TableRow,
-} from '@kentico/xperience-admin-components';
+import { InfoCard } from '@kentico/xperience-admin-components';
 import React, { useMemo, useState } from 'react';
 
-import { downloadCsv, toCsv } from '../shared/csv';
+import { downloadCsv, toTimeSeriesCsv } from '../shared/csv';
 import { DataRetentionNote } from '../shared/DataRetentionNote';
+import { numberFormat } from '../shared/format';
 import { StackedColumnChart } from '../shared/StackedColumnChart';
 import { StatsFilterBar } from '../shared/StatsFilterBar';
 import { StatsTile } from '../shared/StatsTile';
+import { TimeSeriesTable } from '../shared/TimeSeriesTable';
 import {
   StatsChannelOption,
   StatsFilter,
@@ -51,14 +46,6 @@ interface ActivityCountsTemplateProps {
   readonly today: string;
 }
 
-const numberFormat = new Intl.NumberFormat();
-
-const periodCaption: Record<StatsGrouping, string> = {
-  Day: 'Day',
-  Week: 'Week starting',
-  Month: 'Month',
-};
-
 function toFilter(report: ActivityCountsResult): StatsFilter {
   return {
     from: report.from,
@@ -66,12 +53,6 @@ function toFilter(report: ActivityCountsResult): StatsFilter {
     grouping: report.grouping,
     channelId: report.channelId,
   };
-}
-
-function periodTotals(report: ActivityCountsResult): number[] {
-  return report.periods.map((_, index) =>
-    report.series.reduce((sum, s) => sum + (s.values[index] ?? 0), 0),
-  );
 }
 
 export const ActivityCountsTemplate = (props: ActivityCountsTemplateProps) => {
@@ -102,19 +83,9 @@ export const ActivityCountsTemplate = (props: ActivityCountsTemplateProps) => {
   const rangeText = `${report.from} – ${report.to}`;
 
   const exportCsv = () => {
-    const totals = periodTotals(report);
-    const csv = toCsv(
-      ['Period start', 'Period', ...report.series.map((s) => s.displayName), 'Total'],
-      report.periods.map((period, index) => [
-        period.start,
-        period.label,
-        ...report.series.map((s) => s.values[index] ?? 0),
-        totals[index],
-      ]),
-    );
     downloadCsv(
       `activity-counts_${report.from}_${report.to}_${report.grouping.toLowerCase()}.csv`,
-      csv,
+      toTimeSeriesCsv(report.periods, chartSeries),
     );
   };
 
@@ -172,59 +143,16 @@ export const ActivityCountsTemplate = (props: ActivityCountsTemplateProps) => {
             ariaLabel={`Activity counts by type, ${rangeText}`}
           />
         )}
-        renderTable={() => <ActivityCountsTable report={report} />}
+        renderTable={() => (
+          <TimeSeriesTable
+            grouping={report.grouping}
+            periods={report.periods}
+            series={chartSeries}
+          />
+        )}
       />
 
       <DataRetentionNote />
     </div>
   );
 };
-
-const ActivityCountsTable = ({ report }: { report: ActivityCountsResult }) => {
-  const columns = useMemo<TableColumn[]>(
-    () => [
-      column('period', periodCaption[report.grouping], 14, 20),
-      ...report.series.map((s, index) => column(`s${index}`, s.displayName, 10, 24)),
-      column('total', 'Total', 10, 16),
-    ],
-    [report],
-  );
-
-  const rows = useMemo<TableRow[]>(() => {
-    const totals = periodTotals(report);
-    return report.periods.map((period, index) => ({
-      identifier: period.start,
-      disabled: false,
-      cells: [
-        stringCell('period', period.label),
-        ...report.series.map((s, seriesIndex) =>
-          stringCell(`s${seriesIndex}`, numberFormat.format(s.values[index] ?? 0)),
-        ),
-        stringCell('total', numberFormat.format(totals[index])),
-      ],
-    }));
-  }, [report]);
-
-  return (
-    <div className="AdminStats-tableScroll">
-      <Table columns={columns} rows={rows} />
-    </div>
-  );
-};
-
-function column(name: string, caption: string, minWidth: number, maxWidth: number): TableColumn {
-  return {
-    name,
-    caption,
-    visible: true,
-    minWidth,
-    maxWidth,
-    contentType: ColumnContentType.Text,
-    sortable: false,
-    searchable: false,
-  };
-}
-
-function stringCell(columnName: string, value: string) {
-  return { type: CellType.String, columnName, value };
-}

@@ -130,6 +130,23 @@
   overflow-x: auto;
 }
 
+/* Report tiles: stacked on narrow screens, trend + share side by side on wide screens. */
+.AdminStats-tiles {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-xl);
+}
+
+@media (min-width: 1280px) {
+  .AdminStats-tiles {
+    grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+  }
+}
+
+.AdminStats-chart--donut {
+  height: 360px;
+}
+
 /* Height is set inline from the item count. */
 .AdminStats-chart--ranked {
   min-height: 160px;

@@ -2,6 +2,7 @@ using CMS.Core;
 
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.AdminStats.Reports.ActivityCounts;
+using Kentico.Xperience.AdminStats.Reports.NewContacts;
 using Kentico.Xperience.AdminStats.Reports.TopPages;
 using Kentico.Xperience.AdminStats.Shared;
 
@@ -42,5 +43,7 @@ internal sealed class AdminStatsWebAdminModule : AdminModule
         services.TryAddTransient<IActivityCountsService, ActivityCountsService>();
         services.TryAddTransient<ITopPagesRepository, TopPagesRepository>();
         services.TryAddTransient<ITopPagesService, TopPagesService>();
+        services.TryAddTransient<INewContactsRepository, NewContactsRepository>();
+        services.TryAddTransient<INewContactsService, NewContactsService>();
     }
 }

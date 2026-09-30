@@ -78,3 +78,34 @@ export interface StatsSeries {
   readonly name: string;
   readonly values: readonly number[];
 }
+
+/** Mirrors `StatsTimeSeries`: one series of a time series report. */
+export interface StatsTimeSeries {
+  readonly key: string;
+  readonly displayName: string;
+  /** Count per period (zero-filled). Aligns with `StatsTimeSeriesResult.periods`. */
+  readonly values: readonly number[];
+  readonly total: number;
+}
+
+/** Mirrors `StatsTimeSeriesResult`: counts per series per period for one range. */
+export interface StatsTimeSeriesResult {
+  readonly from: string;
+  readonly to: string;
+  readonly grouping: StatsGrouping;
+  /** `null` for all channels or reports without a channel. */
+  readonly channelId: number | null;
+  readonly periods: readonly StatsPeriod[];
+  /** Series in display order. */
+  readonly series: readonly StatsTimeSeries[];
+  readonly total: number;
+  /** ISO timestamp of when the data was read from the database. */
+  readonly updatedAt: string;
+}
+
+/** One slice of a share (donut) chart or table. */
+export interface StatsShareSlice {
+  readonly key: string;
+  readonly name: string;
+  readonly value: number;
+}

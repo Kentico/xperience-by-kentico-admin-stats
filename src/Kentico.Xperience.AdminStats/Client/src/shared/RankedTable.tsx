@@ -1,6 +1,5 @@
 import {
   CellType,
-  ColumnContentType,
   LinkTableCellComponent,
   Table,
   TableCell,
@@ -10,6 +9,7 @@ import {
 import React, { useMemo } from 'react';
 
 import { formatShare, numberFormat } from './format';
+import { column, stringCell } from './table';
 import { StatsRankedCaptions, StatsRankedItem } from './types';
 
 export interface RankedTableProps {
@@ -67,23 +67,6 @@ export const RankedTable = ({ items, captions }: RankedTableProps) => {
     </div>
   );
 };
-
-function column(name: string, caption: string, minWidth: number, maxWidth: number): TableColumn {
-  return {
-    name,
-    caption,
-    visible: true,
-    minWidth,
-    maxWidth,
-    contentType: ColumnContentType.Text,
-    sortable: false,
-    searchable: false,
-  };
-}
-
-function stringCell(columnName: string, value: string): TableCell {
-  return { type: CellType.String, columnName, value } as TableCell;
-}
 
 /**
  * Label as the admin link cell (opens in a new tab, truncates with ellipsis).

@@ -53,6 +53,8 @@ export interface ChartTokens {
   readonly grid: am5.Color;
   readonly tooltip: am5.Color;
   readonly tooltipText: am5.Color;
+  /** Card background, used to separate slices. */
+  readonly surface: am5.Color;
 }
 
 export function getChartTokens(): ChartTokens {
@@ -66,5 +68,6 @@ export function getChartTokens(): ChartTokens {
     grid: read(Colors.DividerDefault, '#dfdfdf'),
     tooltip: read(Colors.TooltipBackground, '#151515'),
     tooltipText: read(Colors.TextDefaultOnDark, '#ffffff'),
+    surface: read(Colors.PaperBackground, '#ffffff'),
   };
 }

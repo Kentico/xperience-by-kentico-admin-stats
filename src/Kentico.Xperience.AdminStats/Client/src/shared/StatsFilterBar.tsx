@@ -42,6 +42,8 @@ export interface StatsFilterBarProps {
   readonly updatedAt?: string;
   /** Shows the grouping control. Hide it for reports that use the range only (for example ranked lists). */
   readonly showGrouping?: boolean;
+  /** Shows the channel filter (when there are channel options). Hide it for data without a channel (for example contacts). */
+  readonly showChannel?: boolean;
 }
 
 const timeFormat = new Intl.DateTimeFormat(undefined, { timeStyle: 'short' });
@@ -76,6 +78,7 @@ export const StatsFilterBar = ({
   isLoading = false,
   updatedAt,
   showGrouping = true,
+  showChannel = true,
 }: StatsFilterBarProps) => {
   const updatedText = updatedAt ? formatUpdatedAt(updatedAt) : null;
 
@@ -146,7 +149,7 @@ export const StatsFilterBar = ({
         </div>
       )}
 
-      {channels.length > 0 && (
+      {showChannel && channels.length > 0 && (
         <div className="AdminStats-filterItem AdminStats-filterItem--channel">
           <Select
             label="Channel"
