@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using CMS.Base;
+using CMS.EmailEngine;
 
 using DancingGoat;
 using DancingGoat.EmailComponents;
@@ -77,6 +78,10 @@ ConfigureMembershipServices(builder.Services);
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.Configure<UrlResolveOptions>(options => options.UseSSL = false);
+
+    // System emails (admin user invitations, password resets) go to a local SMTP catcher, see docs/Contributing-Setup.md
+    builder.Services.AddXperienceSystemSmtp(options => builder.Configuration.GetSection("SystemSmtpOptions").Bind(options));
+    builder.Services.Configure<SystemEmailOptions>(builder.Configuration.GetSection("SystemEmailOptions"));
 }
 
 builder.AddDancingGoatManagementApi();
