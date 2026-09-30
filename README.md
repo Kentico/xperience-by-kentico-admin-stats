@@ -6,6 +6,14 @@
 
 This project is a Kentico Labs example that shows basic charts about your Xperience by Kentico data in the administration. It is not Kentico's plan for reporting in Xperience by Kentico.
 
+### Screenshots
+
+![Activity counts stats graph page](./docs/images/dancing-goat-activity-counts-stats.jpg)
+![Content inventory stats page](./docs/images/dancing-goat-content-inventory-stats.jpg)
+![Event log stats page](./docs/images/dancing-goat-event-log-stats.jpg)
+![New contacts stats graph page](./docs/images/dancing-goat-new-contacts-stats.jpg)
+![Orders and revenue stats page](./docs/images/dancing-goat-orders-and-revenue-stats.jpg)
+
 ## Requirements
 
 ### Library Version Matrix

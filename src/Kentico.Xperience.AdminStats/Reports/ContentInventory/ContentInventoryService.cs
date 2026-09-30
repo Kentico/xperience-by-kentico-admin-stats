@@ -1,0 +1,112 @@
+using CMS.Helpers;
+
+using Kentico.Xperience.Admin.Base;
+using Kentico.Xperience.Admin.Base.UIPages;
+using Kentico.Xperience.AdminStats.Shared;
+
+namespace Kentico.Xperience.AdminStats.Reports.ContentInventory;
+
+/// <summary>
+/// Builds the content inventory report.
+/// </summary>
+public interface IContentInventoryService
+{
+    /// <summary>
+    /// Returns the report for the query.
+    /// </summary>
+    /// <param name="query">Normalized filter (see <see cref="StatsSnapshotFilter.Normalize"/>).</param>
+    /// <param name="refresh">When <c>true</c>, cached data is dropped and read again from the database (then cached again).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    public Task<ContentInventoryResult> GetReport(StatsSnapshotQuery query, bool refresh, CancellationToken cancellationToken);
+}
+
+internal sealed class ContentInventoryService(
+    IContentInventoryRepository repository,
+    IProgressiveCache cache,
+    IStatsCacheInvalidator cacheInvalidator,
+    IStatsAdminLinks adminLinks,
+    TimeProvider clock) : IContentInventoryService
+{
+    private readonly IContentInventoryRepository repository = repository;
+    private readonly IProgressiveCache cache = cache;
+    private readonly IStatsCacheInvalidator cacheInvalidator = cacheInvalidator;
+    private readonly IStatsAdminLinks adminLinks = adminLinks;
+    private readonly TimeProvider clock = clock;
+
+    public async Task<ContentInventoryResult> GetReport(StatsSnapshotQuery query, bool refresh, CancellationToken cancellationToken)
+    {
+        // Current state only: the key is the normalized kind and channel, nothing time-based.
+        // Ages (days since the last change) are counted to the read time, so they are as old as the cached data.
+        var settings = StatsCache.CreateSettings(
+            "content-inventory",
+            query.Kind ?? "all",
+            query.ChannelId ?? 0);
+
+        var snapshot = await cache.LoadAsync(
+            cacheInvalidator,
+            settings,
+            refresh,
+            async token => new ContentInventorySnapshot(
+                await repository.GetData(query, clock.GetLocalNow().DateTime, token),
+                clock.GetUtcNow()),
+            cancellationToken);
+
+        var result = ContentInventoryReportBuilder.Build(query, snapshot.Data, GetContentTypePath, GetWorkflowPath, GetContentItemPath);
+
+        return result with
+        {
+            ByKind = result.ByKind with { UpdatedAt = snapshot.ReadAt },
+            ByContentType = result.ByContentType with { UpdatedAt = snapshot.ReadAt },
+            ByStatus = result.ByStatus with { UpdatedAt = snapshot.ReadAt },
+            Age = result.Age with { Buckets = result.Age.Buckets with { UpdatedAt = snapshot.ReadAt } },
+            UnusedReusable = result.UnusedReusable is { } unused
+                ? unused with { ByContentType = unused.ByContentType with { UpdatedAt = snapshot.ReadAt } }
+                : null,
+            UpdatedAt = snapshot.ReadAt,
+        };
+    }
+
+    /// <summary>
+    /// Path of the "General" tab of the content type in the Content types application.
+    /// </summary>
+    private string? GetContentTypePath(int classId) =>
+        adminLinks.GetPath<ContentTypeGeneral>(new PageParameterValues
+        {
+            { typeof(ContentTypeEditSection), classId },
+        });
+
+    /// <summary>
+    /// Path of the "Steps" tab of the workflow in the Workflows application.
+    /// </summary>
+    private string? GetWorkflowPath(int workflowId) =>
+        adminLinks.GetPath<WorkflowSteps>(new PageParameterValues
+        {
+            { typeof(WorkflowEditSection), workflowId },
+        });
+
+    /// <summary>
+    /// Path of the item where it is edited: reusable items in the Content hub (with <see cref="IStatsAdminLinks"/>),
+    /// pages, emails and headless items in their channel application (see <see cref="StatsChannelItemPaths"/>).
+    /// </summary>
+    private string? GetContentItemPath(ContentItemLink link) =>
+        link.Location switch
+        {
+            ContentItemLocation.ContentHub => GetContentHubPath(link),
+            ContentItemLocation.WebPage => StatsChannelItemPaths.GetWebPagePath(link.ContainerId, link.LanguageName, link.ObjectId),
+            ContentItemLocation.Email => StatsChannelItemPaths.GetEmailPath(link.ContainerId, link.LanguageName, link.ObjectId),
+            ContentItemLocation.Headless => StatsChannelItemPaths.GetHeadlessItemPath(link.ContainerId, link.LanguageName, link.ObjectId),
+            _ => null,
+        };
+
+    /// <summary>
+    /// Path of the "Content" tab of a reusable item in the Content hub (all items of its workspace, the given language).
+    /// </summary>
+    private string? GetContentHubPath(ContentItemLink link) =>
+        adminLinks.GetPath<ContentItemEdit>(new PageParameterValues
+        {
+            { typeof(ContentHubWorkspace), link.ContainerId },
+            { typeof(ContentHubContentLanguage), link.LanguageName },
+            { typeof(ContentHubFolder), ContentHubSlugs.ALL_CONTENT_ITEMS },
+            { typeof(ContentItemEditSection), link.ObjectId },
+        });
+}

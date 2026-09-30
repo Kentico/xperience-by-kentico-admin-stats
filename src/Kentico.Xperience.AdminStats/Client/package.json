@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@amcharts/amcharts5": "5.20.6",
     "@kentico/xperience-admin-base": "31.9.0",
     "@kentico/xperience-admin-components": "31.9.0",
     "react": "18.3.1",
