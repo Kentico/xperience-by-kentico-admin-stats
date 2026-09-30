@@ -61,6 +61,7 @@ Design goals:
 **Other**
 
 - Digital commerce orders and revenue. _Uncertain: not yet checked which commerce tables are stable enough to depend on._
+- Customer growth over time, broken down by billing or shipping country and state; rank top customers by revenue, order count, and item quantity purchased.
 - Member registrations over time.
 - Admin user sign-in activity.
 
