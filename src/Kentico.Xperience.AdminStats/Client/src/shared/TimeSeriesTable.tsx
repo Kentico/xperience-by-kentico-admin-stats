@@ -1,7 +1,7 @@
 import { Table, TableColumn, TableRow } from '@kentico/xperience-admin-components';
 import React, { useMemo } from 'react';
 
-import { numberFormat } from './format';
+import { formatValue, numberFormat } from './format';
 import { column, stringCell } from './table';
 import { periodCaption, periodTotals } from './timeSeries';
 import { StatsGrouping, StatsPeriod, StatsSeries } from './types';
@@ -9,18 +9,24 @@ import { StatsGrouping, StatsPeriod, StatsSeries } from './types';
 export interface TimeSeriesTableProps {
   readonly grouping: StatsGrouping;
   readonly periods: readonly StatsPeriod[];
+  /** Series values are formatted by their `kind` (default count). */
   readonly series: readonly StatsSeries[];
+  /**
+   * Shows the total column (sum of all series). Default `true`.
+   * Hide it when series measure different things (for example orders and revenue).
+   */
+  readonly showTotal?: boolean;
 }
 
-/** Period × series grid with a total column, as a native admin table. */
-export const TimeSeriesTable = ({ grouping, periods, series }: TimeSeriesTableProps) => {
+/** Period × series grid with an optional total column, as a native admin table. */
+export const TimeSeriesTable = ({ grouping, periods, series, showTotal = true }: TimeSeriesTableProps) => {
   const columns = useMemo<TableColumn[]>(
     () => [
       column('period', periodCaption[grouping], 14, 20),
       ...series.map((s, index) => column(`s${index}`, s.name, 10, 24)),
-      column('total', 'Total', 10, 16),
+      ...(showTotal ? [column('total', 'Total', 10, 16)] : []),
     ],
-    [grouping, series],
+    [grouping, series, showTotal],
   );
 
   const rows = useMemo<TableRow[]>(() => {
@@ -31,12 +37,12 @@ export const TimeSeriesTable = ({ grouping, periods, series }: TimeSeriesTablePr
       cells: [
         stringCell('period', period.label),
         ...series.map((s, seriesIndex) =>
-          stringCell(`s${seriesIndex}`, numberFormat.format(s.values[index] ?? 0)),
+          stringCell(`s${seriesIndex}`, formatValue(s.values[index] ?? 0, s.kind, s.texts?.[index])),
         ),
-        stringCell('total', numberFormat.format(totals[index])),
+        ...(showTotal ? [stringCell('total', numberFormat.format(totals[index]))] : []),
       ],
     }));
-  }, [periods, series]);
+  }, [periods, series, showTotal]);
 
   return (
     <div className="AdminStats-tableScroll">

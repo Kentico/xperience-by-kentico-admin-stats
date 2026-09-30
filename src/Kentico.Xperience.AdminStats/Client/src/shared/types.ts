@@ -72,6 +72,12 @@ export interface StatsRankedItem {
    * or `previousValue` is 0.
    */
   readonly change?: number | null;
+  /** `value` formatted by the project's price formatter (amounts only). Missing: format by kind. */
+  readonly valueText?: string;
+  /** `secondaryValue` formatted like `valueText`. */
+  readonly secondaryValueText?: string;
+  /** `previousValue` formatted like `valueText`. */
+  readonly previousValueText?: string;
 }
 
 /** Mirrors `StatsRankedResult`: ranked list for one range and channel. */
@@ -87,6 +93,12 @@ export interface StatsRankedResult {
   readonly itemCount: number;
   /** ISO timestamp of when the data was read from the database. */
   readonly updatedAt: string;
+  /** What `value`, `previousValue` and `total` measure. Missing means `Count`. */
+  readonly valueKind?: StatsValueKind;
+  /** What `secondaryValue` measures. Missing means `Count`. */
+  readonly secondaryValueKind?: StatsValueKind;
+  /** `total` formatted by the project's price formatter (amounts only). */
+  readonly totalText?: string;
 }
 
 /** Column captions of a ranked list, used by the table, chart tooltip and CSV. */
@@ -106,6 +118,10 @@ export interface StatsRankedCaptions {
   readonly previousValue?: string;
   /** Caption of the change column, for example "Change". Omit to hide it. */
   readonly change?: string;
+  /** Format of the value and previous value (for example `Amount` for revenue). Default `Count`. */
+  readonly valueKind?: StatsValueKind;
+  /** Format of the secondary value. Default `Count`. */
+  readonly secondaryValueKind?: StatsValueKind;
 }
 
 /** One chart series. `values` aligns with the period axis. */
@@ -115,6 +131,10 @@ export interface StatsSeries {
   readonly values: readonly number[];
   /** Fixed color token (for example for severities). Omit to use the next palette color. */
   readonly color?: Colors;
+  /** Format of the values in tables and tooltips. Default `Count`. */
+  readonly kind?: StatsValueKind;
+  /** `values` formatted by the project's price formatter, aligned with `values`. Missing: format by `kind`. */
+  readonly texts?: readonly string[];
 }
 
 /** Mirrors `StatsTimeSeries`: one series of a time series report. */
@@ -146,6 +166,10 @@ export interface StatsShareSlice {
   readonly key: string;
   readonly name: string;
   readonly value: number;
+  /** Optional second number shown in tables and CSV (for example revenue next to orders). */
+  readonly secondaryValue?: number | null;
+  /** `secondaryValue` formatted by the project's price formatter. Missing: format the number. */
+  readonly secondaryValueText?: string | null;
 }
 
 /** Mirrors `StatsCoverageItem`: "x of y" row, for example items with a language variant. */
@@ -190,4 +214,45 @@ export interface StatsAgedItem {
   readonly days: number;
   /** Native admin page, relative to the admin root (see `adminLinks.ts`). */
   readonly adminPath?: string | null;
+}
+
+/**
+ * Mirrors `StatsValueKind`: what a value measures, so shared components format it
+ * (see `formatValue`). Count values can be fractional (for example item quantities).
+ */
+export type StatsValueKind = 'Count' | 'Amount' | 'Ratio';
+
+/**
+ * Mirrors `StatsValueComparison`: a decimal value (count, amount or ratio) in the range compared with
+ * the previous period of the same length. Values are `null` when they cannot be computed
+ * (for example an average without orders).
+ */
+export interface StatsValueComparison {
+  readonly kind: StatsValueKind;
+  readonly current: number | null;
+  readonly previous: number | null;
+  /** Relative change as a ratio (0.12 = +12%). `null` when a value is `null` or `previous` is 0. */
+  readonly change: number | null;
+  /** First day of the previous period (`yyyy-MM-dd`). */
+  readonly previousFrom: string;
+  /** Last day of the previous period (`yyyy-MM-dd`). */
+  readonly previousTo: string;
+  /** `current` formatted by the project's price formatter (amounts only). Missing: format the number. */
+  readonly currentText?: string;
+  /** `previous` formatted like `currentText`. */
+  readonly previousText?: string;
+}
+
+/** Mirrors `StatsValueSeries`: one decimal series aligned with a period axis. */
+export interface StatsValueSeries {
+  readonly key: string;
+  readonly displayName: string;
+  readonly kind: StatsValueKind;
+  /** Value per period (zero-filled, amounts rounded to 2 decimals). */
+  readonly values: readonly number[];
+  readonly total: number;
+  /** `values` formatted by the project's price formatter (amounts only). Missing: format the numbers. */
+  readonly texts?: readonly string[];
+  /** `total` formatted like `texts`. */
+  readonly totalText?: string;
 }

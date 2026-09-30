@@ -9,8 +9,11 @@ namespace Kentico.Xperience.AdminStats.Shared;
 /// <param name="Key">Stable identifier of the item (for example the URL). Unique in the list.</param>
 /// <param name="Label">Primary label shown in charts and tables.</param>
 /// <param name="SecondaryLabel">Optional extra text shown under or next to the label.</param>
-/// <param name="Value">Ranked value (for example visits).</param>
-/// <param name="SecondaryValue">Optional second number (for example unique contacts).</param>
+/// <param name="Value">
+/// Ranked value (for example visits, or revenue). Decimal so amounts fit; counts are whole numbers and serialize as before.
+/// See <see cref="StatsRankedResult.ValueKind"/>.
+/// </param>
+/// <param name="SecondaryValue">Optional second number (for example unique contacts). See <see cref="StatsRankedResult.SecondaryValueKind"/>.</param>
 /// <param name="Share">Share of <see cref="StatsRankedResult.Total"/> (0-1).</param>
 /// <param name="Url">Optional absolute link opened in a new tab.</param>
 public sealed record StatsRankedItem(
@@ -18,8 +21,8 @@ public sealed record StatsRankedItem(
     string Key,
     string Label,
     string? SecondaryLabel,
-    int Value,
-    int? SecondaryValue,
+    decimal Value,
+    decimal? SecondaryValue,
     double Share,
     string? Url)
 {
@@ -35,14 +38,33 @@ public sealed record StatsRankedItem(
     /// so reports without a comparison send the same data as before.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public int? PreviousValue { get; init; }
+    public decimal? PreviousValue { get; init; }
 
     /// <summary>
-    /// Relative change of <see cref="Value"/> vs <see cref="PreviousValue"/> as a ratio (0.12 = +12%), see <see cref="StatsComparison.GetChange"/>.
+    /// Relative change of <see cref="Value"/> vs <see cref="PreviousValue"/> as a ratio (0.12 = +12%), see <see cref="StatsComparison.GetChange(decimal, decimal)"/>.
     /// <c>null</c> (left out of the JSON) when the report does not compare periods or the previous value is 0.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public double? Change { get; init; }
+
+    /// <summary>
+    /// <see cref="Value"/> formatted by the project's price formatter when it is an amount (see <see cref="StatsAmountTexts"/>).
+    /// <c>null</c> (left out of the JSON) when not formatted; the client then formats the number.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ValueText { get; init; }
+
+    /// <summary>
+    /// <see cref="SecondaryValue"/> formatted like <see cref="ValueText"/> when it is an amount.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? SecondaryValueText { get; init; }
+
+    /// <summary>
+    /// <see cref="PreviousValue"/> formatted like <see cref="ValueText"/>.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? PreviousValueText { get; init; }
 }
 
 /// <summary>
@@ -59,9 +81,28 @@ public sealed record StatsRankedResult(
     DateOnly To,
     int? ChannelId,
     IReadOnlyList<StatsRankedItem> Items,
-    int Total,
+    decimal Total,
     int ItemCount)
 {
+    /// <summary>
+    /// What <see cref="StatsRankedItem.Value"/>, <see cref="StatsRankedItem.PreviousValue"/> and <see cref="Total"/> measure.
+    /// <c>null</c> (left out of the JSON) means <see cref="StatsValueKind.Count"/>, so count reports send the same data as before.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public StatsValueKind? ValueKind { get; init; }
+
+    /// <summary>
+    /// What <see cref="StatsRankedItem.SecondaryValue"/> measures. <c>null</c> (left out of the JSON) means <see cref="StatsValueKind.Count"/>.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public StatsValueKind? SecondaryValueKind { get; init; }
+
+    /// <summary>
+    /// <see cref="Total"/> formatted by the project's price formatter when it is an amount. <c>null</c> (left out of the JSON) otherwise.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? TotalText { get; init; }
+
     /// <summary>
     /// When the data was read from the database. Can be older than the request when served from cache.
     /// </summary>
@@ -75,8 +116,8 @@ public sealed record StatsRankedEntry(
     string Key,
     string Label,
     string? SecondaryLabel,
-    int Value,
-    int? SecondaryValue,
+    decimal Value,
+    decimal? SecondaryValue,
     string? Url)
 {
     /// <inheritdoc cref="StatsRankedItem.AdminPath"/>
@@ -86,7 +127,7 @@ public sealed record StatsRankedEntry(
     /// Optional value in the previous period. When set, the ranked item gets <see cref="StatsRankedItem.PreviousValue"/>
     /// and <see cref="StatsRankedItem.Change"/>. <c>null</c> (default) leaves both empty.
     /// </summary>
-    public int? PreviousValue { get; init; }
+    public decimal? PreviousValue { get; init; }
 }
 
 /// <summary>
@@ -109,18 +150,22 @@ public static class StatsRankedBuilder
     /// When <c>true</c>, entries with value 0 are kept and listed last (for example unused forms).
     /// Negative values are always dropped.
     /// </param>
+    /// <param name="keepOrder">
+    /// When <c>true</c>, entries keep their order (for example fixed categories such as statuses) instead of being sorted by value.
+    /// </param>
     public static StatsRankedResult Build(
         StatsQuery query,
         IEnumerable<StatsRankedEntry> entries,
-        int total,
+        decimal total,
         int itemCount,
         int limit,
-        bool includeZero = false) =>
-        Build(query.From, query.To, query.ChannelId, entries, total, itemCount, limit, includeZero, keepOrder: false);
+        bool includeZero = false,
+        bool keepOrder = false) =>
+        Build(query.From, query.To, query.ChannelId, entries, total, itemCount, limit, includeZero, keepOrder);
 
     /// <summary>
     /// Builds a ranked result for a current-state (snapshot) report. Same rules as
-    /// <see cref="Build(StatsQuery, IEnumerable{StatsRankedEntry}, int, int, int, bool)"/>, but the result has no range:
+    /// <see cref="Build(StatsQuery, IEnumerable{StatsRankedEntry}, decimal, int, int, bool, bool)"/>, but the result has no range:
     /// <see cref="StatsRankedResult.From"/> and <see cref="StatsRankedResult.To"/> are <see cref="DateOnly.MinValue"/> and not used.
     /// </summary>
     /// <param name="channelId">Applied channel filter.</param>
@@ -136,7 +181,7 @@ public static class StatsRankedBuilder
     public static StatsRankedResult BuildSnapshot(
         int? channelId,
         IEnumerable<StatsRankedEntry> entries,
-        int total,
+        decimal total,
         int itemCount,
         int limit,
         bool includeZero = false,
@@ -148,7 +193,7 @@ public static class StatsRankedBuilder
         DateOnly to,
         int? channelId,
         IEnumerable<StatsRankedEntry> entries,
-        int total,
+        decimal total,
         int itemCount,
         int limit,
         bool includeZero,
@@ -159,7 +204,7 @@ public static class StatsRankedBuilder
             .DistinctBy(e => e.Key, StringComparer.Ordinal)
             .ToList();
 
-        int safeTotal = Math.Max(total, valid.Sum(e => e.Value));
+        decimal safeTotal = Math.Max(total, valid.Sum(e => e.Value));
         int safeCount = Math.Max(itemCount, valid.Count);
 
         IEnumerable<StatsRankedEntry> ordered = keepOrder
@@ -177,12 +222,12 @@ public static class StatsRankedBuilder
                 e.SecondaryLabel,
                 e.Value,
                 e.SecondaryValue,
-                safeTotal > 0 ? (double)e.Value / safeTotal : 0,
+                safeTotal > 0 ? (double)e.Value / (double)safeTotal : 0,
                 e.Url)
             {
                 AdminPath = e.AdminPath,
                 PreviousValue = e.PreviousValue,
-                Change = e.PreviousValue is int previous ? StatsComparison.GetChange(e.Value, previous) : null,
+                Change = e.PreviousValue is decimal previous ? StatsComparison.GetChange(e.Value, previous) : null,
             })
             .ToList();
 

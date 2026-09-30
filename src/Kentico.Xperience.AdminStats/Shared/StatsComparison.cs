@@ -41,4 +41,8 @@ public sealed record StatsComparison(int Current, int Previous, double? Change, 
     /// </summary>
     public static double? GetChange(int current, int previous) =>
         previous == 0 ? null : (double)(current - previous) / previous;
+
+    /// <inheritdoc cref="GetChange(int, int)"/>
+    public static double? GetChange(decimal current, decimal previous) =>
+        previous == 0 ? null : (double)((current - previous) / previous);
 }

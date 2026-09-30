@@ -6,6 +6,7 @@ using Kentico.Xperience.AdminStats.Reports.ContentInventory;
 using Kentico.Xperience.AdminStats.Reports.EventLog;
 using Kentico.Xperience.AdminStats.Reports.FormSubmissions;
 using Kentico.Xperience.AdminStats.Reports.NewContacts;
+using Kentico.Xperience.AdminStats.Reports.OrdersRevenue;
 using Kentico.Xperience.AdminStats.Reports.TopPages;
 using Kentico.Xperience.AdminStats.Shared;
 
@@ -55,5 +56,8 @@ internal sealed class AdminStatsWebAdminModule : AdminModule
         services.TryAddTransient<IContentInventoryService, ContentInventoryService>();
         services.TryAddTransient<IEventLogRepository, EventLogRepository>();
         services.TryAddTransient<IEventLogReportService, EventLogReportService>();
+        services.TryAddTransient<IStatsAmountFormatter, StatsAmountFormatter>();
+        services.TryAddTransient<IOrdersRevenueRepository, OrdersRevenueRepository>();
+        services.TryAddTransient<IOrdersRevenueService, OrdersRevenueService>();
     }
 }

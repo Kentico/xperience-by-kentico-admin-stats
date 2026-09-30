@@ -73,36 +73,45 @@ export function toRankedCsv(
 }
 
 /**
- * Builds CSV text for a time series: period start, period label, one column per series, total.
+ * Builds CSV text for a time series: period start, period label, one column per series, and a total
+ * (leave it out with `includeTotal: false` when series measure different things, for example orders and revenue).
+ * Values are raw numbers (dot decimal, no grouping).
  */
 export function toTimeSeriesCsv(
   periods: readonly StatsPeriod[],
   series: readonly StatsSeries[],
+  options: { readonly includeTotal?: boolean } = {},
 ): string {
+  const includeTotal = options.includeTotal ?? true;
   const totals = periodTotals(periods, series);
   return toCsv(
-    ['Period start', 'Period', ...series.map((s) => s.name), 'Total'],
+    ['Period start', 'Period', ...series.map((s) => s.name), ...(includeTotal ? ['Total'] : [])],
     periods.map((period, index) => [
       period.start,
       period.label,
       ...series.map((s) => s.values[index] ?? 0),
-      totals[index],
+      ...(includeTotal ? [totals[index]] : []),
     ]),
   );
 }
 
-/** Builds CSV text for share slices: name, value, share (%, one decimal). */
+/**
+ * Builds CSV text for share slices: name, value, optional secondary value (with `secondaryValueCaption`),
+ * share (%, one decimal). Values are raw numbers.
+ */
 export function toShareCsv(
   slices: readonly StatsShareSlice[],
   labelCaption: string,
   valueCaption: string,
+  secondaryValueCaption?: string,
 ): string {
   const total = slices.reduce((sum, s) => sum + s.value, 0);
   return toCsv(
-    [labelCaption, valueCaption, 'Share (%)'],
+    [labelCaption, valueCaption, ...(secondaryValueCaption ? [secondaryValueCaption] : []), 'Share (%)'],
     slices.map((slice) => [
       slice.name,
       slice.value,
+      ...(secondaryValueCaption ? [slice.secondaryValue] : []),
       total > 0 ? Math.round((slice.value / total) * 1000) / 10 : 0,
     ]),
   );

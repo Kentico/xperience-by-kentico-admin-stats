@@ -10,7 +10,7 @@ import React, { ReactNode } from 'react';
 
 import { StatsChannelOption } from './types';
 
-const allChannelsValue = '0';
+const allIdValue = '0';
 
 const timeFormat = new Intl.DateTimeFormat(undefined, { timeStyle: 'short' });
 const dateTimeFormat = new Intl.DateTimeFormat(undefined, {
@@ -35,22 +35,59 @@ export interface ChannelSelectProps {
 }
 
 /** Channel filter item of the filter bars: "All channels" plus one option per channel. */
-export const ChannelSelect = ({ channels, channelId, onChange }: ChannelSelectProps) => {
-  const handleChange = (value?: string) => {
-    const id = Number(value ?? allChannelsValue);
+export const ChannelSelect = ({ channels, channelId, onChange }: ChannelSelectProps) => (
+  <IdSelect
+    label="Channel"
+    allLabel="All channels"
+    options={channels.map((channel) => ({
+      id: channel.id,
+      label: channel.displayName,
+      secondaryLabel: channel.type,
+    }))}
+    value={channelId}
+    onChange={onChange}
+  />
+);
+
+/** Option of an `IdSelect`. */
+export interface IdSelectOption {
+  /** Positive ID. */
+  readonly id: number;
+  readonly label: string;
+  readonly secondaryLabel?: string;
+}
+
+export interface IdSelectProps {
+  /** Label above the select, for example "Order status". */
+  readonly label: string;
+  /** Label of the option that clears the value, for example "All statuses". */
+  readonly allLabel: string;
+  readonly options: readonly IdSelectOption[];
+  /** Selected ID, `null` for all. */
+  readonly value: number | null;
+  readonly onChange: (value: number | null) => void;
+}
+
+/**
+ * Filter bar item with a select of ID options plus an "all" option (for example channels or order statuses).
+ * Use it instead of an `OptionToggle` when the options come from project data and can be many.
+ */
+export const IdSelect = ({ label, allLabel, options, value, onChange }: IdSelectProps) => {
+  const handleChange = (selected?: string) => {
+    const id = Number(selected ?? allIdValue);
     onChange(id > 0 ? id : null);
   };
 
   return (
     <div className="AdminStats-filterItem AdminStats-filterItem--channel">
-      <Select label="Channel" value={String(channelId ?? allChannelsValue)} onChange={handleChange}>
-        <MenuItem primaryLabel="All channels" value={allChannelsValue} />
-        {channels.map((channel) => (
+      <Select label={label} value={String(value ?? allIdValue)} onChange={handleChange}>
+        <MenuItem primaryLabel={allLabel} value={allIdValue} />
+        {options.map((option) => (
           <MenuItem
-            key={channel.id}
-            primaryLabel={channel.displayName}
-            secondaryLabel={channel.type}
-            value={String(channel.id)}
+            key={option.id}
+            primaryLabel={option.label}
+            secondaryLabel={option.secondaryLabel}
+            value={String(option.id)}
           />
         ))}
       </Select>

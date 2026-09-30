@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace Kentico.Xperience.AdminStats.Shared;
 
 /// <summary>
@@ -135,6 +137,35 @@ public static class StatsTimeSeriesBuilder
         return Create(query, periods, series);
     }
 
+    /// <summary>
+    /// Builds one decimal series on the query's period axis (<see cref="StatsPeriods.Build"/>), zero-filled.
+    /// Rows of other keys, outside the range or with a value &lt;= 0 are ignored. Period values and the total are rounded by <paramref name="kind"/>.
+    /// </summary>
+    /// <param name="query">Normalized filter.</param>
+    /// <param name="dailyValues">Daily values.</param>
+    /// <param name="definition">Key (compared case-insensitively) and display name of the series.</param>
+    /// <param name="kind">What the values measure.</param>
+    public static StatsValueSeries BuildValueSeries(
+        StatsQuery query,
+        IEnumerable<StatsDailyValue> dailyValues,
+        StatsSeriesDefinition definition,
+        StatsValueKind kind)
+    {
+        var rows = dailyValues
+            .Where(row => string.Equals(row.SeriesKey, definition.Key, StringComparison.OrdinalIgnoreCase))
+            .Select(row => (row.SeriesKey, row.Date, row.Value));
+
+        var (periods, valuesByKey) = Bucket(query, rows);
+        decimal[] values = valuesByKey.Values.FirstOrDefault() ?? new decimal[periods.Count];
+
+        return new(
+            definition.Key,
+            definition.DisplayName,
+            kind,
+            [.. values.Select(v => StatsValues.Round(v, kind))],
+            StatsValues.Round(values.Sum(), kind));
+    }
+
     private static StatsTimeSeriesResult Create(StatsQuery query, IReadOnlyList<StatsPeriod> periods, IReadOnlyList<StatsTimeSeries> series) =>
         new(query.From, query.To, query.Grouping, query.ChannelId, periods, series, series.Sum(s => s.Total));
 
@@ -143,18 +174,27 @@ public static class StatsTimeSeriesBuilder
     /// </summary>
     private static (IReadOnlyList<StatsPeriod> Periods, Dictionary<string, int[]> ValuesByKey) Bucket(
         StatsQuery query,
-        IEnumerable<StatsDailyCount> dailyCounts)
+        IEnumerable<StatsDailyCount> dailyCounts) =>
+        Bucket(query, dailyCounts.Select(row => (row.SeriesKey, row.Date, row.Count)));
+
+    /// <summary>
+    /// Shared by count (<c>int</c>) and value (<c>decimal</c>) series.
+    /// </summary>
+    private static (IReadOnlyList<StatsPeriod> Periods, Dictionary<string, T[]> ValuesByKey) Bucket<T>(
+        StatsQuery query,
+        IEnumerable<(string SeriesKey, DateOnly Date, T Value)> rows)
+        where T : struct, INumber<T>
     {
         var periods = StatsPeriods.Build(query.From, query.To, query.Grouping);
         var periodIndexes = periods
             .Select((period, index) => (period.Start, index))
             .ToDictionary(p => p.Start, p => p.index);
 
-        var valuesByKey = new Dictionary<string, int[]>(StringComparer.OrdinalIgnoreCase);
+        var valuesByKey = new Dictionary<string, T[]>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var row in dailyCounts)
+        foreach (var row in rows)
         {
-            if (row.Date < query.From || row.Date > query.To || row.Count <= 0)
+            if (row.Date < query.From || row.Date > query.To || row.Value <= T.Zero)
             {
                 continue;
             }
@@ -166,13 +206,13 @@ public static class StatsTimeSeriesBuilder
             }
 
             string key = row.SeriesKey ?? string.Empty;
-            if (!valuesByKey.TryGetValue(key, out int[]? values))
+            if (!valuesByKey.TryGetValue(key, out T[]? values))
             {
-                values = new int[periods.Count];
+                values = new T[periods.Count];
                 valuesByKey[key] = values;
             }
 
-            values[index] += row.Count;
+            values[index] += row.Value;
         }
 
         return (periods, valuesByKey);

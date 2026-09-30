@@ -14,14 +14,15 @@ The library adds the **Stats (Labs)** application to the **Digital marketing** c
   - **View** - opens the application.
   - One permission per report. The role sees only the reports it has a permission for. Other reports are hidden from the navigation and return an error if opened by URL.
 
-| Permission        | Code name                                       |
-| ----------------- | ----------------------------------------------- |
-| Activity counts   | `Kentico.Xperience.AdminStats.ActivityCounts`   |
-| Top pages         | `Kentico.Xperience.AdminStats.TopPages`         |
-| New contacts      | `Kentico.Xperience.AdminStats.NewContacts`      |
-| Form submissions  | `Kentico.Xperience.AdminStats.FormSubmissions`  |
-| Content inventory | `Kentico.Xperience.AdminStats.ContentInventory` |
-| Event log         | `Kentico.Xperience.AdminStats.EventLog`         |
+| Permission         | Code name                                       |
+| ------------------ | ----------------------------------------------- |
+| Activity counts    | `Kentico.Xperience.AdminStats.ActivityCounts`   |
+| Top pages          | `Kentico.Xperience.AdminStats.TopPages`         |
+| New contacts       | `Kentico.Xperience.AdminStats.NewContacts`      |
+| Form submissions   | `Kentico.Xperience.AdminStats.FormSubmissions`  |
+| Content inventory  | `Kentico.Xperience.AdminStats.ContentInventory` |
+| Event log          | `Kentico.Xperience.AdminStats.EventLog`         |
+| Orders and revenue | `Kentico.Xperience.AdminStats.OrdersRevenue`    |
 
 ## Reports
 
@@ -103,9 +104,26 @@ Shows events of the system [event log](https://docs.kentico.com/documentation/de
 
 The event log keeps at most the number of events in **Settings → System → Event log → Event log size**. When the log is full, the oldest events are deleted, so long ranges can show fewer events in older periods than really happened. The report shows the current limit.
 
+### Orders and revenue
+
+Shows [digital commerce](https://docs.kentico.com/documentation/business-users/manage-commerce-stores) orders and revenue over time, orders by status, and the products with the most revenue.
+
+- **Revenue** - the order grand total (incl. shipping and tax) as stored when the order was placed. Orders without a stored grand total count as orders with 0 revenue.
+- **Currency** - orders store no currency. Amounts are formatted with the project's price formatter (`CMS.Commerce.IPriceFormatter`), the same way the native **Orders** application shows them, so they show your store's currency. Without a custom formatter the product default is used (2 decimals, no currency symbol). Amounts are not converted between currencies. Chart axes show plain numbers; tooltips and tables show formatted amounts.
+- **KPIs** - orders, revenue, average order value (revenue / orders; "–" when there are no orders) and items sold (sum of item quantities), each with the change vs the previous period of the same length.
+- **Filters** - date range, grouping and **Order status** (all statuses, or one of the project's order statuses from **Commerce configuration**, in their order). No channel; orders have no channel. The status filter applies to the KPIs, "Orders and revenue over time" and "Top products".
+- **Tiles**
+  - "Orders and revenue over time" - orders as columns (left axis) and revenue as a line (right axis), or a table.
+  - "Orders by status" - donut chart or table (orders, revenue, share) of the current status of orders created in the range. Always shows every status, also with the status filter set.
+  - "Top products" - the 10 products with the most revenue (sum of order item totals), grouped by SKU (by item name when an item has no SKU), with quantity, previous period revenue and change ("New" when there was none).
+- **Open orders** - opens the native **Orders** application.
+- Each tile has its own CSV export. CSV values are raw numbers (dot decimal separator, no grouping, no currency); amount columns are marked "(raw amount)".
+
+Orders are grouped by the date they were created. Deleted orders are not counted. When the project does not use digital commerce (no orders, or no commerce tables), the report is empty.
+
 ### Dates and caching
 
-Time-based reports use the server date. Results of all reports are cached for 5 minutes, so new activities, contacts, submissions, content changes and events can take a few minutes to appear. Select **Refresh** to load the latest numbers.
+Time-based reports use the server date. Results of all reports are cached for 5 minutes, so new activities, contacts, submissions, content changes, events and orders can take a few minutes to appear. Select **Refresh** to load the latest numbers.
 
 ## Data retention
 

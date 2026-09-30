@@ -25,4 +25,7 @@ public static class StatsPermissions
 
     public const string EVENT_LOG = PREFIX + "EventLog";
     public const string EVENT_LOG_DISPLAY_NAME = "Event log";
+
+    public const string ORDERS_REVENUE = PREFIX + "OrdersRevenue";
+    public const string ORDERS_REVENUE_DISPLAY_NAME = "Orders and revenue";
 }

@@ -5,7 +5,7 @@ import { Colors } from '@kentico/xperience-admin-components';
 import React, { useId, useLayoutEffect, useMemo } from 'react';
 
 import { getChartTokens, getSeriesPalette, getXbkTheme, resolveToken } from './chartTheme';
-import { formatItemChange, formatShare, numberFormat } from './format';
+import { chartNumberFormat, formatItemChange, formatShare, formatValue } from './format';
 import { StatsRankedCaptions, StatsRankedItem } from './types';
 import { useStableValue } from './useStableValue';
 
@@ -29,6 +29,8 @@ interface ChartRow {
   readonly tooltip: string;
   readonly href: string | null;
   readonly highlight: boolean;
+  /** Bar-end label formatted on the server (for example an amount with currency). `null`: the number is formatted by the chart. */
+  readonly valueLabel: string | null;
 }
 
 const rowHeight = 32;
@@ -67,12 +69,12 @@ export const RankedBarChart = React.memo(function RankedBarChart({
           ...(captions.secondaryLabel && item.secondaryLabel
             ? [escapeChartText(item.secondaryLabel)]
             : []),
-          `${captions.value}: ${numberFormat.format(item.value)}${showShare ? ` (${formatShare(item.share)})` : ''}`,
+          `${captions.value}: ${escapeChartText(formatValue(item.value, captions.valueKind, item.valueText))}${showShare ? ` (${formatShare(item.share)})` : ''}`,
           ...(captions.secondaryValue && item.secondaryValue !== null
-            ? [`${captions.secondaryValue}: ${numberFormat.format(item.secondaryValue)}`]
+            ? [`${captions.secondaryValue}: ${escapeChartText(formatValue(item.secondaryValue, captions.secondaryValueKind, item.secondaryValueText))}`]
             : []),
           ...(captions.previousValue && item.previousValue !== null && item.previousValue !== undefined
-            ? [`${captions.previousValue}: ${numberFormat.format(item.previousValue)}`]
+            ? [`${captions.previousValue}: ${escapeChartText(formatValue(item.previousValue, captions.valueKind, item.previousValueText))}`]
             : []),
           ...(captions.change ? [`${captions.change}: ${formatItemChange(item)}`] : []),
         ];
@@ -83,6 +85,7 @@ export const RankedBarChart = React.memo(function RankedBarChart({
           tooltip: lines.join('\n'),
           href: getHref?.(item) ?? null,
           highlight: highlightFrom !== undefined && item.value >= highlightFrom,
+          valueLabel: item.valueText ? escapeChartText(item.valueText) : null,
         };
       }),
     [items, captions, getHref, showShare, highlightFrom],
@@ -95,7 +98,8 @@ export const RankedBarChart = React.memo(function RankedBarChart({
   useLayoutEffect(() => {
     const root = am5.Root.new(chartId);
     root.setThemes([am5ThemesAnimated.new(root), getXbkTheme(root)]);
-    root.numberFormatter.set('numberFormat', '#,###');
+    // Value labels at the bar ends and axis labels, formatted by the value kind (counts as before).
+    root.numberFormatter.set('numberFormat', captions.valueKind ? chartNumberFormat(captions.valueKind) : '#,###');
 
     const tokens = getChartTokens();
     const barColor = getSeriesPalette()[0];
@@ -202,7 +206,8 @@ export const RankedBarChart = React.memo(function RankedBarChart({
       am5.Bullet.new(root, {
         locationX: 1,
         sprite: am5.Label.new(root, {
-          text: '{valueX}',
+          // Server-formatted values (amounts with currency) when every row has one; else the chart formats the number.
+          text: data.length > 0 && data.every((row) => row.valueLabel) ? '{valueLabel}' : '{valueX}',
           fill: tokens.text,
           fontSize: 12,
           centerY: am5.p50,
@@ -251,7 +256,7 @@ export const RankedBarChart = React.memo(function RankedBarChart({
     return () => {
       root.dispose();
     };
-  }, [chartId, data, captions.value]);
+  }, [chartId, data, captions.value, captions.valueKind]);
 
   return (
     <div

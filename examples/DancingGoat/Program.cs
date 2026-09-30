@@ -60,7 +60,8 @@ builder.Services.AddKentico(features =>
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
 builder.Services.AddLocalization()
-    .AddControllersWithViews()
+    // <Nullable>annotations</Nullable> would otherwise make every non-nullable string/collection implicitly [Required]
+    .AddControllersWithViews(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true)
     .AddViewLocalization()
     .AddDataAnnotationsLocalization(options =>
     {

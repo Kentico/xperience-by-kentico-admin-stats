@@ -9,7 +9,7 @@ import {
 } from '@kentico/xperience-admin-components';
 import React, { useMemo } from 'react';
 
-import { formatItemChange, formatShare, numberFormat } from './format';
+import { formatItemChange, formatShare, formatValue } from './format';
 import { column, stringCell } from './table';
 import { StatsRankedCaptions, StatsRankedItem } from './types';
 
@@ -56,30 +56,18 @@ export const RankedTable = ({ items, captions, getAdminHref }: RankedTableProps)
         cells: [
           stringCell('rank', String(item.rank)),
           labelCell(item, getAdminHref ? getAdminHref(item) : null),
-          stringCell('value', numberFormat.format(item.value)),
+          stringCell('value', formatValue(item.value, captions.valueKind, item.valueText)),
           ...(showSecondaryValue
-            ? [
-                stringCell(
-                  'secondaryValue',
-                  item.secondaryValue === null ? '–' : numberFormat.format(item.secondaryValue),
-                ),
-              ]
+            ? [stringCell('secondaryValue', formatValue(item.secondaryValue, captions.secondaryValueKind, item.secondaryValueText))]
             : []),
           ...(showPreviousValue
-            ? [
-                stringCell(
-                  'previousValue',
-                  item.previousValue === null || item.previousValue === undefined
-                    ? '–'
-                    : numberFormat.format(item.previousValue),
-                ),
-              ]
+            ? [stringCell('previousValue', formatValue(item.previousValue, captions.valueKind, item.previousValueText))]
             : []),
           ...(showChange ? [stringCell('change', formatItemChange(item))] : []),
           stringCell('share', formatShare(item.share)),
         ],
       })),
-    [items, showSecondaryValue, showPreviousValue, showChange, getAdminHref],
+    [items, captions.valueKind, captions.secondaryValueKind, showSecondaryValue, showPreviousValue, showChange, getAdminHref],
   );
 
   return (
