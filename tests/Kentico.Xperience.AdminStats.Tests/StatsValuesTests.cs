@@ -23,7 +23,7 @@ public class StatsValuesTests
 
     [Test]
     public void Round_Null_StaysNull() =>
-        Assert.That(StatsValues.Round((decimal?)null, StatsValueKind.Amount), Is.Null);
+        Assert.That(StatsValues.Round(null, StatsValueKind.Amount), Is.Null);
 
     [Test]
     public void Divide_ByZero_IsNull()

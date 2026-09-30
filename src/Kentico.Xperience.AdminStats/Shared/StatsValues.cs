@@ -87,8 +87,8 @@ public sealed record StatsValueComparison(
     public static StatsValueComparison Create(StatsQuery query, StatsValueKind kind, decimal? current, decimal? previous)
     {
         var (from, to) = StatsComparison.GetPreviousRange(query);
-        var roundedCurrent = StatsValues.Round(current, kind);
-        var roundedPrevious = StatsValues.Round(previous, kind);
+        decimal? roundedCurrent = StatsValues.Round(current, kind);
+        decimal? roundedPrevious = StatsValues.Round(previous, kind);
 
         double? change = roundedCurrent is decimal c && roundedPrevious is decimal p ? StatsComparison.GetChange(c, p) : null;
 

@@ -50,16 +50,16 @@ internal static class OrdersRevenueReportBuilder
             return (rows.Sum(row => Math.Max(row.Orders, 0)), rows.Sum(row => Math.Max(row.Revenue, 0)));
         }
 
-        var current = Sum(range.From, range.To);
+        var (Orders, Revenue) = Sum(range.From, range.To);
         var previous = Sum(previousFrom, previousTo);
 
         var totals = new OrdersRevenueTotals(
-            StatsValueComparison.Create(range, StatsValueKind.Count, current.Orders, previous.Orders),
-            StatsValueComparison.Create(range, StatsValueKind.Amount, current.Revenue, previous.Revenue),
+            StatsValueComparison.Create(range, StatsValueKind.Count, Orders, previous.Orders),
+            StatsValueComparison.Create(range, StatsValueKind.Amount, Revenue, previous.Revenue),
             StatsValueComparison.Create(
                 range,
                 StatsValueKind.Amount,
-                StatsValues.Divide(current.Revenue, current.Orders),
+                StatsValues.Divide(Revenue, Orders),
                 StatsValues.Divide(previous.Revenue, previous.Orders)),
             StatsValueComparison.Create(range, StatsValueKind.Count, Math.Max(data.ItemsSold.Current, 0), Math.Max(data.ItemsSold.Previous, 0)));
 

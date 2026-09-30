@@ -192,27 +192,27 @@ public static class StatsTimeSeriesBuilder
 
         var valuesByKey = new Dictionary<string, T[]>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var row in rows)
+        foreach (var (SeriesKey, Date, Value) in rows)
         {
-            if (row.Date < query.From || row.Date > query.To || row.Value <= T.Zero)
+            if (Date < query.From || Date > query.To || Value <= T.Zero)
             {
                 continue;
             }
 
-            var periodStart = StatsPeriods.GetPeriodStart(row.Date, query.Grouping);
+            var periodStart = StatsPeriods.GetPeriodStart(Date, query.Grouping);
             if (!periodIndexes.TryGetValue(periodStart, out int index))
             {
                 continue;
             }
 
-            string key = row.SeriesKey ?? string.Empty;
-            if (!valuesByKey.TryGetValue(key, out T[]? values))
+            string key = SeriesKey ?? string.Empty;
+            if (!valuesByKey.TryGetValue(key, out var values))
             {
                 values = new T[periods.Count];
                 valuesByKey[key] = values;
             }
 
-            values[index] += row.Value;
+            values[index] += Value;
         }
 
         return (periods, valuesByKey);

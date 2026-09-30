@@ -43,15 +43,12 @@ public class EventLogFilterTests
     }
 
     [Test]
-    public void EventTypes_UseProductConstants_InformationFirst()
-    {
-        Assert.That(EventLogTypes.All.Select(t => t.Key), Is.EqualTo(new[]
+    public void EventTypes_UseProductConstants_InformationFirst() => Assert.That(EventLogTypes.All.Select(t => t.Key), Is.EqualTo(new[]
         {
             CMS.EventLog.EventType.INFORMATION,
             CMS.EventLog.EventType.WARNING,
             CMS.EventLog.EventType.ERROR,
         }));
-    }
 
     [Test]
     public void Sql_AddsTypeConditionOnlyWhenFiltering()

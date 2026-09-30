@@ -124,7 +124,7 @@ public class EventLogReportBuilderTests
 
         Assert.That(result.TopSources.Items.Select(i => (i.Label, i.Value, i.PreviousValue)), Is.EqualTo(new[]
         {
-            ("Content", 10, (int?)5),
+            ("Content", 10, 5),
             ("Scheduler", 5, (int?)0),
         }));
         Assert.That(result.TopSources.Items[0].Change, Is.EqualTo(1.0).Within(1e-9));

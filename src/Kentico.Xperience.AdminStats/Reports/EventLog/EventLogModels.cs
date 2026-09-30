@@ -54,7 +54,7 @@ public sealed record EventLogLoadRequest
 
 /// <summary>
 /// Event types of the event log, in trend order (information, warnings, errors).
-/// Codes are the product constants (<see cref="CMS.EventLog.EventType"/>), stored in <c>CMS_EventLog.EventType</c>.
+/// Codes are the product constants (<see cref="EventType"/>), stored in <c>CMS_EventLog.EventType</c>.
 /// </summary>
 public static class EventLogTypes
 {
