@@ -151,3 +151,8 @@
 .AdminStats-chart--ranked {
   min-height: 160px;
 }
+
+/* Same as the admin link cell wrapper: lets the link truncate with ellipsis. */
+.AdminStats-cellLink {
+  min-width: 0;
+}

@@ -80,7 +80,32 @@ public static class StatsTimeSeriesBuilder
     public static StatsTimeSeriesResult BuildByTotal(
         StatsQuery query,
         IEnumerable<StatsDailyCount> dailyCounts,
-        Func<string, string> getDisplayName)
+        Func<string, string> getDisplayName) =>
+        BuildDynamic(query, dailyCounts, getDisplayName);
+
+    /// <summary>
+    /// Default series that <see cref="BuildDynamic"/> folds the smaller series into.
+    /// The key contains characters that code names cannot contain, so it does not collide with data keys.
+    /// </summary>
+    public static StatsSeriesDefinition OtherSeries { get; } = new("(other)", "Other");
+
+    /// <summary>
+    /// Builds one series per key that has data (keys come from the data, not a fixed list),
+    /// sorted by total (descending), then display name.
+    /// When <paramref name="maxSeries"/> is set and more keys have data, the first <c>maxSeries</c> series are kept
+    /// and the rest are summed into one <paramref name="other"/> series, added last.
+    /// </summary>
+    /// <param name="query">Normalized filter.</param>
+    /// <param name="dailyCounts">Daily counts.</param>
+    /// <param name="getDisplayName">Returns the display name of a key.</param>
+    /// <param name="maxSeries">Optional number of series to keep. Values &lt; 1 are treated as 1. <c>null</c> keeps all.</param>
+    /// <param name="other">Key and display name of the folded series. Defaults to <see cref="OtherSeries"/>.</param>
+    public static StatsTimeSeriesResult BuildDynamic(
+        StatsQuery query,
+        IEnumerable<StatsDailyCount> dailyCounts,
+        Func<string, string> getDisplayName,
+        int? maxSeries = null,
+        StatsSeriesDefinition? other = null)
     {
         var (periods, valuesByKey) = Bucket(query, dailyCounts);
 
@@ -89,6 +114,23 @@ public static class StatsTimeSeriesBuilder
             .OrderByDescending(s => s.Total)
             .ThenBy(s => s.DisplayName, StringComparer.OrdinalIgnoreCase)
             .ToList();
+
+        if (maxSeries is int max && series.Count > Math.Max(max, 1))
+        {
+            int keep = Math.Max(max, 1);
+            int[] folded = new int[periods.Count];
+
+            foreach (var small in series.Skip(keep))
+            {
+                for (int i = 0; i < folded.Length; i++)
+                {
+                    folded[i] += small.Values[i];
+                }
+            }
+
+            var otherDefinition = other ?? OtherSeries;
+            series = [.. series.Take(keep), new StatsTimeSeries(otherDefinition.Key, otherDefinition.DisplayName, folded, folded.Sum())];
+        }
 
         return Create(query, periods, series);
     }

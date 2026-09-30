@@ -12,6 +12,8 @@ export interface RankedBarChartProps {
   readonly captions: StatsRankedCaptions;
   /** Accessible name for the chart. */
   readonly ariaLabel: string;
+  /** Optional link per item. Clicking its bar opens it in the same tab. */
+  readonly getHref?: (item: StatsRankedItem) => string | null;
 }
 
 interface ChartRow {
@@ -19,6 +21,7 @@ interface ChartRow {
   readonly label: string;
   readonly value: number;
   readonly tooltip: string;
+  readonly href: string | null;
 }
 
 const rowHeight = 32;
@@ -39,7 +42,7 @@ function escapeChartText(text: string): string {
  * value labels at bar ends. Long labels are truncated; the full text shows in the tooltip.
  * The root is created in `useLayoutEffect` and disposed on unmount or data change.
  */
-export const RankedBarChart = ({ items, captions, ariaLabel }: RankedBarChartProps) => {
+export const RankedBarChart = ({ items, captions, ariaLabel, getHref }: RankedBarChartProps) => {
   const chartId = `stats-chart-${useId().replace(/:/g, '')}`;
 
   const data = useMemo<ChartRow[]>(
@@ -60,9 +63,10 @@ export const RankedBarChart = ({ items, captions, ariaLabel }: RankedBarChartPro
           label: item.label,
           value: item.value,
           tooltip: lines.join('\n'),
+          href: getHref?.(item) ?? null,
         };
       }),
-    [items, captions],
+    [items, captions, getHref],
   );
 
   const height = Math.max(minHeight, data.length * rowHeight + chartPadding);
@@ -187,6 +191,21 @@ export const RankedBarChart = ({ items, captions, ariaLabel }: RankedBarChartPro
     );
 
     series.data.setAll(data);
+
+    // Bars of linked items open the link, like the table's link cells.
+    if (data.some((row) => row.href)) {
+      const hrefOf = (target: am5.Sprite) =>
+        (target.dataItem?.dataContext as ChartRow | undefined)?.href ?? null;
+      series.columns.template.adapters.add('cursorOverStyle', (style, target) =>
+        hrefOf(target) ? 'pointer' : style,
+      );
+      series.columns.template.events.on('click', (ev) => {
+        const href = hrefOf(ev.target);
+        if (href) {
+          window.location.assign(href);
+        }
+      });
+    }
 
     // Truncate labels relative to the chart width, so wide screens show more text.
     chart.events.on('boundschanged', () => {

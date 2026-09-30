@@ -74,5 +74,39 @@ public class StatsRankedBuilderTests
         Assert.That(result.Items[0].Share, Is.EqualTo(0.6).Within(1e-9));
     }
 
+    [Test]
+    public void Build_IncludeZero_KeepsZeroValuesLast_AndDropsNegative()
+    {
+        var result = StatsRankedBuilder.Build(
+            query,
+            [Entry("b", 0), Entry("a", 3), Entry("c", -1), Entry("d", 0)],
+            total: 3,
+            itemCount: 3,
+            limit: 25,
+            includeZero: true);
+
+        Assert.That(result.Items.Select(i => i.Key), Is.EqualTo(new[] { "a", "b", "d" }));
+        Assert.That(result.Items.Select(i => i.Rank), Is.EqualTo(new[] { 1, 2, 3 }));
+        Assert.That(result.Items[1].Share, Is.Zero);
+    }
+
+    [Test]
+    public void Build_IncludeZero_AllZero_HasZeroShares()
+    {
+        var result = StatsRankedBuilder.Build(query, [Entry("a", 0)], total: 0, itemCount: 1, limit: 25, includeZero: true);
+
+        Assert.That(result.Items, Has.Count.EqualTo(1));
+        Assert.That(result.Total, Is.Zero);
+        Assert.That(result.Items[0].Share, Is.Zero);
+    }
+
+    [Test]
+    public void Build_CopiesAdminPath()
+    {
+        var result = StatsRankedBuilder.Build(query, [Entry("a", 1) with { AdminPath = "/x/1" }, Entry("b", 1)], total: 2, itemCount: 2, limit: 25);
+
+        Assert.That(result.Items.Select(i => i.AdminPath), Is.EqualTo(new[] { "/x/1", null }));
+    }
+
     private static StatsRankedEntry Entry(string key, int value) => new(key, key, null, value, null, null);
 }

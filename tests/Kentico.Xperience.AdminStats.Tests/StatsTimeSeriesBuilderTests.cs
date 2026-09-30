@@ -113,4 +113,77 @@ public class StatsTimeSeriesBuilderTests
         Assert.That(result.Series.Select(s => s.DisplayName), Is.EqualTo(new[] { "Y", "X", "Z" }));
         Assert.That(result.Total, Is.EqualTo(9));
     }
+
+    [Test]
+    public void BuildDynamic_WithoutLimit_MatchesBuildByTotal()
+    {
+        var query = new StatsQuery(new(2026, 9, 1), new(2026, 9, 2), StatsGrouping.Day, null);
+        StatsDailyCount[] rows =
+        [
+            new("x", new(2026, 9, 1), 1),
+            new("y", new(2026, 9, 1), 7),
+        ];
+
+        var dynamic = StatsTimeSeriesBuilder.BuildDynamic(query, rows, key => key);
+        var byTotal = StatsTimeSeriesBuilder.BuildByTotal(query, rows, key => key);
+
+        Assert.That(dynamic.Series.Select(s => (s.Key, s.Total)), Is.EqualTo(byTotal.Series.Select(s => (s.Key, s.Total))));
+    }
+
+    [Test]
+    public void BuildDynamic_FoldsSmallSeriesIntoOther()
+    {
+        var query = new StatsQuery(new(2026, 9, 1), new(2026, 9, 2), StatsGrouping.Day, null);
+        StatsDailyCount[] rows =
+        [
+            new("a", new(2026, 9, 1), 10),
+            new("b", new(2026, 9, 1), 5),
+            new("c", new(2026, 9, 1), 2),
+            new("d", new(2026, 9, 2), 1),
+            new("d", new(2026, 9, 1), 1),
+        ];
+
+        var result = StatsTimeSeriesBuilder.BuildDynamic(query, rows, key => key.ToUpperInvariant(), maxSeries: 2);
+
+        Assert.That(result.Series.Select(s => s.Key), Is.EqualTo(new[] { "a", "b", StatsTimeSeriesBuilder.OtherSeries.Key }));
+        Assert.That(result.Series[2].DisplayName, Is.EqualTo("Other"));
+        Assert.That(result.Series[2].Values, Is.EqualTo(new[] { 3, 1 }));
+        Assert.That(result.Series[2].Total, Is.EqualTo(4));
+        Assert.That(result.Total, Is.EqualTo(19));
+    }
+
+    [Test]
+    public void BuildDynamic_DoesNotAddOther_WhenSeriesFitLimit()
+    {
+        var query = new StatsQuery(new(2026, 9, 1), new(2026, 9, 1), StatsGrouping.Day, null);
+        StatsDailyCount[] rows = [new("a", new(2026, 9, 1), 1), new("b", new(2026, 9, 1), 2)];
+
+        var result = StatsTimeSeriesBuilder.BuildDynamic(query, rows, key => key, maxSeries: 2, other: new("rest", "Rest"));
+
+        Assert.That(result.Series.Select(s => s.Key), Is.EqualTo(new[] { "b", "a" }));
+    }
+
+    [Test]
+    public void BuildDynamic_UsesCustomOther_AndTreatsLimitBelowOneAsOne()
+    {
+        var query = new StatsQuery(new(2026, 9, 1), new(2026, 9, 1), StatsGrouping.Day, null);
+        StatsDailyCount[] rows = [new("a", new(2026, 9, 1), 1), new("b", new(2026, 9, 1), 2)];
+
+        var result = StatsTimeSeriesBuilder.BuildDynamic(query, rows, key => key, maxSeries: 0, other: new("rest", "Rest"));
+
+        Assert.That(result.Series.Select(s => s.Key), Is.EqualTo(new[] { "b", "rest" }));
+        Assert.That(result.Series[1].Total, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void BuildDynamic_NoData_ReturnsNoSeries()
+    {
+        var query = new StatsQuery(new(2026, 9, 1), new(2026, 9, 3), StatsGrouping.Day, null);
+
+        var result = StatsTimeSeriesBuilder.BuildDynamic(query, [], key => key, maxSeries: 5);
+
+        Assert.That(result.Series, Is.Empty);
+        Assert.That(result.Periods, Has.Count.EqualTo(3));
+        Assert.That(result.Total, Is.Zero);
+    }
 }

@@ -43,6 +43,11 @@ export interface StatsRankedItem {
   readonly share: number;
   /** Absolute link opened in a new tab. */
   readonly url: string | null;
+  /**
+   * Native admin page of the item, relative to the admin root (see `adminLinks.ts`).
+   * Opened in the same tab. `null` or missing when the report has no admin links.
+   */
+  readonly adminPath?: string | null;
 }
 
 /** Mirrors `StatsRankedResult`: ranked list for one range and channel. */
@@ -108,4 +113,16 @@ export interface StatsShareSlice {
   readonly key: string;
   readonly name: string;
   readonly value: number;
+}
+
+/** Mirrors `StatsComparison`: a value in the range compared with the previous period of the same length. */
+export interface StatsComparison {
+  readonly current: number;
+  readonly previous: number;
+  /** Relative change as a ratio (0.12 = +12%). `null` when `previous` is 0. */
+  readonly change: number | null;
+  /** First day of the previous period (`yyyy-MM-dd`). */
+  readonly previousFrom: string;
+  /** Last day of the previous period (`yyyy-MM-dd`). */
+  readonly previousTo: string;
 }

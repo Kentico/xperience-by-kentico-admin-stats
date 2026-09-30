@@ -48,9 +48,20 @@ Shows contacts created per period, stacked by identified and anonymous, and the 
 
 Counts only include contacts that still exist. Contacts deleted by cleanup and contacts removed when merged into another contact are not counted. A contact that gets an email address later counts as identified in the period it was created.
 
+### Form submissions
+
+Shows submissions per form over time and ranks all forms from most to least used.
+
+- **Source** - counts come from the form data tables (`FormInserted`), so they include every stored submission, not only submissions logged as contact activities.
+- **KPIs** - total submissions (with the change vs the previous period of the same length, for example "+12% vs previous 30 days"), average submissions per day, and forms with no submissions.
+- **Filters** - date range and grouping (no channel; form data has no channel).
+- **Tiles** - "Submissions over time" (stacked column chart per form or table; the top 5 forms are shown, the rest are grouped as Other) and "Forms by submissions" (bar chart or table of every form, including forms with 0). Click a form's graph bar or name in the table to open the form's **Submissions** tab in the **Forms** application. Each tile has its own CSV export.
+
+Deleting a contact (manually or by inactive contact cleanup) deletes their activities but not their form submissions, so submissions stay counted. Submissions are removed only when editors delete them or through [personal data erasure](https://docs.kentico.com/x/04B1CQ).
+
 ### Dates and caching
 
-All reports: dates use the server date. Results are cached for 5 minutes, so new activities and contacts can take a few minutes to appear. Select **Refresh** to load the latest numbers.
+All reports: dates use the server date. Results are cached for 5 minutes, so new activities, contacts and submissions can take a few minutes to appear. Select **Refresh** to load the latest numbers.
 
 ## Data retention
 

@@ -1,5 +1,6 @@
 import {
   CellType,
+  Link,
   LinkTableCellComponent,
   Table,
   TableCell,
@@ -15,16 +16,21 @@ import { StatsRankedCaptions, StatsRankedItem } from './types';
 export interface RankedTableProps {
   readonly items: readonly StatsRankedItem[];
   readonly captions: StatsRankedCaptions;
+  /**
+   * Returns the link to the item's native admin page (same tab), or `null`.
+   * Used only for items without an absolute `url`. Omit when the report has no admin links.
+   */
+  readonly getAdminHref?: (item: StatsRankedItem) => string | null;
 }
 
 /**
- * Ranked list as a native admin table: rank, label (link when the item has a URL),
+ * Ranked list as a native admin table: rank, label (link when the item has a URL or admin link),
  * value, optional secondary value and share.
  * Uses the same cell types as the other report tables (string cells, plus the admin link cell),
  * so rows keep the native single-line layout. The admin table has no column alignment option,
  * so numbers are left aligned like in other admin listings.
  */
-export const RankedTable = ({ items, captions }: RankedTableProps) => {
+export const RankedTable = ({ items, captions, getAdminHref }: RankedTableProps) => {
   const showSecondaryValue = Boolean(captions.secondaryValue);
 
   const columns = useMemo<TableColumn[]>(
@@ -45,7 +51,7 @@ export const RankedTable = ({ items, captions }: RankedTableProps) => {
         disabled: false,
         cells: [
           stringCell('rank', String(item.rank)),
-          labelCell(item),
+          labelCell(item, getAdminHref ? getAdminHref(item) : null),
           stringCell('value', numberFormat.format(item.value)),
           ...(showSecondaryValue
             ? [
@@ -58,7 +64,7 @@ export const RankedTable = ({ items, captions }: RankedTableProps) => {
           stringCell('share', formatShare(item.share)),
         ],
       })),
-    [items, showSecondaryValue],
+    [items, showSecondaryValue, getAdminHref],
   );
 
   return (
@@ -69,18 +75,31 @@ export const RankedTable = ({ items, captions }: RankedTableProps) => {
 };
 
 /**
- * Label as the admin link cell (opens in a new tab, truncates with ellipsis).
- * Items without a URL use a plain string cell. The admin table renders `component`
- * as a component type (`<component />`), so a render function is passed.
+ * Label cell:
+ * - item with an absolute `url`: the admin link cell (opens in a new tab, truncates with ellipsis);
+ * - item with an admin link: the admin `Link` in the same tab, wrapped like the link cell;
+ * - otherwise a plain string cell.
+ * The admin table renders `component` as a component type (`<component />`), so a render function is passed.
  */
-function labelCell(item: StatsRankedItem): TableCell {
-  if (!item.url) {
-    return stringCell('label', item.label);
+function labelCell(item: StatsRankedItem, adminHref: string | null): TableCell {
+  if (item.url) {
+    const url = item.url;
+    return {
+      type: CellType.Component,
+      columnName: 'label',
+      component: () => <LinkTableCellComponent text={item.label} url={url} />,
+    } as TableCell;
   }
-  const url = item.url;
-  return {
-    type: CellType.Component,
-    columnName: 'label',
-    component: () => <LinkTableCellComponent text={item.label} url={url} />,
-  } as TableCell;
+  if (adminHref) {
+    return {
+      type: CellType.Component,
+      columnName: 'label',
+      component: () => (
+        <div title={item.label} className="AdminStats-cellLink">
+          <Link href={adminHref} text={item.label} target="_self" ellipsis />
+        </div>
+      ),
+    } as TableCell;
+  }
+  return stringCell('label', item.label);
 }

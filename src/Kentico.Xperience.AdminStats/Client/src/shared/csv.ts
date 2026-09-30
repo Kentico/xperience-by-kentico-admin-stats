@@ -34,11 +34,13 @@ export function toCsv(
 
 /**
  * Builds CSV text for a ranked list: rank, label, optional secondary label, value,
- * optional secondary value, share (%, one decimal) and URL.
+ * optional secondary value, share (%, one decimal) and URL (the absolute URL, else the admin link
+ * from `getAdminHref` made absolute).
  */
 export function toRankedCsv(
   items: readonly StatsRankedItem[],
   captions: StatsRankedCaptions,
+  getAdminHref?: (item: StatsRankedItem) => string | null,
 ): string {
   const header: CsvValue[] = [
     'Rank',
@@ -57,7 +59,7 @@ export function toRankedCsv(
     item.value,
     ...(captions.secondaryValue ? [item.secondaryValue] : []),
     Math.round(item.share * 1000) / 10,
-    item.url,
+    item.url ?? toAbsoluteUrl(getAdminHref?.(item) ?? null),
   ]);
 
   return toCsv(header, rows);
@@ -110,4 +112,9 @@ export function downloadCsv(fileName: string, csv: string): void {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+/** Makes a same-origin path absolute, so CSV links work outside the admin. */
+function toAbsoluteUrl(path: string | null): string | null {
+  return path ? new URL(path, window.location.origin).toString() : null;
 }

@@ -19,7 +19,14 @@ public sealed record StatsRankedItem(
     int Value,
     int? SecondaryValue,
     double Share,
-    string? Url);
+    string? Url)
+{
+    /// <summary>
+    /// Optional link to a native admin page of the item (for example a form's submissions).
+    /// Path relative to the admin root, see <see cref="StatsAdminLinks"/>. Opened in the same tab.
+    /// </summary>
+    public string? AdminPath { get; init; }
+}
 
 /// <summary>
 /// Ranked list for one range and channel.
@@ -53,7 +60,11 @@ public sealed record StatsRankedEntry(
     string? SecondaryLabel,
     int Value,
     int? SecondaryValue,
-    string? Url);
+    string? Url)
+{
+    /// <inheritdoc cref="StatsRankedItem.AdminPath"/>
+    public string? AdminPath { get; init; }
+}
 
 /// <summary>
 /// Orders entries, applies the limit and computes shares.
@@ -64,19 +75,27 @@ public static class StatsRankedBuilder
     /// Builds a ranked result.
     /// </summary>
     /// <param name="query">Normalized filter.</param>
-    /// <param name="entries">Entries (usually already top N from SQL). Entries with a value &lt;= 0 are dropped; duplicate keys keep the first.</param>
+    /// <param name="entries">
+    /// Entries (usually already top N from SQL). Entries with a value &lt;= 0 are dropped
+    /// (value 0 is kept with <paramref name="includeZero"/>); duplicate keys keep the first.
+    /// </param>
     /// <param name="total">Sum of values over all items in the range. Raised to the sum of <paramref name="entries"/> if lower.</param>
     /// <param name="itemCount">Number of distinct items in the range. Raised to the number of entries if lower.</param>
     /// <param name="limit">Maximum number of items.</param>
+    /// <param name="includeZero">
+    /// When <c>true</c>, entries with value 0 are kept and listed last (for example unused forms).
+    /// Negative values are always dropped.
+    /// </param>
     public static StatsRankedResult Build(
         StatsQuery query,
         IEnumerable<StatsRankedEntry> entries,
         int total,
         int itemCount,
-        int limit)
+        int limit,
+        bool includeZero = false)
     {
         var valid = entries
-            .Where(e => e.Value > 0)
+            .Where(e => e.Value > 0 || (includeZero && e.Value == 0))
             .DistinctBy(e => e.Key, StringComparer.Ordinal)
             .ToList();
 
@@ -95,7 +114,10 @@ public static class StatsRankedBuilder
                 e.Value,
                 e.SecondaryValue,
                 safeTotal > 0 ? (double)e.Value / safeTotal : 0,
-                e.Url))
+                e.Url)
+            {
+                AdminPath = e.AdminPath,
+            })
             .ToList();
 
         return new(query.From, query.To, query.ChannelId, items, safeTotal, safeCount);
