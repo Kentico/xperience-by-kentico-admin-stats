@@ -4,6 +4,7 @@ import { ContentInventoryTemplate as ContentInventory } from './content-inventor
 import { CustomersTemplate as Customers } from './customers/CustomersTemplate';
 import { EventLogTemplate as EventLog } from './event-log/EventLogTemplate';
 import { FormSubmissionsTemplate as FormSubmissions } from './form-submissions/FormSubmissionsTemplate';
+import { MembersTemplate as Members } from './members/MembersTemplate';
 import { NewContactsTemplate as NewContacts } from './new-contacts/NewContactsTemplate';
 import { OrdersRevenueTemplate as OrdersRevenue } from './orders-revenue/OrdersRevenueTemplate';
 import { withExportPermission } from './shared/exportPermission';
@@ -18,5 +19,6 @@ export const ContentInventoryTemplate = withExportPermission(ContentInventory);
 export const EventLogTemplate = withExportPermission(EventLog);
 export const OrdersRevenueTemplate = withExportPermission(OrdersRevenue);
 export const CustomersTemplate = withExportPermission(Customers);
+export const MembersTemplate = withExportPermission(Members);
 
 export { NoReportsTemplate } from './no-reports/NoReportsTemplate';

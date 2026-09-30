@@ -157,6 +157,25 @@ public class StatsRankedBuilderTests
     }
 
     [Test]
+    public void BuildSnapshot_ItemsOverlap_KeepsTotal_SharesOfTotal()
+    {
+        // 10 members, 6 + 5 in roles (one member in both): shares of all members, not of role memberships.
+        var result = StatsRankedBuilder.BuildSnapshot(null, [Entry("a", 6), Entry("b", 5)], total: 10, itemCount: 2, limit: 25, itemsOverlap: true);
+
+        Assert.That(result.Total, Is.EqualTo(10m));
+        Assert.That(result.Items.Select(i => i.Share), Is.EqualTo(new[] { 0.6, 0.5 }).Within(1e-9));
+    }
+
+    [Test]
+    public void BuildSnapshot_ItemsOverlap_RaisesTotalOnlyToLargestValue()
+    {
+        var result = StatsRankedBuilder.BuildSnapshot(null, [Entry("a", 6), Entry("b", 5)], total: 3, itemCount: 2, limit: 25, itemsOverlap: true);
+
+        Assert.That(result.Total, Is.EqualTo(6m));
+        Assert.That(result.Items[0].Share, Is.EqualTo(1d));
+    }
+
+    [Test]
     public void BuildSnapshot_KeepOrder_KeepsEntryOrderAndRanksByPosition()
     {
         var result = StatsRankedBuilder.BuildSnapshot(

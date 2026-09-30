@@ -183,7 +183,7 @@ public static class StatsRankedBuilder
         int limit,
         bool includeZero = false,
         bool keepOrder = false) =>
-        Build(query.From, query.To, query.ChannelId, entries, total, itemCount, limit, includeZero, keepOrder);
+        Build(query.From, query.To, query.ChannelId, entries, total, itemCount, limit, includeZero, keepOrder, itemsOverlap: false);
 
     /// <summary>
     /// Builds a ranked result for a current-state (snapshot) report. Same rules as
@@ -200,6 +200,11 @@ public static class StatsRankedBuilder
     /// When <c>true</c>, entries keep their order (for example fixed categories such as statuses, so chart colors stay stable)
     /// instead of being sorted by value.
     /// </param>
+    /// <param name="itemsOverlap">
+    /// When <c>true</c>, one thing can count in several entries (for example a member in several roles), so values can add up to more
+    /// than <paramref name="total"/>. The total is then kept (not raised to the sum), and shares are of <paramref name="total"/>
+    /// (for example the share of all members in a role). Shares then do not add up to 100%.
+    /// </param>
     public static StatsRankedResult BuildSnapshot(
         int? channelId,
         IEnumerable<StatsRankedEntry> entries,
@@ -207,8 +212,9 @@ public static class StatsRankedBuilder
         int itemCount,
         int limit,
         bool includeZero = false,
-        bool keepOrder = false) =>
-        Build(DateOnly.MinValue, DateOnly.MinValue, channelId, entries, total, itemCount, limit, includeZero, keepOrder);
+        bool keepOrder = false,
+        bool itemsOverlap = false) =>
+        Build(DateOnly.MinValue, DateOnly.MinValue, channelId, entries, total, itemCount, limit, includeZero, keepOrder, itemsOverlap);
 
     private static StatsRankedResult Build(
         DateOnly from,
@@ -219,14 +225,18 @@ public static class StatsRankedBuilder
         int itemCount,
         int limit,
         bool includeZero,
-        bool keepOrder)
+        bool keepOrder,
+        bool itemsOverlap)
     {
         var valid = entries
             .Where(e => e.Value > 0 || (includeZero && e.Value == 0))
             .DistinctBy(e => e.Key, StringComparer.Ordinal)
             .ToList();
 
-        decimal safeTotal = Math.Max(total, valid.Sum(e => e.Value));
+        // Overlapping entries: each value is at most the total, so only raise the total to the largest value.
+        decimal safeTotal = itemsOverlap
+            ? Math.Max(total, valid.Select(e => e.Value).DefaultIfEmpty(0).Max())
+            : Math.Max(total, valid.Sum(e => e.Value));
         int safeCount = Math.Max(itemCount, valid.Count);
 
         IEnumerable<StatsRankedEntry> ordered = keepOrder

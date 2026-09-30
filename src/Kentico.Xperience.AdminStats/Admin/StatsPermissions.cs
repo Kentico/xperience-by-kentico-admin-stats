@@ -32,6 +32,9 @@ public static class StatsPermissions
     public const string CUSTOMERS = PREFIX + "Customers";
     public const string CUSTOMERS_DISPLAY_NAME = "Customers";
 
+    public const string MEMBERS = PREFIX + "Members";
+    public const string MEMBERS_DISPLAY_NAME = "Member registrations";
+
     /// <summary>
     /// Shows "Export CSV" in all reports. Not tied to a report page.
     /// </summary>

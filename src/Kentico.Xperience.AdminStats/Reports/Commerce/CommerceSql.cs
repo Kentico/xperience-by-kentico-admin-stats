@@ -1,5 +1,7 @@
 using System.Data.Common;
 
+using Kentico.Xperience.AdminStats.Shared;
+
 namespace Kentico.Xperience.AdminStats.Reports.Commerce;
 
 /// <summary>
@@ -32,23 +34,11 @@ internal static class CommerceSql
     /// <summary>
     /// Returns a check that selects one row (<see cref="AvailableColumn"/>): <c>0</c> and <c>RETURN</c> when one of the tables
     /// does not exist (commerce not installed or unused), else <c>1</c>. Commerce may be unlicensed, so reports must not fail without it.
+    /// See <see cref="StatsSql.BuildAvailabilityCheck"/>.
     /// </summary>
     /// <param name="tables">Table names (constants of the report, never user input).</param>
-    public static string BuildAvailabilityCheck(params string[] tables)
-    {
-        string conditions = string.Join(
-            Environment.NewLine + "    OR ",
-            tables.Select(table => $"OBJECT_ID(N'[{table}]', N'U') IS NULL"));
-
-        return $"""
-            IF {conditions}
-            BEGIN
-                SELECT CAST(0 AS bit) AS [{AvailableColumn}];
-                RETURN;
-            END;
-            SELECT CAST(1 AS bit) AS [{AvailableColumn}];
-            """;
-    }
+    public static string BuildAvailabilityCheck(params string[] tables) =>
+        StatsSql.BuildAvailabilityCheck(AvailableColumn, tables);
 
     /// <summary>
     /// Builds the batch that reads the order statuses (for status filters), in status order (<c>OrderStatusOrder</c>).
@@ -60,20 +50,10 @@ internal static class CommerceSql
     /// <summary>
     /// Reads the first result set of a batch that starts with <see cref="BuildAvailabilityCheck"/>.
     /// </summary>
-    public static async Task<bool> IsAvailable(DbDataReader reader, CancellationToken cancellationToken) =>
-        await reader.ReadAsync(cancellationToken) && reader.GetBoolean(reader.GetOrdinal(AvailableColumn));
+    public static Task<bool> IsAvailable(DbDataReader reader, CancellationToken cancellationToken) =>
+        StatsSql.IsAvailable(reader, AvailableColumn, cancellationToken);
 
-    /// <summary>
-    /// Moves to the next result set, or throws when the batch returned fewer result sets than expected.
-    /// </summary>
-    /// <param name="reader">Reader of the batch.</param>
-    /// <param name="reportName">Report name for the error message, for example "orders and revenue".</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    public static async Task NextResult(DbDataReader reader, string reportName, CancellationToken cancellationToken)
-    {
-        if (!await reader.NextResultAsync(cancellationToken))
-        {
-            throw new InvalidOperationException($"The {reportName} query returned fewer result sets than expected.");
-        }
-    }
+    /// <inheritdoc cref="StatsSql.NextResult"/>
+    public static Task NextResult(DbDataReader reader, string reportName, CancellationToken cancellationToken) =>
+        StatsSql.NextResult(reader, reportName, cancellationToken);
 }

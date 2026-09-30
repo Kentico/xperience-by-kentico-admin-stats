@@ -13,12 +13,12 @@ The library adds the **Stats (Labs)** application to the **Digital marketing** c
 
 Reports are grouped into sections. Opening the application or a section opens its first report the role may see.
 
-| Section  | Reports                                                    |
-| -------- | ---------------------------------------------------------- |
-| Contacts | Activity counts, Top pages, New contacts, Form submissions |
-| Content  | Content inventory                                          |
-| Commerce | Orders and revenue, Customers                              |
-| System   | Event log                                                  |
+| Section  | Reports                                                                          |
+| -------- | -------------------------------------------------------------------------------- |
+| Contacts | Activity counts, Top pages, New contacts, Form submissions, Member registrations |
+| Content  | Content inventory                                                                |
+| Commerce | Orders and revenue, Customers                                                    |
+| System   | Event log                                                                        |
 
 Sections have no permission of their own. A section is hidden when the role has no permission for any of its reports. A role with **View** but no report permission sees a **No reports available** message.
 
@@ -30,17 +30,18 @@ Sections have no permission of their own. A section is hidden when the role has 
   - One permission per report. The role sees only the reports it has a permission for. Other reports are hidden from the navigation and return an error if opened by URL.
   - **Export** - shows the **Export CSV** buttons in all reports the role can see. Without it, the buttons are hidden.
 
-| Permission         | Code name                                       |
-| ------------------ | ----------------------------------------------- |
-| Activity counts    | `Kentico.Xperience.AdminStats.ActivityCounts`   |
-| Top pages          | `Kentico.Xperience.AdminStats.TopPages`         |
-| New contacts       | `Kentico.Xperience.AdminStats.NewContacts`      |
-| Form submissions   | `Kentico.Xperience.AdminStats.FormSubmissions`  |
-| Content inventory  | `Kentico.Xperience.AdminStats.ContentInventory` |
-| Event log          | `Kentico.Xperience.AdminStats.EventLog`         |
-| Orders and revenue | `Kentico.Xperience.AdminStats.OrdersRevenue`    |
-| Customers          | `Kentico.Xperience.AdminStats.Customers`        |
-| Export             | `Kentico.Xperience.AdminStats.Export`           |
+| Permission           | Code name                                       |
+| -------------------- | ----------------------------------------------- |
+| Activity counts      | `Kentico.Xperience.AdminStats.ActivityCounts`   |
+| Top pages            | `Kentico.Xperience.AdminStats.TopPages`         |
+| New contacts         | `Kentico.Xperience.AdminStats.NewContacts`      |
+| Form submissions     | `Kentico.Xperience.AdminStats.FormSubmissions`  |
+| Content inventory    | `Kentico.Xperience.AdminStats.ContentInventory` |
+| Event log            | `Kentico.Xperience.AdminStats.EventLog`         |
+| Orders and revenue   | `Kentico.Xperience.AdminStats.OrdersRevenue`    |
+| Customers            | `Kentico.Xperience.AdminStats.Customers`        |
+| Member registrations | `Kentico.Xperience.AdminStats.Members`          |
+| Export               | `Kentico.Xperience.AdminStats.Export`           |
 
 The **Export** permission only hides the buttons. The CSV is built in the browser from the data the report already shows, so a role that can see a report can still copy its numbers. It is not data protection.
 
@@ -90,6 +91,26 @@ Shows submissions per form over time and ranks all forms from most to least used
 - **Tiles** - "Submissions over time" (stacked column chart per form or table; the top 5 forms are shown, the rest are grouped as Other) and "Forms by submissions" (bar chart or table of every form, including forms with 0). Click a form's graph bar or name in the table to open the form's **Submissions** tab in the **Forms** application. Each tile has its own CSV export.
 
 Deleting a contact (manually or by inactive contact cleanup) deletes their activities but not their form submissions, so submissions stay counted. Submissions are removed only when editors delete them or through [personal data erasure](https://docs.kentico.com/x/04B1CQ).
+
+### Member registrations
+
+Shows [members](https://docs.kentico.com/documentation/business-users/members) (visitors with a site account) registered over time, total members, external sign-ups and members per member role.
+
+- **Definitions**
+  - **New member** - a member account created in the range (`MemberCreated`).
+  - **Total members** (on a day) - members created on or before that day that still exist. Deleted members are not counted, also not for past days.
+  - **External** - the member signed up through an external sign-in provider (for example Google or Microsoft). **Internal** - all other members.
+  - **Disabled** - the member account is disabled now (current state, not historical).
+- **KPIs** - new members, total members (on the last day of the range vs the last day of the previous period), external sign-ups (share of new members; the change is in percentage points, "pp"; "–" without new members), each vs the previous period of the same length, and disabled members (current state, no comparison).
+- **Filters** - date range and grouping (no channel; members are global).
+- **Tiles**
+  - "Member growth" - new members as columns (left axis) and total members at the end of each period as a line (right axis), or a table with new, internal, external and total members.
+  - "New members by sign-in type" - internal vs external new members in the range, as a donut chart or table.
+  - "Members by role" - current members per member role, plus **No role** for members without a role, with how many of them were created in the range. Roles are the current state. A member can have several roles, so the share is of all members and shares do not add up to 100%. Roles without members are left out. Click a role to open it in the native **Members** application.
+- **Open members** - opens the native **Members** application.
+- Each tile has its own CSV export.
+
+Deleted members are not counted. When the member tables do not exist, the report is empty.
 
 ### Content inventory
 
@@ -166,7 +187,7 @@ The event log keeps at most the number of events in **Settings → System → Ev
 
 ### Dates and caching
 
-Time-based reports use the server date. Results of all reports are cached for 5 minutes, so new activities, contacts, submissions, content changes, events, orders and customers can take a few minutes to appear. Select **Refresh** to load the latest numbers.
+Time-based reports use the server date. Results of all reports are cached for 5 minutes, so new activities, contacts, submissions, content changes, events, orders, customers and members can take a few minutes to appear. Select **Refresh** to load the latest numbers.
 
 ## Data retention
 
