@@ -108,5 +108,33 @@ public class StatsRankedBuilderTests
         Assert.That(result.Items.Select(i => i.AdminPath), Is.EqualTo(new[] { "/x/1", null }));
     }
 
+    [Test]
+    public void BuildSnapshot_HasNoRange_AndSortsByValue()
+    {
+        var result = StatsRankedBuilder.BuildSnapshot(2, [Entry("a", 1), Entry("b", 3)], total: 4, itemCount: 2, limit: 25);
+
+        Assert.That(result.From, Is.EqualTo(DateOnly.MinValue));
+        Assert.That(result.To, Is.EqualTo(DateOnly.MinValue));
+        Assert.That(result.ChannelId, Is.EqualTo(2));
+        Assert.That(result.Items.Select(i => i.Key), Is.EqualTo(new[] { "b", "a" }));
+    }
+
+    [Test]
+    public void BuildSnapshot_KeepOrder_KeepsEntryOrderAndRanksByPosition()
+    {
+        var result = StatsRankedBuilder.BuildSnapshot(
+            null,
+            [Entry("published", 5), Entry("draft", 0), Entry("workflow", 7)],
+            total: 12,
+            itemCount: 3,
+            limit: 25,
+            includeZero: true,
+            keepOrder: true);
+
+        Assert.That(result.Items.Select(i => i.Key), Is.EqualTo(new[] { "published", "draft", "workflow" }));
+        Assert.That(result.Items.Select(i => i.Rank), Is.EqualTo(new[] { 1, 2, 3 }));
+        Assert.That(result.Items[2].Share, Is.EqualTo(7d / 12).Within(1e-9));
+    }
+
     private static StatsRankedEntry Entry(string key, int value) => new(key, key, null, value, null, null);
 }

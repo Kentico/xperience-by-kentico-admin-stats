@@ -8,7 +8,7 @@ namespace Kentico.Xperience.AdminStats.Shared;
 /// </summary>
 /// <param name="Id">Channel ID.</param>
 /// <param name="DisplayName">Channel display name.</param>
-/// <param name="Type">Channel type name (Website or Email).</param>
+/// <param name="Type">Channel type name (<see cref="ChannelType"/>, for example Website or Email).</param>
 public sealed record StatsChannelOption(int Id, string DisplayName, string Type);
 
 /// <summary>
@@ -16,14 +16,27 @@ public sealed record StatsChannelOption(int Id, string DisplayName, string Type)
 /// </summary>
 public interface IStatsChannelOptionsProvider
 {
+    /// <summary>
+    /// Returns website and email channels (the channels activities are logged for).
+    /// </summary>
     public Task<IReadOnlyList<StatsChannelOption>> GetChannelOptions(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Returns channels of the given types, ordered by type (in the order of <paramref name="types"/>), then display name.
+    /// </summary>
+    public Task<IReadOnlyList<StatsChannelOption>> GetChannelOptions(IReadOnlyList<ChannelType> types, CancellationToken cancellationToken);
 }
 
 internal sealed class StatsChannelOptionsProvider(IInfoProvider<ChannelInfo> channelProvider) : IStatsChannelOptionsProvider
 {
+    private static readonly ChannelType[] activityChannelTypes = [ChannelType.Website, ChannelType.Email];
+
     private readonly IInfoProvider<ChannelInfo> channelProvider = channelProvider;
 
-    public async Task<IReadOnlyList<StatsChannelOption>> GetChannelOptions(CancellationToken cancellationToken)
+    public Task<IReadOnlyList<StatsChannelOption>> GetChannelOptions(CancellationToken cancellationToken) =>
+        GetChannelOptions(activityChannelTypes, cancellationToken);
+
+    public async Task<IReadOnlyList<StatsChannelOption>> GetChannelOptions(IReadOnlyList<ChannelType> types, CancellationToken cancellationToken)
     {
         var channels = await channelProvider
             .Get()
@@ -36,10 +49,23 @@ internal sealed class StatsChannelOptionsProvider(IInfoProvider<ChannelInfo> cha
         return
         [
             .. channels
-                .Where(c => c.ChannelType is ChannelType.Website or ChannelType.Email)
-                .OrderBy(c => c.ChannelType)
+                .Where(c => types.Contains(c.ChannelType))
+                .OrderBy(c => IndexOf(types, c.ChannelType))
                 .ThenBy(c => c.ChannelDisplayName, StringComparer.OrdinalIgnoreCase)
                 .Select(c => new StatsChannelOption(c.ChannelID, c.ChannelDisplayName, c.ChannelType.ToString()))
         ];
+    }
+
+    private static int IndexOf(IReadOnlyList<ChannelType> types, ChannelType type)
+    {
+        for (int i = 0; i < types.Count; i++)
+        {
+            if (types[i] == type)
+            {
+                return i;
+            }
+        }
+
+        return types.Count;
     }
 }

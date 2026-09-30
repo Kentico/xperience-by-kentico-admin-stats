@@ -1,20 +1,16 @@
 import {
-  Button,
-  ButtonColor,
   DateTimeRangeInput,
-  MenuItem,
   NameToggleButton,
   NameToggleButtons,
-  Select,
 } from '@kentico/xperience-admin-components';
 import React from 'react';
 
 import { addDays, formatDateOnly, parseDateOnly, rangeLength } from './dates';
+import { ChannelSelect, RefreshControl } from './filterControls';
 import { StatsChannelOption, StatsFilter, StatsGrouping } from './types';
 
 const presetDays = [7, 30, 90] as const;
 const customPresetId = 'custom';
-const allChannelsValue = '0';
 
 const presetItems: NameToggleButton[] = [
   ...presetDays.map((days) => ({ id: String(days), label: `${days} days` })),
@@ -46,21 +42,6 @@ export interface StatsFilterBarProps {
   readonly showChannel?: boolean;
 }
 
-const timeFormat = new Intl.DateTimeFormat(undefined, { timeStyle: 'short' });
-const dateTimeFormat = new Intl.DateTimeFormat(undefined, {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-});
-
-function formatUpdatedAt(value: string): string | null {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime()) || date.getFullYear() < 2000) {
-    return null;
-  }
-  const isToday = date.toDateString() === new Date().toDateString();
-  return (isToday ? timeFormat : dateTimeFormat).format(date);
-}
-
 function getPresetId(filter: StatsFilter, today: string): string {
   const days = rangeLength(filter.from, filter.to);
   return filter.to === today && presetDays.some((d) => d === days)
@@ -68,7 +49,10 @@ function getPresetId(filter: StatsFilter, today: string): string {
     : customPresetId;
 }
 
-/** Shared filters: date range presets + custom range, grouping, channel, refresh. */
+/**
+ * Shared filters: date range presets + custom range, grouping, channel, refresh.
+ * Current-state reports (no range) use `SnapshotFilterBar`.
+ */
 export const StatsFilterBar = ({
   filter,
   today,
@@ -80,8 +64,6 @@ export const StatsFilterBar = ({
   showGrouping = true,
   showChannel = true,
 }: StatsFilterBarProps) => {
-  const updatedText = updatedAt ? formatUpdatedAt(updatedAt) : null;
-
   const [showCustom, setShowCustom] = React.useState(
     () => getPresetId(filter, today) === customPresetId,
   );
@@ -105,11 +87,6 @@ export const StatsFilterBar = ({
     if (from !== filter.from || to !== filter.to) {
       onChange({ ...filter, from, to });
     }
-  };
-
-  const handleChannel = (value?: string) => {
-    const id = Number(value ?? allChannelsValue);
-    onChange({ ...filter, channelId: id > 0 ? id : null });
   };
 
   return (
@@ -150,39 +127,15 @@ export const StatsFilterBar = ({
       )}
 
       {showChannel && channels.length > 0 && (
-        <div className="AdminStats-filterItem AdminStats-filterItem--channel">
-          <Select
-            label="Channel"
-            value={String(filter.channelId ?? allChannelsValue)}
-            onChange={handleChannel}
-          >
-            <MenuItem primaryLabel="All channels" value={allChannelsValue} />
-            {channels.map((channel) => (
-              <MenuItem
-                key={channel.id}
-                primaryLabel={channel.displayName}
-                secondaryLabel={channel.type}
-                value={String(channel.id)}
-              />
-            ))}
-          </Select>
-        </div>
+        <ChannelSelect
+          channels={channels}
+          channelId={filter.channelId}
+          onChange={(channelId) => onChange({ ...filter, channelId })}
+        />
       )}
 
       {onRefresh && (
-        <div className="AdminStats-filterItem AdminStats-filterItem--refresh">
-          {updatedText && (
-            <span className="AdminStats-updated">Updated {updatedText}</span>
-          )}
-          <Button
-            label="Refresh"
-            icon="xp-rotate-right"
-            color={ButtonColor.Secondary}
-            title="Reload data from the database"
-            inProgress={isLoading}
-            onClick={onRefresh}
-          />
-        </div>
+        <RefreshControl onRefresh={onRefresh} isLoading={isLoading} updatedAt={updatedAt} />
       )}
     </div>
   );

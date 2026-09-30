@@ -1,9 +1,10 @@
 import * as am5 from '@amcharts/amcharts5';
 import am5ThemesAnimated from '@amcharts/amcharts5/themes/Animated';
 import * as am5xy from '@amcharts/amcharts5/xy';
+import { Colors } from '@kentico/xperience-admin-components';
 import React, { useId, useLayoutEffect, useMemo } from 'react';
 
-import { getChartTokens, getSeriesPalette, getXbkTheme } from './chartTheme';
+import { getChartTokens, getSeriesPalette, getXbkTheme, resolveToken } from './chartTheme';
 import { formatShare, numberFormat } from './format';
 import { StatsRankedCaptions, StatsRankedItem } from './types';
 
@@ -14,6 +15,10 @@ export interface RankedBarChartProps {
   readonly ariaLabel: string;
   /** Optional link per item. Clicking its bar opens it in the same tab. */
   readonly getHref?: (item: StatsRankedItem) => string | null;
+  /** Shows the share of the total in tooltips. Hide it when values do not add up (for example days). Default `true`. */
+  readonly showShare?: boolean;
+  /** Bars with a value at or above this are drawn in the alert color (for example items waiting too long). */
+  readonly highlightFrom?: number;
 }
 
 interface ChartRow {
@@ -22,6 +27,7 @@ interface ChartRow {
   readonly value: number;
   readonly tooltip: string;
   readonly href: string | null;
+  readonly highlight: boolean;
 }
 
 const rowHeight = 32;
@@ -42,7 +48,14 @@ function escapeChartText(text: string): string {
  * value labels at bar ends. Long labels are truncated; the full text shows in the tooltip.
  * The root is created in `useLayoutEffect` and disposed on unmount or data change.
  */
-export const RankedBarChart = ({ items, captions, ariaLabel, getHref }: RankedBarChartProps) => {
+export const RankedBarChart = ({
+  items,
+  captions,
+  ariaLabel,
+  getHref,
+  showShare = true,
+  highlightFrom,
+}: RankedBarChartProps) => {
   const chartId = `stats-chart-${useId().replace(/:/g, '')}`;
 
   const data = useMemo<ChartRow[]>(
@@ -53,7 +66,7 @@ export const RankedBarChart = ({ items, captions, ariaLabel, getHref }: RankedBa
           ...(captions.secondaryLabel && item.secondaryLabel
             ? [escapeChartText(item.secondaryLabel)]
             : []),
-          `${captions.value}: ${numberFormat.format(item.value)} (${formatShare(item.share)})`,
+          `${captions.value}: ${numberFormat.format(item.value)}${showShare ? ` (${formatShare(item.share)})` : ''}`,
           ...(captions.secondaryValue && item.secondaryValue !== null
             ? [`${captions.secondaryValue}: ${numberFormat.format(item.secondaryValue)}`]
             : []),
@@ -64,9 +77,10 @@ export const RankedBarChart = ({ items, captions, ariaLabel, getHref }: RankedBa
           value: item.value,
           tooltip: lines.join('\n'),
           href: getHref?.(item) ?? null,
+          highlight: highlightFrom !== undefined && item.value >= highlightFrom,
         };
       }),
-    [items, captions, getHref],
+    [items, captions, getHref, showShare, highlightFrom],
   );
 
   const height = Math.max(minHeight, data.length * rowHeight + chartPadding);
@@ -78,6 +92,8 @@ export const RankedBarChart = ({ items, captions, ariaLabel, getHref }: RankedBa
 
     const tokens = getChartTokens();
     const barColor = getSeriesPalette()[0];
+    const highlightValue = resolveToken(Colors.AlertBackgroundHighEmphasis);
+    const highlightColor = highlightValue ? am5.color(highlightValue) : undefined;
 
     const chart = root.container.children.push(
       am5xy.XYChart.new(root, {
@@ -189,6 +205,13 @@ export const RankedBarChart = ({ items, captions, ariaLabel, getHref }: RankedBa
         }),
       }),
     );
+
+    // Highlighted rows (see `highlightFrom`) use the alert color.
+    if (highlightColor && data.some((row) => row.highlight)) {
+      series.columns.template.adapters.add('fill', (fill, target) =>
+        (target.dataItem?.dataContext as ChartRow | undefined)?.highlight ? highlightColor : fill,
+      );
+    }
 
     series.data.setAll(data);
 

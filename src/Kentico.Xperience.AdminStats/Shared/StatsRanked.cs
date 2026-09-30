@@ -31,8 +31,8 @@ public sealed record StatsRankedItem(
 /// <summary>
 /// Ranked list for one range and channel.
 /// </summary>
-/// <param name="From">Applied range start (inclusive).</param>
-/// <param name="To">Applied range end (inclusive).</param>
+/// <param name="From">Applied range start (inclusive). <see cref="DateOnly.MinValue"/> for snapshot reports (no range).</param>
+/// <param name="To">Applied range end (inclusive). <see cref="DateOnly.MinValue"/> for snapshot reports (no range).</param>
 /// <param name="ChannelId">Applied channel filter.</param>
 /// <param name="Items">Top items, largest value first.</param>
 /// <param name="Total">Sum of values over all items in the range, not only <paramref name="Items"/>.</param>
@@ -92,7 +92,44 @@ public static class StatsRankedBuilder
         int total,
         int itemCount,
         int limit,
-        bool includeZero = false)
+        bool includeZero = false) =>
+        Build(query.From, query.To, query.ChannelId, entries, total, itemCount, limit, includeZero, keepOrder: false);
+
+    /// <summary>
+    /// Builds a ranked result for a current-state (snapshot) report. Same rules as
+    /// <see cref="Build(StatsQuery, IEnumerable{StatsRankedEntry}, int, int, int, bool)"/>, but the result has no range:
+    /// <see cref="StatsRankedResult.From"/> and <see cref="StatsRankedResult.To"/> are <see cref="DateOnly.MinValue"/> and not used.
+    /// </summary>
+    /// <param name="channelId">Applied channel filter.</param>
+    /// <param name="entries">Entries. See the other overload.</param>
+    /// <param name="total">Sum of values over all items. See the other overload.</param>
+    /// <param name="itemCount">Number of distinct items. See the other overload.</param>
+    /// <param name="limit">Maximum number of items.</param>
+    /// <param name="includeZero">When <c>true</c>, entries with value 0 are kept.</param>
+    /// <param name="keepOrder">
+    /// When <c>true</c>, entries keep their order (for example fixed categories such as statuses, so chart colors stay stable)
+    /// instead of being sorted by value.
+    /// </param>
+    public static StatsRankedResult BuildSnapshot(
+        int? channelId,
+        IEnumerable<StatsRankedEntry> entries,
+        int total,
+        int itemCount,
+        int limit,
+        bool includeZero = false,
+        bool keepOrder = false) =>
+        Build(DateOnly.MinValue, DateOnly.MinValue, channelId, entries, total, itemCount, limit, includeZero, keepOrder);
+
+    private static StatsRankedResult Build(
+        DateOnly from,
+        DateOnly to,
+        int? channelId,
+        IEnumerable<StatsRankedEntry> entries,
+        int total,
+        int itemCount,
+        int limit,
+        bool includeZero,
+        bool keepOrder)
     {
         var valid = entries
             .Where(e => e.Value > 0 || (includeZero && e.Value == 0))
@@ -102,9 +139,13 @@ public static class StatsRankedBuilder
         int safeTotal = Math.Max(total, valid.Sum(e => e.Value));
         int safeCount = Math.Max(itemCount, valid.Count);
 
-        var items = valid
-            .OrderByDescending(e => e.Value)
-            .ThenBy(e => e.Key, StringComparer.Ordinal)
+        IEnumerable<StatsRankedEntry> ordered = keepOrder
+            ? valid
+            : valid
+                .OrderByDescending(e => e.Value)
+                .ThenBy(e => e.Key, StringComparer.Ordinal);
+
+        var items = ordered
             .Take(Math.Max(limit, 0))
             .Select((e, index) => new StatsRankedItem(
                 index + 1,
@@ -120,6 +161,6 @@ public static class StatsRankedBuilder
             })
             .ToList();
 
-        return new(query.From, query.To, query.ChannelId, items, safeTotal, safeCount);
+        return new(from, to, channelId, items, safeTotal, safeCount);
     }
 }

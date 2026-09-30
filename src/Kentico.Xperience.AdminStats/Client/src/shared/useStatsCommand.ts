@@ -8,21 +8,21 @@ export interface StatsLoadOptions {
   readonly refresh?: boolean;
 }
 
-export interface StatsCommandState<TResult> {
+export interface StatsCommandState<TResult, TFilter = StatsFilter> {
   readonly data: TResult;
   readonly isLoading: boolean;
   readonly hasError: boolean;
-  readonly load: (filter: StatsFilter, options?: StatsLoadOptions) => Promise<void>;
+  readonly load: (filter: TFilter, options?: StatsLoadOptions) => Promise<void>;
 }
 
 /**
- * Wraps a report page command (default `LOAD`) that takes a `StatsLoadRequest`.
+ * Wraps a report page command (default `LOAD`) that takes a `StatsLoadRequest` (or a snapshot request with `TFilter`).
  * Ignores responses from older requests when filters change quickly.
  */
-export function useStatsCommand<TResult>(
+export function useStatsCommand<TResult, TFilter = StatsFilter>(
   initialData: TResult,
   commandName = 'LOAD',
-): StatsCommandState<TResult> {
+): StatsCommandState<TResult, TFilter> {
   const [data, setData] = useState<TResult>(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -33,13 +33,13 @@ export function useStatsCommand<TResult>(
   const { executeCommand } = usePageCommandProvider();
 
   const load = useCallback(
-    async (filter: StatsFilter, options?: StatsLoadOptions) => {
+    async (filter: TFilter, options?: StatsLoadOptions) => {
       const id = ++requestId.current;
       setIsLoading(true);
       setHasError(false);
 
       try {
-        const result = await executeCommand<TResult, StatsLoadRequest>(commandName, {
+        const result = await executeCommand<TResult, StatsLoadRequest<TFilter>>(commandName, {
           filter,
           refresh: options?.refresh ?? false,
         });

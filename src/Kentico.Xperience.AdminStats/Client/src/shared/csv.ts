@@ -1,5 +1,7 @@
 import { periodTotals } from './timeSeries';
 import {
+  StatsAgedItem,
+  StatsCoverageItem,
   StatsPeriod,
   StatsRankedCaptions,
   StatsRankedItem,
@@ -97,6 +99,74 @@ export function toShareCsv(
       slice.name,
       slice.value,
       total > 0 ? Math.round((slice.value / total) * 1000) / 10 : 0,
+    ]),
+  );
+}
+
+/** Builds CSV text for "x of y" rows: label, optional secondary label, covered, missing, total, share (%, one decimal). */
+export function toCoverageCsv(
+  items: readonly StatsCoverageItem[],
+  captions: {
+    readonly label: string;
+    readonly secondaryLabel?: string;
+    readonly covered: string;
+    readonly missing: string;
+  },
+): string {
+  return toCsv(
+    [
+      captions.label,
+      ...(captions.secondaryLabel ? [captions.secondaryLabel] : []),
+      captions.covered,
+      captions.missing,
+      'Total',
+      'Share (%)',
+    ],
+    items.map((item) => [
+      item.label,
+      ...(captions.secondaryLabel ? [item.secondaryLabel] : []),
+      item.covered,
+      item.missing,
+      item.total,
+      Math.round(item.share * 1000) / 10,
+    ]),
+  );
+}
+
+/**
+ * Builds CSV text for an aged item list: label, optional category / language / detail, since, days
+ * and URL (the admin link from `getAdminHref` made absolute).
+ */
+export function toAgedCsv(
+  items: readonly StatsAgedItem[],
+  captions: {
+    readonly label: string;
+    readonly category?: string;
+    readonly language?: string;
+    readonly detail?: string;
+    readonly since: string;
+    readonly days: string;
+  },
+  getAdminHref?: (item: StatsAgedItem) => string | null,
+): string {
+  return toCsv(
+    [
+      captions.label,
+      ...(captions.category ? [captions.category] : []),
+      ...(captions.language ? [captions.language] : []),
+      ...(captions.detail ? [captions.detail] : []),
+      captions.since,
+      captions.days,
+      'URL',
+    ],
+    items.map((item) => [
+      item.label,
+      ...(captions.category ? [item.category] : []),
+      ...(captions.language ? [item.language] : []),
+      ...(captions.detail ? [item.detail] : []),
+      item.since,
+      item.days,
+      toAbsoluteUrl(getAdminHref?.(item) ?? null),
     ]),
   );
 }

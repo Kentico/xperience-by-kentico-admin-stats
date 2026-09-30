@@ -9,9 +9,22 @@ export interface StatsFilter {
   readonly channelId: number | null;
 }
 
-/** Mirrors `StatsLoadRequest` (input of the `LOAD` page command). */
-export interface StatsLoadRequest {
-  readonly filter: StatsFilter;
+/**
+ * Mirrors `StatsSnapshotFilter`: filter of a current-state report (no date range or grouping).
+ * `null` means all.
+ */
+export interface StatsSnapshotFilter {
+  /** Report-specific kind, for example a content type type (`Website`). */
+  readonly kind: string | null;
+  readonly channelId: number | null;
+}
+
+/**
+ * Mirrors `StatsLoadRequest` (input of the `LOAD` page command),
+ * or `StatsSnapshotLoadRequest` with a `StatsSnapshotFilter`.
+ */
+export interface StatsLoadRequest<TFilter = StatsFilter> {
+  readonly filter: TFilter;
   /** Drop cached data for the filter and read it again from the database. */
   readonly refresh: boolean;
 }
@@ -115,6 +128,20 @@ export interface StatsShareSlice {
   readonly value: number;
 }
 
+/** Mirrors `StatsCoverageItem`: "x of y" row, for example items with a language variant. */
+export interface StatsCoverageItem {
+  /** Stable, unique identifier (for example a language code name). */
+  readonly key: string;
+  readonly label: string;
+  readonly secondaryLabel: string | null;
+  readonly covered: number;
+  readonly total: number;
+  /** `total` - `covered`. */
+  readonly missing: number;
+  /** `covered` / `total` (0–1). */
+  readonly share: number;
+}
+
 /** Mirrors `StatsComparison`: a value in the range compared with the previous period of the same length. */
 export interface StatsComparison {
   readonly current: number;
@@ -125,4 +152,22 @@ export interface StatsComparison {
   readonly previousFrom: string;
   /** Last day of the previous period (`yyyy-MM-dd`). */
   readonly previousTo: string;
+}
+
+/** Mirrors `StatsAgedItem`: one row of an "oldest first" list. */
+export interface StatsAgedItem {
+  /** Stable, unique identifier. */
+  readonly key: string;
+  readonly label: string;
+  /** For example the content type. */
+  readonly category: string | null;
+  readonly language: string | null;
+  /** For example the workflow step. */
+  readonly detail: string | null;
+  /** Date the age is counted from (`yyyy-MM-dd`, server date). */
+  readonly since: string;
+  /** Whole days since `since`. */
+  readonly days: number;
+  /** Native admin page, relative to the admin root (see `adminLinks.ts`). */
+  readonly adminPath?: string | null;
 }

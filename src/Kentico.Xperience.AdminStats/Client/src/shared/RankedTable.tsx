@@ -90,16 +90,24 @@ function labelCell(item: StatsRankedItem, adminHref: string | null): TableCell {
       component: () => <LinkTableCellComponent text={item.label} url={url} />,
     } as TableCell;
   }
-  if (adminHref) {
-    return {
-      type: CellType.Component,
-      columnName: 'label',
-      component: () => (
-        <div title={item.label} className="AdminStats-cellLink">
-          <Link href={adminHref} text={item.label} target="_self" ellipsis />
-        </div>
-      ),
-    } as TableCell;
+  return adminLinkCell('label', item.label, adminHref);
+}
+
+/**
+ * Text cell that links to a native admin page in the same tab (the admin `Link`, wrapped like the link cell),
+ * or a plain string cell when there is no link.
+ */
+export function adminLinkCell(columnName: string, text: string, adminHref: string | null): TableCell {
+  if (!adminHref) {
+    return stringCell(columnName, text);
   }
-  return stringCell('label', item.label);
+  return {
+    type: CellType.Component,
+    columnName,
+    component: () => (
+      <div title={text} className="AdminStats-cellLink">
+        <Link href={adminHref} text={text} target="_self" ellipsis />
+      </div>
+    ),
+  } as TableCell;
 }

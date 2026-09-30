@@ -62,8 +62,29 @@ Design goals:
 
 - Digital commerce orders and revenue. _Uncertain: not yet checked which commerce tables are stable enough to depend on._
 - Member registrations over time.
-- Event log errors over time.
 - Admin user sign-in activity.
+
+**Event log** (useful for administrators and developers)
+
+Data source: `CMS_EventLog` (`EventType`, `EventTime`, `Source`, `EventCode`, `UserID`, `UserName`, `EventDescription`, `EventUrl`, `EventMachineName`).
+
+- Event types: Information (`I`), Warning (`W`), Error (`E`).
+- Events can come from any admin UI user (`UserID` / `UserName`) or from the system (no user).
+- `Source` and `EventCode` have a small, fairly fixed set of values, so they group well.
+
+Report ideas:
+
+- Events by type over time (stacked, by day, week, or month), with a filter for event type.
+- Totals per type compared with the previous period (reuse `StatsComparison`), for example "Errors +40% vs previous 30 days".
+- Top sources and top event codes (ranked), each with a change vs the previous period.
+- Top users by event count, with system events shown as their own row.
+- Optional: link to the native Event log application (via `IStatsAdminLinks`).
+
+Notes:
+
+- The event log is trimmed by a size limit setting (verify the setting name), so old events disappear. Add a data retention note.
+- The table can be large on busy sites. Aggregate in SQL and use `TOP N`.
+- Local DancingGoat DB (2026-09-29): 582 events (532 I, 44 W, 6 E), 28 sources, 24 codes, 2 users, all from one day. Trends over time need seeded data.
 
 ### Data limitations
 
@@ -96,6 +117,15 @@ Design goals:
 - Load data through page commands.
 - Reference: the Community Portal reporting admin UI (`CommunityStatsLayoutTemplate.tsx` in the `Kentico/community-portal` repo), linked from the Admin Design Components README.
 - Stats should have their own application permissions to help administrators limit who has access to the information
+- **Permission per report page.** Today `StatsApplicationPage` declares only `SystemPermissions.VIEW`, and every report page checks VIEW. Change to one custom permission per report page:
+  - Declare each permission on the application page with `[UIPermission("<name>", "<display name>")]`, for example `Kentico.Xperience.AdminStats.ActivityCounts` / "Activity counts". These show up in **Role management** for the Stats (Labs) application.
+  - Keep `[UIPermission(SystemPermissions.VIEW)]` for access to the application itself.
+  - Restrict each report page with `[UIEvaluatePermission("<name>")]`. It must be one of the permissions declared on the application, or it cannot be assigned to roles.
+  - Set the same permission on each page's `LOAD` command (`[PageCommand(Permission = "<name>")]`) so the data can't be read without it.
+  - Keep permission names as constants in one class (e.g. `StatsPermissions`), with a stable `Kentico.Xperience.AdminStats.` prefix.
+  - Verify: roles without a report permission get 403 on that page. The side navigation hides pages the user has no permission for automatically (confirmed by user), so no custom nav filtering is needed.
+  - Update `docs/Usage-Guide.md` with the permission list and how to assign them in Role management.
+  - Reference: [UI page permission checks](https://docs.kentico.com/documentation/developers-and-admins/customization/extend-the-administration-interface/ui-pages/ui-page-permission-checks) (define with `UIPermission` on the `ApplicationPage`, evaluate with `UIEvaluatePermission`, `PageCommand.Permission`, `IUIPermissionEvaluator` for client-side flags).
 
 ## Out of scope
 

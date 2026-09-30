@@ -156,3 +156,11 @@
 .AdminStats-cellLink {
   min-width: 0;
 }
+
+/* Tiles stacked in one grid cell (for example a right column beside a longer tile). */
+.AdminStats-tileColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  min-width: 0;
+}
