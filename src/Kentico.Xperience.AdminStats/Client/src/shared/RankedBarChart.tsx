@@ -1,10 +1,9 @@
 import * as am5 from '@amcharts/amcharts5';
-import am5ThemesAnimated from '@amcharts/amcharts5/themes/Animated';
 import * as am5xy from '@amcharts/amcharts5/xy';
 import { Colors } from '@kentico/xperience-admin-components';
 import React, { useId, useLayoutEffect, useMemo } from 'react';
 
-import { getChartTokens, getSeriesPalette, getXbkTheme, resolveToken } from './chartTheme';
+import { chartLogoSpace, createChartRoot, getChartTokens, getSeriesPalette, resolveToken } from './chartTheme';
 import { chartNumberFormat, formatItemChange, formatShare, formatValue } from './format';
 import { StatsRankedCaptions, StatsRankedItem } from './types';
 import { useStableValue } from './useStableValue';
@@ -93,11 +92,10 @@ export const RankedBarChart = React.memo(function RankedBarChart({
   // Rebuild the chart only when the rows change by content, not on every new prop identity.
   const data = useStableValue(rows);
 
-  const height = Math.max(minHeight, data.length * rowHeight + chartPadding);
+  const height = Math.max(minHeight, data.length * rowHeight + chartPadding) + chartLogoSpace;
 
   useLayoutEffect(() => {
-    const root = am5.Root.new(chartId);
-    root.setThemes([am5ThemesAnimated.new(root), getXbkTheme(root)]);
+    const root = createChartRoot(chartId);
     // Value labels at the bar ends and axis labels, formatted by the value kind (counts as before).
     root.numberFormatter.set('numberFormat', captions.valueKind ? chartNumberFormat(captions.valueKind) : '#,###');
 

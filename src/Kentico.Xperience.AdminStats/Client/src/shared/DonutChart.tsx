@@ -1,9 +1,8 @@
 import * as am5 from '@amcharts/amcharts5';
 import * as am5percent from '@amcharts/amcharts5/percent';
-import am5ThemesAnimated from '@amcharts/amcharts5/themes/Animated';
 import React, { useId, useLayoutEffect, useMemo } from 'react';
 
-import { getChartTokens, getSeriesPalette, getXbkTheme } from './chartTheme';
+import { createChartRoot, getChartTokens, getSeriesPalette } from './chartTheme';
 import { StatsShareSlice } from './types';
 import { useStableValue } from './useStableValue';
 
@@ -55,8 +54,7 @@ export const DonutChart = React.memo(function DonutChart({
   const data = useStableValue(rows);
 
   useLayoutEffect(() => {
-    const root = am5.Root.new(chartId);
-    root.setThemes([am5ThemesAnimated.new(root), getXbkTheme(root)]);
+    const root = createChartRoot(chartId);
     root.numberFormatter.set('numberFormat', '#,##0');
 
     const tokens = getChartTokens();

@@ -1,9 +1,8 @@
 import * as am5 from '@amcharts/amcharts5';
-import am5ThemesAnimated from '@amcharts/amcharts5/themes/Animated';
 import * as am5xy from '@amcharts/amcharts5/xy';
 import React, { useId, useLayoutEffect, useMemo } from 'react';
 
-import { getChartTokens, getSeriesPalette, getXbkTheme, resolveToken } from './chartTheme';
+import { createChartRoot, getChartTokens, getContrastingColor, getSeriesPalette, resolveToken } from './chartTheme';
 import { chartNumberFormat, formatValue } from './format';
 import { StatsPeriod, StatsSeries } from './types';
 import { useStableValue } from './useStableValue';
@@ -71,8 +70,7 @@ export const ComboChart = React.memo(function ComboChart({
   const data = useStableValue(rows);
 
   useLayoutEffect(() => {
-    const root = am5.Root.new(chartId);
-    root.setThemes([am5ThemesAnimated.new(root), getXbkTheme(root)]);
+    const root = createChartRoot(chartId);
 
     const tokens = getChartTokens();
     const palette = getSeriesPalette();
@@ -81,7 +79,9 @@ export const ComboChart = React.memo(function ComboChart({
       return fixed ? am5.color(fixed) : palette[index];
     };
     const columnColor = colorOf(columns, 0);
-    const lineColor = colorOf(line, 1);
+    // Without a fixed color, the line takes the palette color that differs most from the columns,
+    // so the two series are easy to tell apart.
+    const lineColor = line.color ? colorOf(line, 1) : getContrastingColor(palette, columnColor);
 
     const chart = root.container.children.push(
       am5xy.XYChart.new(root, {
@@ -191,18 +191,6 @@ export const ComboChart = React.memo(function ComboChart({
       }),
     );
     lineSeries.strokes.template.setAll({ strokeWidth: 2 });
-    if (data.length <= maxBulletPeriods) {
-      lineSeries.bullets.push(() =>
-        am5.Bullet.new(root, {
-          sprite: am5.Circle.new(root, {
-            radius: 3,
-            fill: lineColor,
-            stroke: tokens.surface,
-            strokeWidth: 1.5,
-          }),
-        }),
-      );
-    }
     lineSeries.data.setAll(data);
 
     const cursor = chart.set('cursor', am5xy.XYCursor.new(root, { behavior: 'none', xAxis }));
@@ -220,6 +208,21 @@ export const ComboChart = React.memo(function ComboChart({
     legend.labels.template.setAll({ fill: tokens.text, fontSize: 13 });
     legend.valueLabels.template.set('forceHidden', true);
     legend.data.setAll(chart.series.values);
+
+    // Bullets are added after the legend, so the line's legend marker is the plain solid line (same color and width),
+    // like the columns' marker is a plain square. Bullets added later still apply to the existing data items.
+    if (data.length <= maxBulletPeriods) {
+      lineSeries.bullets.push(() =>
+        am5.Bullet.new(root, {
+          sprite: am5.Circle.new(root, {
+            radius: 3,
+            fill: lineColor,
+            stroke: tokens.surface,
+            strokeWidth: 1.5,
+          }),
+        }),
+      );
+    }
 
     void columnSeries.appear(600);
     void lineSeries.appear(600);
