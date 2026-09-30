@@ -1,5 +1,6 @@
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.Admin.DigitalCommerce.UIPages;
+using Kentico.Xperience.AdminStats.Reports.Commerce;
 using Kentico.Xperience.AdminStats.Reports.OrdersRevenue;
 using Kentico.Xperience.AdminStats.Shared;
 
@@ -210,7 +211,7 @@ public class OrdersRevenueServiceTests
     {
         public OrdersRevenueReportData Data { get; set; } = OrdersRevenueReportData.Empty;
 
-        public IReadOnlyList<OrdersRevenueStatusOption> Statuses { get; set; } = [new(4, "Pending"), new(1, "Fulfilled")];
+        public IReadOnlyList<CommerceOrderStatusOption> Statuses { get; set; } = [new(4, "Pending"), new(1, "Fulfilled")];
 
         public int DataCalls { get; private set; }
 
@@ -225,7 +226,7 @@ public class OrdersRevenueServiceTests
             return Task.FromResult(Data);
         }
 
-        public Task<IReadOnlyList<OrdersRevenueStatusOption>> GetStatuses(CancellationToken cancellationToken)
+        public Task<IReadOnlyList<CommerceOrderStatusOption>> GetStatuses(CancellationToken cancellationToken)
         {
             StatusCalls++;
             return Task.FromResult(Statuses);

@@ -74,6 +74,20 @@ public class StatsAmountFormatterTests
         Assert.That(json, Does.Not.Contain("Text"));
     }
 
+    [Test]
+    public void WithTexts_Ranked_TertiaryAmountOnly()
+    {
+        var result = StatsRankedBuilder.Build(range, [new StatsRankedEntry("a", "A", null, 3, 1, null) { TertiaryValue = 2.5m }], 3, 1, 10)
+            with
+        { TertiaryValueKind = StatsValueKind.Amount };
+
+        var item = result.WithTexts(new StatsAmountFormatter([new FakePriceFormatter("$")])).Items.Single();
+
+        Assert.That(item.TertiaryValueText, Is.EqualTo("$2.50"));
+        Assert.That(item.ValueText, Is.Null);
+        Assert.That(item.SecondaryValueText, Is.Null);
+    }
+
     private sealed class FakePriceFormatter(string prefix) : IPriceFormatter
     {
         public bool Throw { get; init; }

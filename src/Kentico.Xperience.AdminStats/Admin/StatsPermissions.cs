@@ -1,7 +1,7 @@
 namespace Kentico.Xperience.AdminStats.Admin;
 
 /// <summary>
-/// Custom permissions of the "Stats (Labs)" application, one per report page.
+/// Custom permissions of the "Stats (Labs)" application: one per report page, plus <see cref="EXPORT"/>.
 /// Names are stored in role assignments, so do not change them.
 /// </summary>
 public static class StatsPermissions
@@ -28,4 +28,19 @@ public static class StatsPermissions
 
     public const string ORDERS_REVENUE = PREFIX + "OrdersRevenue";
     public const string ORDERS_REVENUE_DISPLAY_NAME = "Orders and revenue";
+
+    public const string CUSTOMERS = PREFIX + "Customers";
+    public const string CUSTOMERS_DISPLAY_NAME = "Customers";
+
+    public const string MEMBERS = PREFIX + "Members";
+    public const string MEMBERS_DISPLAY_NAME = "Member registrations";
+
+    public const string CONSENTS = PREFIX + "Consents";
+    public const string CONSENTS_DISPLAY_NAME = "Consents";
+
+    /// <summary>
+    /// Shows "Export CSV" in all reports. Not tied to a report page.
+    /// </summary>
+    public const string EXPORT = PREFIX + "Export";
+    public const string EXPORT_DISPLAY_NAME = "Export";
 }

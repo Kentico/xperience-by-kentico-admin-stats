@@ -5,7 +5,7 @@ using Kentico.Xperience.AdminStats.Shared;
 
 [assembly: UIPage(
     uiPageType: typeof(FormSubmissionsPage),
-    parentType: typeof(StatsApplicationPage),
+    parentType: typeof(StatsContactsSection),
     slug: "form-submissions",
     name: "Form submissions",
     templateName: FormSubmissionsPage.TEMPLATE_NAME,
@@ -21,7 +21,8 @@ namespace Kentico.Xperience.AdminStats.Admin;
 public sealed class FormSubmissionsPage(
     IFormSubmissionsService formSubmissionsService,
     IPageLinkGenerator pageLinkGenerator,
-    TimeProvider clock) : Page<FormSubmissionsClientProperties>
+    TimeProvider clock,
+    IUIPermissionEvaluator permissionEvaluator) : StatsReportPage<FormSubmissionsClientProperties>(permissionEvaluator)
 {
     public const string TEMPLATE_NAME = "@kentico/xperience-admin-stats/FormSubmissions";
 
@@ -29,7 +30,7 @@ public sealed class FormSubmissionsPage(
     private readonly IPageLinkGenerator pageLinkGenerator = pageLinkGenerator;
     private readonly TimeProvider clock = clock;
 
-    public override async Task<FormSubmissionsClientProperties> ConfigureTemplateProperties(FormSubmissionsClientProperties properties)
+    protected override async Task<FormSubmissionsClientProperties> ConfigureReportProperties(FormSubmissionsClientProperties properties)
     {
         var query = new StatsFilter().Normalize(GetToday());
 
@@ -53,7 +54,7 @@ public sealed class FormSubmissionsPage(
     private DateOnly GetToday() => DateOnly.FromDateTime(clock.GetLocalNow().DateTime);
 }
 
-public sealed class FormSubmissionsClientProperties : TemplateClientProperties
+public sealed class FormSubmissionsClientProperties : StatsReportClientProperties
 {
     public FormSubmissionsResult? Report { get; set; }
 

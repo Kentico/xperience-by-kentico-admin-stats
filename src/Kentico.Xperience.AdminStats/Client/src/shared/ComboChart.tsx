@@ -1,18 +1,20 @@
 import * as am5 from '@amcharts/amcharts5';
-import am5ThemesAnimated from '@amcharts/amcharts5/themes/Animated';
 import * as am5xy from '@amcharts/amcharts5/xy';
 import React, { useId, useLayoutEffect, useMemo } from 'react';
 
-import { getChartTokens, getSeriesPalette, getXbkTheme, resolveToken } from './chartTheme';
+import { createChartRoot, getChartTokens, getContrastingColor, getSeriesPalette, resolveToken } from './chartTheme';
 import { chartNumberFormat, formatValue } from './format';
 import { StatsPeriod, StatsSeries } from './types';
 import { useStableValue } from './useStableValue';
 
 export interface ComboChartProps {
   readonly periods: readonly StatsPeriod[];
-  /** Columns on the left axis (for example orders). Formatted by its `kind`. */
-  readonly columns: StatsSeries;
-  /** Line on the right axis (for example revenue). Formatted by its `kind`. */
+  /**
+   * Columns on the left axis (for example orders). Formatted by its `kind`.
+   * Omit for a line-only chart (for example a point-in-time count over time); the line then uses the left axis.
+   */
+  readonly columns?: StatsSeries;
+  /** Line on the right axis (for example revenue), or on the left axis without columns. Formatted by its `kind`. */
   readonly line: StatsSeries;
   /** Accessible name for the chart. */
   readonly ariaLabel: string;
@@ -20,7 +22,7 @@ export interface ComboChartProps {
 
 interface ChartRow {
   readonly category: string;
-  readonly column: number;
+  readonly column: number | null;
   readonly line: number;
   readonly tooltip: string;
 }
@@ -36,7 +38,7 @@ function escapeChartText(text: string): string {
 /**
  * Column + line chart with two value axes (amCharts 5): one column per period on the left axis
  * and a line on the right axis, for two measures of one trend (for example orders and revenue).
- * One tooltip per period shows both values, formatted by their kinds.
+ * One tooltip per period shows both values, formatted by their kinds. Without `columns` it is a line chart on one axis.
  * The root is created in `useLayoutEffect` and disposed on unmount or data change.
  */
 export const ComboChart = React.memo(function ComboChart({
@@ -52,7 +54,7 @@ export const ComboChart = React.memo(function ComboChart({
   const rows = useMemo<ChartRow[]>(
     () =>
       periods.map((period, index) => {
-        const columnValue = columns.values[index] ?? 0;
+        const columnValue = columns ? (columns.values[index] ?? 0) : null;
         const lineValue = line.values[index] ?? 0;
         return {
           category: period.label,
@@ -60,7 +62,9 @@ export const ComboChart = React.memo(function ComboChart({
           line: lineValue,
           tooltip: [
             `[bold]${escapeChartText(period.label)}[/]`,
-            `${escapeChartText(columns.name)}: ${escapeChartText(formatValue(columnValue, columns.kind, columns.texts?.[index]))}`,
+            ...(columns
+              ? [`${escapeChartText(columns.name)}: ${escapeChartText(formatValue(columnValue, columns.kind, columns.texts?.[index]))}`]
+              : []),
             `${escapeChartText(line.name)}: ${escapeChartText(formatValue(lineValue, line.kind, line.texts?.[index]))}`,
           ].join('\n'),
         };
@@ -71,8 +75,7 @@ export const ComboChart = React.memo(function ComboChart({
   const data = useStableValue(rows);
 
   useLayoutEffect(() => {
-    const root = am5.Root.new(chartId);
-    root.setThemes([am5ThemesAnimated.new(root), getXbkTheme(root)]);
+    const root = createChartRoot(chartId);
 
     const tokens = getChartTokens();
     const palette = getSeriesPalette();
@@ -80,8 +83,10 @@ export const ComboChart = React.memo(function ComboChart({
       const fixed = series.color ? resolveToken(series.color) : undefined;
       return fixed ? am5.color(fixed) : palette[index];
     };
-    const columnColor = colorOf(columns, 0);
-    const lineColor = colorOf(line, 1);
+    const columnColor = columns ? colorOf(columns, 0) : undefined;
+    // Without a fixed color, the line takes the palette color that differs most from the columns,
+    // so the two series are easy to tell apart. A line without columns takes the first palette color.
+    const lineColor = line.color || !columnColor ? colorOf(line, columns ? 1 : 0) : getContrastingColor(palette, columnColor);
 
     const chart = root.container.children.push(
       am5xy.XYChart.new(root, {
@@ -145,11 +150,14 @@ export const ComboChart = React.memo(function ComboChart({
       return axis;
     };
 
-    const leftAxis = createValueAxis(columns, false);
-    const rightAxis = createValueAxis(line, true);
-    // One set of grid lines: the right axis follows the left axis steps.
-    rightAxis.set('syncWithAxis', leftAxis);
-    rightAxis.get('renderer').grid.template.set('forceHidden', true);
+    const leftAxis = createValueAxis(columns ?? line, false);
+    let lineAxis = leftAxis;
+    if (columns) {
+      lineAxis = createValueAxis(line, true);
+      // One set of grid lines: the right axis follows the left axis steps.
+      lineAxis.set('syncWithAxis', leftAxis);
+      lineAxis.get('renderer').grid.template.set('forceHidden', true);
+    }
 
     const tooltip = am5.Tooltip.new(root, {
       labelText: '{tooltip}',
@@ -160,49 +168,41 @@ export const ComboChart = React.memo(function ComboChart({
     tooltip.get('background')?.setAll({ fill: tokens.tooltip, stroke: tokens.tooltip });
     tooltip.label.set('fill', tokens.tooltipText);
 
-    const columnSeries = chart.series.push(
-      am5xy.ColumnSeries.new(root, {
-        name: columns.name,
-        xAxis,
-        yAxis: leftAxis,
-        categoryXField: 'category',
-        valueYField: 'column',
-        // The cursor shows this one tooltip for both series.
-        tooltip,
-        ...(columnColor ? { fill: columnColor, stroke: columnColor } : {}),
-      }),
-    );
-    columnSeries.columns.template.setAll({
+    const columnSeries = columns
+      ? chart.series.push(
+          am5xy.ColumnSeries.new(root, {
+            name: columns.name,
+            xAxis,
+            yAxis: leftAxis,
+            categoryXField: 'category',
+            valueYField: 'column',
+            // The cursor shows this one tooltip for both series.
+            tooltip,
+            ...(columnColor ? { fill: columnColor, stroke: columnColor } : {}),
+          }),
+        )
+      : undefined;
+    columnSeries?.columns.template.setAll({
       width: am5.percent(90),
       strokeOpacity: 0,
       cornerRadiusTL: 2,
       cornerRadiusTR: 2,
     });
-    columnSeries.data.setAll(data);
+    columnSeries?.data.setAll(data);
 
     const lineSeries = chart.series.push(
       am5xy.LineSeries.new(root, {
         name: line.name,
         xAxis,
-        yAxis: rightAxis,
+        yAxis: lineAxis,
         categoryXField: 'category',
         valueYField: 'line',
+        // Without columns, the line shows the tooltip.
+        ...(columns ? {} : { tooltip }),
         ...(lineColor ? { fill: lineColor, stroke: lineColor } : {}),
       }),
     );
     lineSeries.strokes.template.setAll({ strokeWidth: 2 });
-    if (data.length <= maxBulletPeriods) {
-      lineSeries.bullets.push(() =>
-        am5.Bullet.new(root, {
-          sprite: am5.Circle.new(root, {
-            radius: 3,
-            fill: lineColor,
-            stroke: tokens.surface,
-            strokeWidth: 1.5,
-          }),
-        }),
-      );
-    }
     lineSeries.data.setAll(data);
 
     const cursor = chart.set('cursor', am5xy.XYCursor.new(root, { behavior: 'none', xAxis }));
@@ -221,7 +221,22 @@ export const ComboChart = React.memo(function ComboChart({
     legend.valueLabels.template.set('forceHidden', true);
     legend.data.setAll(chart.series.values);
 
-    void columnSeries.appear(600);
+    // Bullets are added after the legend, so the line's legend marker is the plain solid line (same color and width),
+    // like the columns' marker is a plain square. Bullets added later still apply to the existing data items.
+    if (data.length <= maxBulletPeriods) {
+      lineSeries.bullets.push(() =>
+        am5.Bullet.new(root, {
+          sprite: am5.Circle.new(root, {
+            radius: 3,
+            fill: lineColor,
+            stroke: tokens.surface,
+            strokeWidth: 1.5,
+          }),
+        }),
+      );
+    }
+
+    void columnSeries?.appear(600);
     void lineSeries.appear(600);
     void chart.appear(600, 100);
 

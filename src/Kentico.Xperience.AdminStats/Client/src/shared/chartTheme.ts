@@ -1,4 +1,5 @@
 import * as am5 from '@amcharts/amcharts5';
+import am5ThemesAnimated from '@amcharts/amcharts5/themes/Animated';
 import { Colors } from '@kentico/xperience-admin-components';
 
 /**
@@ -70,4 +71,36 @@ export function getChartTokens(): ChartTokens {
     tooltipText: read(Colors.TextDefaultOnDark, '#ffffff'),
     surface: read(Colors.PaperBackground, '#ffffff'),
   };
+}
+
+/**
+ * Height (px) kept free at the bottom of every chart for the amCharts logo, which amCharts draws
+ * in the bottom-left corner of the root when no license is set. Keeps it off legends and axis labels.
+ * Charts with a computed height add it to their height.
+ */
+export const chartLogoSpace = 28;
+
+/**
+ * Creates the amCharts root of every shared chart, with the admin themes and room for the amCharts logo.
+ * All charts must create their root here, so chart-wide setup lives in one place.
+ * An amCharts license (`am5.addLicense(...)`, which also removes the logo) can be added here later.
+ */
+export function createChartRoot(elementId: string): am5.Root {
+  const root = am5.Root.new(elementId);
+  root.setThemes([am5ThemesAnimated.new(root), getXbkTheme(root)]);
+  root.container.set('paddingBottom', chartLogoSpace);
+  return root;
+}
+
+/**
+ * Returns the palette color that differs most from `base` (RGB distance), for a second series that must
+ * stand out from the first (for example a line over columns). Falls back to `base`.
+ */
+export function getContrastingColor(palette: readonly am5.Color[], base: am5.Color | undefined): am5.Color | undefined {
+  if (!base) {
+    return palette[1] ?? palette[0];
+  }
+  const distance = (a: am5.Color, b: am5.Color) =>
+    (a.r - b.r) ** 2 + (a.g - b.g) ** 2 + (a.b - b.b) ** 2;
+  return palette.reduce<am5.Color>((best, c) => (distance(c, base) > distance(best, base) ? c : best), base);
 }

@@ -59,6 +59,16 @@ documentation on [creating a new database](https://docs.kentico.com/documentatio
 }
 ```
 
+### System Emails
+
+To test report permissions with other admin users, the invitation emails must be delivered. In Development, DancingGoat sends [system emails](https://docs.kentico.com/x/JQwcCQ) over SMTP to `localhost:1025` (`SystemSmtpOptions` in `appsettings.Development.json`). Run a local SMTP catcher such as [Mailpit](https://mailpit.axllent.org/) and read the emails at <http://localhost:8025>:
+
+```bash
+docker run -d --name mailpit --restart unless-stopped -p 1025:1025 -p 8025:8025 axllent/mailpit
+```
+
+`SystemEmailOptions.ServiceDomain` is `localhost:48896` (required for invitations; the request host fallback is not used while `AllowedHosts` is `*`). Check delivery in **Email queue → Send test email**.
+
 ## Development Workflow
 
 1. Create a new branch with one of the following prefixes

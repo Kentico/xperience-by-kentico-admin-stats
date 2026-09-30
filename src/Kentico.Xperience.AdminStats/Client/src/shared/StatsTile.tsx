@@ -10,6 +10,8 @@ import {
 } from '@kentico/xperience-admin-components';
 import React, { ReactNode, useState } from 'react';
 
+import { useCanExport } from './exportPermission';
+
 export type StatsTileView = 'chart' | 'table';
 
 export interface StatsTileProps {
@@ -21,10 +23,12 @@ export interface StatsTileProps {
   readonly emptyMessage?: string;
   readonly renderChart: () => ReactNode;
   readonly renderTable: () => ReactNode;
-  /** Called by the CSV button. Omit to hide the button. */
+  /** Called by the CSV button. Omit to hide the button. Also hidden without the Export permission. */
   readonly onExportCsv?: () => void;
   /** Tile-level controls shown before the chart/table toggle (for example a toggle that switches the list). */
   readonly headerControls?: ReactNode;
+  /** View shown first. Default `chart`; use `table` for lists where the exact rows matter most. */
+  readonly defaultView?: StatsTileView;
 }
 
 const viewItems = [
@@ -44,8 +48,10 @@ export const StatsTile = ({
   renderTable,
   onExportCsv,
   headerControls,
+  defaultView = 'chart',
 }: StatsTileProps) => {
-  const [view, setView] = useState<StatsTileView>('chart');
+  const [view, setView] = useState<StatsTileView>(defaultView);
+  const canExport = useCanExport();
 
   let content: ReactNode;
   if (hasError) {
@@ -72,7 +78,7 @@ export const StatsTile = ({
               selectedItemId={view}
               onChange={(id) => setView(id as StatsTileView)}
             />
-            {onExportCsv && (
+            {onExportCsv && canExport && (
               <Button
                 label="Export CSV"
                 icon="xp-arrow-down-line"

@@ -1,9 +1,8 @@
 import * as am5 from '@amcharts/amcharts5';
-import am5ThemesAnimated from '@amcharts/amcharts5/themes/Animated';
 import * as am5xy from '@amcharts/amcharts5/xy';
 import React, { useId, useLayoutEffect, useMemo } from 'react';
 
-import { getChartTokens, getSeriesPalette, getXbkTheme, resolveToken } from './chartTheme';
+import { createChartRoot, getChartTokens, getSeriesPalette, resolveToken } from './chartTheme';
 import { StatsPeriod, StatsSeries } from './types';
 import { useStableValue } from './useStableValue';
 
@@ -43,8 +42,7 @@ export const StackedColumnChart = React.memo(function StackedColumnChart({
   const data = useStableValue(rows);
 
   useLayoutEffect(() => {
-    const root = am5.Root.new(chartId);
-    root.setThemes([am5ThemesAnimated.new(root), getXbkTheme(root)]);
+    const root = createChartRoot(chartId);
     root.numberFormatter.set('numberFormat', '#,###');
 
     const tokens = getChartTokens();

@@ -16,10 +16,34 @@ public class StatsValuesTests
     public void Round_Amount_TwoDecimalsAwayFromZero(decimal value, decimal expected) =>
         Assert.That(StatsValues.Round(value, StatsValueKind.Amount), Is.EqualTo(expected));
 
-    [TestCase(StatsValueKind.Count)]
-    [TestCase(StatsValueKind.Ratio)]
-    public void Round_CountAndRatio_Unchanged(StatsValueKind kind) =>
-        Assert.That(StatsValues.Round(1.23456m, kind), Is.EqualTo(1.23456m));
+    [Test]
+    public void Round_Count_Unchanged() =>
+        Assert.That(StatsValues.Round(1.23456m, StatsValueKind.Count), Is.EqualTo(1.23456m));
+
+    [TestCase(0.123456, 0.1235)]
+    [TestCase(0.33333333, 0.3333)]
+    [TestCase(0.5, 0.5)]
+    public void Round_Ratio_FourDecimals(decimal value, decimal expected) =>
+        Assert.That(StatsValues.Round(value, StatsValueKind.Ratio), Is.EqualTo(expected));
+
+    [Test]
+    public void Comparison_Ratio_ChangeInPoints_AlsoWhenPreviousIsZero()
+    {
+        var comparison = StatsValueComparison.Create(range, StatsValueKind.Ratio, 0.3m, 0.2m);
+        var fromZero = StatsValueComparison.Create(range, StatsValueKind.Ratio, 0.25m, 0m);
+
+        Assert.That(comparison.Change, Is.EqualTo(0.1).Within(1e-9));
+        Assert.That(fromZero.Change, Is.EqualTo(0.25).Within(1e-9));
+    }
+
+    [Test]
+    public void Comparison_Ratio_MissingValue_ChangeNull()
+    {
+        var comparison = StatsValueComparison.Create(range, StatsValueKind.Ratio, StatsValues.Divide(1, 3), null);
+
+        Assert.That(comparison.Current, Is.EqualTo(0.3333m));
+        Assert.That(comparison.Change, Is.Null);
+    }
 
     [Test]
     public void Round_Null_StaysNull() =>
@@ -152,5 +176,55 @@ public class StatsValuesTests
         Assert.That(result.Items.Select(i => i.Key), Is.EqualTo(new[] { "a", "b" }));
         Assert.That(result.Total, Is.EqualTo(6));
         Assert.That(result.From, Is.EqualTo(range.From));
+    }
+
+    [TestCase(StatsGrouping.Day, new[] { 12.0, 12.0, 15.0, 15.0, 15.0, 15.0, 15.0, 16.0 })]
+    [TestCase(StatsGrouping.Week, new[] { 15.0, 16.0 })]
+    [TestCase(StatsGrouping.Month, new[] { 16.0 })]
+    public void BuildCumulativeSeries_RunningTotalFromStartValue_PerGrouping(StatsGrouping grouping, double[] expected)
+    {
+        // Mon Sep 7 .. Mon Sep 14 -> two weeks, one month
+        var query = new StatsQuery(new(2026, 9, 7), new(2026, 9, 14), grouping, null);
+        StatsDailyValue[] rows =
+        [
+            new("total", new(2026, 9, 1), 5m),   // before the range: part of the start value, not added again
+            new("total", new(2026, 9, 7), 2m),
+            new("TOTAL", new(2026, 9, 9), 3m),
+            new("other", new(2026, 9, 10), 50m),
+            new("total", new(2026, 9, 14), 1m),
+            new("total", new(2026, 9, 15), 9m),  // after the range
+        ];
+
+        var series = StatsTimeSeriesBuilder.BuildCumulativeSeries(query, rows, new("total", "Total"), StatsValueKind.Count, startValue: 10m);
+
+        Assert.That(series.Values, Is.EqualTo(expected.Select(v => (decimal)v)));
+        Assert.That(series.Total, Is.EqualTo(16m));
+        Assert.That(series.Kind, Is.EqualTo(StatsValueKind.Count));
+    }
+
+    [Test]
+    public void BuildCumulativeSeries_NoData_FlatStartValue_NegativeStartIsZero()
+    {
+        var flat = StatsTimeSeriesBuilder.BuildCumulativeSeries(range, [], new("total", "Total"), StatsValueKind.Count, startValue: 7m);
+        var negative = StatsTimeSeriesBuilder.BuildCumulativeSeries(range, [], new("total", "Total"), StatsValueKind.Count, startValue: -3m);
+
+        Assert.That(flat.Values, Has.Count.EqualTo(30).And.All.EqualTo(7m));
+        Assert.That(flat.Total, Is.EqualTo(7m));
+        Assert.That(negative.Values, Is.All.Zero);
+    }
+
+    [Test]
+    public void RankedResult_TertiaryValue_OptIn_InJson()
+    {
+        var without = StatsRankedBuilder.Build(range, [new("a", "A", null, 3, 1, null)], 3, 1, 10);
+        var with = StatsRankedBuilder.Build(range, [new StatsRankedEntry("a", "A", null, 3, 1, null) { TertiaryValue = 2.5m }], 3, 1, 10)
+            with
+        { TertiaryValueKind = StatsValueKind.Amount };
+
+        Assert.That(JsonSerializer.Serialize(without), Does.Not.Contain("Tertiary"));
+        Assert.That(with.Items.Single().TertiaryValue, Is.EqualTo(2.5m));
+        Assert.That(
+            JsonSerializer.Serialize(with),
+            Does.Contain("\"TertiaryValue\":2.5").And.Contain("\"TertiaryValueKind\":\"Amount\""));
     }
 }

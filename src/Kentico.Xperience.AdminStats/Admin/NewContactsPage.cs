@@ -5,7 +5,7 @@ using Kentico.Xperience.AdminStats.Shared;
 
 [assembly: UIPage(
     uiPageType: typeof(NewContactsPage),
-    parentType: typeof(StatsApplicationPage),
+    parentType: typeof(StatsContactsSection),
     slug: "new-contacts",
     name: "New contacts",
     templateName: NewContactsPage.TEMPLATE_NAME,
@@ -20,14 +20,15 @@ namespace Kentico.Xperience.AdminStats.Admin;
 [UIEvaluatePermission(StatsPermissions.NEW_CONTACTS)]
 public sealed class NewContactsPage(
     INewContactsService newContactsService,
-    TimeProvider clock) : Page<NewContactsClientProperties>
+    TimeProvider clock,
+    IUIPermissionEvaluator permissionEvaluator) : StatsReportPage<NewContactsClientProperties>(permissionEvaluator)
 {
     public const string TEMPLATE_NAME = "@kentico/xperience-admin-stats/NewContacts";
 
     private readonly INewContactsService newContactsService = newContactsService;
     private readonly TimeProvider clock = clock;
 
-    public override async Task<NewContactsClientProperties> ConfigureTemplateProperties(NewContactsClientProperties properties)
+    protected override async Task<NewContactsClientProperties> ConfigureReportProperties(NewContactsClientProperties properties)
     {
         var query = new StatsFilter().Normalize(GetToday());
 
@@ -50,7 +51,7 @@ public sealed class NewContactsPage(
     private DateOnly GetToday() => DateOnly.FromDateTime(clock.GetLocalNow().DateTime);
 }
 
-public sealed class NewContactsClientProperties : TemplateClientProperties
+public sealed class NewContactsClientProperties : StatsReportClientProperties
 {
     public NewContactsResult? Report { get; set; }
 

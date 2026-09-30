@@ -3,6 +3,8 @@ using System.Data.Common;
 
 using CMS.DataEngine;
 
+using Kentico.Xperience.AdminStats.Reports.Commerce;
+
 namespace Kentico.Xperience.AdminStats.Reports.OrdersRevenue;
 
 /// <summary>
@@ -25,11 +27,13 @@ internal interface IOrdersRevenueRepository
     /// <summary>
     /// Returns the order statuses in status order. Empty when the commerce tables do not exist.
     /// </summary>
-    public Task<IReadOnlyList<OrdersRevenueStatusOption>> GetStatuses(CancellationToken cancellationToken);
+    public Task<IReadOnlyList<CommerceOrderStatusOption>> GetStatuses(CancellationToken cancellationToken);
 }
 
 internal sealed class OrdersRevenueRepository : IOrdersRevenueRepository
 {
+    private const string ReportName = "orders and revenue";
+
     public async Task<OrdersRevenueReportData> GetData(DateOnly previousFrom, DateOnly from, DateOnly to, int? orderStatusId, int limit, CancellationToken cancellationToken)
     {
         var parameters = new QueryDataParameters
@@ -48,61 +52,25 @@ internal sealed class OrdersRevenueRepository : IOrdersRevenueRepository
 
         await using var reader = await ConnectionHelper.ExecuteReaderAsync(sql, parameters, QueryTypeEnum.SQLQuery, CommandBehavior.Default, cancellationToken);
 
-        if (!await IsAvailable(reader, cancellationToken))
+        if (!await CommerceSql.IsAvailable(reader, cancellationToken))
         {
             return OrdersRevenueReportData.Unavailable;
         }
 
-        await NextResult(reader, cancellationToken);
+        await CommerceSql.NextResult(reader, ReportName, cancellationToken);
         var daily = await ReadDaily(reader, cancellationToken);
-        await NextResult(reader, cancellationToken);
+        await CommerceSql.NextResult(reader, ReportName, cancellationToken);
         var itemsSold = await ReadItemsSold(reader, cancellationToken);
-        await NextResult(reader, cancellationToken);
+        await CommerceSql.NextResult(reader, ReportName, cancellationToken);
         var byStatus = await ReadByStatus(reader, cancellationToken);
-        await NextResult(reader, cancellationToken);
+        await CommerceSql.NextResult(reader, ReportName, cancellationToken);
         var (products, productCount, productRevenue) = await ReadProducts(reader, cancellationToken);
 
         return new(true, daily, itemsSold, byStatus, products, productCount, productRevenue);
     }
 
-    public async Task<IReadOnlyList<OrdersRevenueStatusOption>> GetStatuses(CancellationToken cancellationToken)
-    {
-        await using var reader = await ConnectionHelper.ExecuteReaderAsync(
-            OrdersRevenueSql.BuildStatuses(),
-            new QueryDataParameters(),
-            QueryTypeEnum.SQLQuery,
-            CommandBehavior.Default,
-            cancellationToken);
-
-        if (!await IsAvailable(reader, cancellationToken))
-        {
-            return [];
-        }
-
-        await NextResult(reader, cancellationToken);
-
-        int idOrdinal = reader.GetOrdinal(OrdersRevenueSql.StatusIdColumn);
-        int nameOrdinal = reader.GetOrdinal(OrdersRevenueSql.StatusNameColumn);
-
-        var rows = new List<OrdersRevenueStatusOption>();
-        while (await reader.ReadAsync(cancellationToken))
-        {
-            rows.Add(new(reader.GetInt32(idOrdinal), reader.GetString(nameOrdinal)));
-        }
-
-        return rows;
-    }
-
-    private static async Task<bool> IsAvailable(DbDataReader reader, CancellationToken cancellationToken) =>
-        await reader.ReadAsync(cancellationToken) && reader.GetBoolean(reader.GetOrdinal(OrdersRevenueSql.AvailableColumn));
-
-    private static async Task NextResult(DbDataReader reader, CancellationToken cancellationToken)
-    {
-        if (!await reader.NextResultAsync(cancellationToken))
-        {
-            throw new InvalidOperationException("The orders and revenue query returned fewer result sets than expected.");
-        }
-    }
+    public Task<IReadOnlyList<CommerceOrderStatusOption>> GetStatuses(CancellationToken cancellationToken) =>
+        CommerceOrderStatuses.Read(cancellationToken);
 
     private static async Task<IReadOnlyList<OrdersRevenueDailyRow>> ReadDaily(DbDataReader reader, CancellationToken cancellationToken)
     {

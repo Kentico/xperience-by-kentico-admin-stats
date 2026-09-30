@@ -5,7 +5,7 @@ using Kentico.Xperience.AdminStats.Shared;
 
 [assembly: UIPage(
     uiPageType: typeof(ContentInventoryPage),
-    parentType: typeof(StatsApplicationPage),
+    parentType: typeof(StatsContentSection),
     slug: "content-inventory",
     name: "Content inventory",
     templateName: ContentInventoryPage.TEMPLATE_NAME,
@@ -21,7 +21,8 @@ namespace Kentico.Xperience.AdminStats.Admin;
 public sealed class ContentInventoryPage(
     IContentInventoryService contentInventoryService,
     IStatsChannelOptionsProvider channelOptionsProvider,
-    IPageLinkGenerator pageLinkGenerator) : Page<ContentInventoryClientProperties>
+    IPageLinkGenerator pageLinkGenerator,
+    IUIPermissionEvaluator permissionEvaluator) : StatsReportPage<ContentInventoryClientProperties>(permissionEvaluator)
 {
     public const string TEMPLATE_NAME = "@kentico/xperience-admin-stats/ContentInventory";
 
@@ -29,7 +30,7 @@ public sealed class ContentInventoryPage(
     private readonly IStatsChannelOptionsProvider channelOptionsProvider = channelOptionsProvider;
     private readonly IPageLinkGenerator pageLinkGenerator = pageLinkGenerator;
 
-    public override async Task<ContentInventoryClientProperties> ConfigureTemplateProperties(ContentInventoryClientProperties properties)
+    protected override async Task<ContentInventoryClientProperties> ConfigureReportProperties(ContentInventoryClientProperties properties)
     {
         var query = new StatsSnapshotFilter().Normalize(ContentInventoryReportBuilder.Kinds);
 
@@ -54,7 +55,7 @@ public sealed class ContentInventoryPage(
     }
 }
 
-public sealed class ContentInventoryClientProperties : TemplateClientProperties
+public sealed class ContentInventoryClientProperties : StatsReportClientProperties
 {
     public ContentInventoryResult? Report { get; set; }
 

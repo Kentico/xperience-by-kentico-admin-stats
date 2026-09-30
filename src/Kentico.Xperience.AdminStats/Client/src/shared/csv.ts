@@ -37,7 +37,7 @@ export function toCsv(
 
 /**
  * Builds CSV text for a ranked list: rank, label, optional secondary label, value,
- * optional secondary value, optional previous value and change (%, one decimal), share (%, one decimal) and URL (the absolute URL, else the admin link
+ * optional secondary and third value, optional previous value and change (%, one decimal), share (%, one decimal) and URL (the absolute URL, else the admin link
  * from `getAdminHref` made absolute).
  */
 export function toRankedCsv(
@@ -51,6 +51,7 @@ export function toRankedCsv(
     ...(captions.secondaryLabel ? [captions.secondaryLabel] : []),
     captions.value,
     ...(captions.secondaryValue ? [captions.secondaryValue] : []),
+    ...(captions.tertiaryValue ? [captions.tertiaryValue] : []),
     ...(captions.previousValue ? [captions.previousValue] : []),
     ...(captions.change ? [`${captions.change} (%)`] : []),
     'Share (%)',
@@ -63,6 +64,7 @@ export function toRankedCsv(
     ...(captions.secondaryLabel ? [item.secondaryLabel] : []),
     item.value,
     ...(captions.secondaryValue ? [item.secondaryValue] : []),
+    ...(captions.tertiaryValue ? [item.tertiaryValue] : []),
     ...(captions.previousValue ? [item.previousValue] : []),
     ...(captions.change ? [toChangeCsv(item)] : []),
     Math.round(item.share * 1000) / 10,
