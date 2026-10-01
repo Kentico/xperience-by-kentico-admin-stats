@@ -21,7 +21,8 @@ public sealed class ConsentsPage(
     IConsentsService consentsService,
     IPageLinkGenerator pageLinkGenerator,
     TimeProvider clock,
-    IUIPermissionEvaluator permissionEvaluator) : StatsReportPage<ConsentsClientProperties>(permissionEvaluator)
+    IUIPermissionEvaluator permissionEvaluator,
+    IStatsExportEventPublisher exportEventPublisher) : StatsReportPage<ConsentsClientProperties>(permissionEvaluator, exportEventPublisher)
 {
     public const string TEMPLATE_NAME = "@kentico/xperience-admin-stats/Consents";
 

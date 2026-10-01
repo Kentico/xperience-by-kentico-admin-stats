@@ -8,6 +8,7 @@ import { FormSubmissionsTemplate as FormSubmissions } from './form-submissions/F
 import { MembersTemplate as Members } from './members/MembersTemplate';
 import { NewContactsTemplate as NewContacts } from './new-contacts/NewContactsTemplate';
 import { OrdersRevenueTemplate as OrdersRevenue } from './orders-revenue/OrdersRevenueTemplate';
+import { RecipientListsTemplate as RecipientLists } from './recipient-lists/RecipientListsTemplate';
 import { withExportPermission } from './shared/exportPermission';
 import { TopPagesTemplate as TopPages } from './top-pages/TopPagesTemplate';
 
@@ -22,5 +23,6 @@ export const OrdersRevenueTemplate = withExportPermission(OrdersRevenue);
 export const CustomersTemplate = withExportPermission(Customers);
 export const MembersTemplate = withExportPermission(Members);
 export const ConsentsTemplate = withExportPermission(Consents);
+export const RecipientListsTemplate = withExportPermission(RecipientLists);
 
 export { NoReportsTemplate } from './no-reports/NoReportsTemplate';

@@ -4,7 +4,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { toAdminHref } from '../shared/adminLinks';
 import { ComboChart } from '../shared/ComboChart';
 import { ComparisonInfoCard } from '../shared/ComparisonInfoCard';
-import { downloadCsv, toRankedCsv, toShareCsv, toTimeSeriesCsv } from '../shared/csv';
+import { toRankedCsv, toShareCsv, toTimeSeriesCsv } from '../shared/csv';
 import { DataRetentionNote } from '../shared/DataRetentionNote';
 import { DonutChart } from '../shared/DonutChart';
 import { formatShare, numberFormat } from '../shared/format';
@@ -26,6 +26,7 @@ import {
   StatsValueComparison,
   StatsValueSeries,
 } from '../shared/types';
+import { useCsvExport } from '../shared/useCsvExport';
 import { useStatsCommand } from '../shared/useStatsCommand';
 import '../shared/stats.css';
 
@@ -87,6 +88,7 @@ function toFilter(report: MembersResult): StatsFilter {
 }
 
 export const MembersTemplate = (props: MembersTemplateProps) => {
+  const saveCsv = useCsvExport();
   const { data: report, isLoading, hasError, load } = useStatsCommand<MembersResult>(props.report);
   const [filter, setFilter] = useState<StatsFilter>(() => toFilter(props.report));
 
@@ -130,18 +132,19 @@ export const MembersTemplate = (props: MembersTemplateProps) => {
     : noMembers;
 
   const exportGrowthCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'members-growth',
       `members-growth_${report.from}_${report.to}_${period}.csv`,
       toTimeSeriesCsv(periods, growthTableSeries, { includeTotal: false }),
     );
   };
 
   const exportSignInCsv = () => {
-    downloadCsv(`members-sign-in-type_${report.from}_${report.to}.csv`, toShareCsv(slices, 'Sign-in type', 'New members'));
+    saveCsv('members-sign-in-type', `members-sign-in-type_${report.from}_${report.to}.csv`, toShareCsv(slices, 'Sign-in type', 'New members'));
   };
 
   const exportRolesCsv = () => {
-    downloadCsv(`members-by-role_${report.to}.csv`, toRankedCsv(byRole.items, roleCaptions, getRoleHref));
+    saveCsv('members-by-role', `members-by-role_${report.to}.csv`, toRankedCsv(byRole.items, roleCaptions, getRoleHref));
   };
 
   const externalShare = totals.externalShare.current;

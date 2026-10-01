@@ -2,7 +2,7 @@ import { InfoCard } from '@kentico/xperience-admin-components';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { toAdminHref } from '../shared/adminLinks';
-import { downloadCsv, toRankedCsv, toTimeSeriesCsv } from '../shared/csv';
+import { toRankedCsv, toTimeSeriesCsv } from '../shared/csv';
 import { DataRetentionNote } from '../shared/DataRetentionNote';
 import { rangeLength } from '../shared/dates';
 import { formatComparison, numberFormat } from '../shared/format';
@@ -22,6 +22,7 @@ import {
   StatsSeries,
   StatsTimeSeriesResult,
 } from '../shared/types';
+import { useCsvExport } from '../shared/useCsvExport';
 import { useStatsCommand } from '../shared/useStatsCommand';
 import '../shared/stats.css';
 
@@ -71,6 +72,7 @@ function toFilter(report: FormSubmissionsResult): StatsFilter {
 }
 
 export const FormSubmissionsTemplate = (props: FormSubmissionsTemplateProps) => {
+  const saveCsv = useCsvExport();
   const { data: report, isLoading, hasError, load } =
     useStatsCommand<FormSubmissionsResult>(props.report);
   const [filter, setFilter] = useState<StatsFilter>(() => toFilter(props.report));
@@ -100,14 +102,16 @@ export const FormSubmissionsTemplate = (props: FormSubmissionsTemplateProps) => 
   );
 
   const exportTrendCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'form-submissions',
       `form-submissions_${trend.from}_${trend.to}_${trend.grouping.toLowerCase()}.csv`,
       toTimeSeriesCsv(trend.periods, series),
     );
   };
 
   const exportFormsCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'form-submissions-by-form',
       `form-submissions-by-form_${forms.from}_${forms.to}.csv`,
       toRankedCsv(forms.items, captions, getAdminHref),
     );

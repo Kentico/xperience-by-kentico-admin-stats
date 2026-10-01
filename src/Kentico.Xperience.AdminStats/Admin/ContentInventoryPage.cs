@@ -22,7 +22,8 @@ public sealed class ContentInventoryPage(
     IContentInventoryService contentInventoryService,
     IStatsChannelOptionsProvider channelOptionsProvider,
     IPageLinkGenerator pageLinkGenerator,
-    IUIPermissionEvaluator permissionEvaluator) : StatsReportPage<ContentInventoryClientProperties>(permissionEvaluator)
+    IUIPermissionEvaluator permissionEvaluator,
+    IStatsExportEventPublisher exportEventPublisher) : StatsReportPage<ContentInventoryClientProperties>(permissionEvaluator, exportEventPublisher)
 {
     public const string TEMPLATE_NAME = "@kentico/xperience-admin-stats/ContentInventory";
 

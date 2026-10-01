@@ -3,6 +3,9 @@ import { StatsValueKind } from './types';
 
 export const numberFormat = new Intl.NumberFormat();
 
+/** Signed counts (net change), for example "+12", "−3", "0". */
+export const signedNumberFormat = new Intl.NumberFormat(undefined, { signDisplay: 'exceptZero' });
+
 /** Amounts: 2 decimals, locale grouping, no currency symbol (orders store no currency). */
 const amountFormat = new Intl.NumberFormat(undefined, {
   minimumFractionDigits: 2,

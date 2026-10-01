@@ -21,7 +21,8 @@ public sealed class CustomersPage(
     ICustomersService customersService,
     IPageLinkGenerator pageLinkGenerator,
     TimeProvider clock,
-    IUIPermissionEvaluator permissionEvaluator) : StatsReportPage<CustomersClientProperties>(permissionEvaluator)
+    IUIPermissionEvaluator permissionEvaluator,
+    IStatsExportEventPublisher exportEventPublisher) : StatsReportPage<CustomersClientProperties>(permissionEvaluator, exportEventPublisher)
 {
     public const string TEMPLATE_NAME = "@kentico/xperience-admin-stats/Customers";
 

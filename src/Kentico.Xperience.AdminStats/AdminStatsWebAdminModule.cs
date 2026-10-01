@@ -1,6 +1,7 @@
 using CMS.Core;
 
 using Kentico.Xperience.Admin.Base;
+using Kentico.Xperience.AdminStats.Admin;
 using Kentico.Xperience.AdminStats.Reports.ActivityCounts;
 using Kentico.Xperience.AdminStats.Reports.Consents;
 using Kentico.Xperience.AdminStats.Reports.ContentInventory;
@@ -10,6 +11,7 @@ using Kentico.Xperience.AdminStats.Reports.FormSubmissions;
 using Kentico.Xperience.AdminStats.Reports.Members;
 using Kentico.Xperience.AdminStats.Reports.NewContacts;
 using Kentico.Xperience.AdminStats.Reports.OrdersRevenue;
+using Kentico.Xperience.AdminStats.Reports.RecipientLists;
 using Kentico.Xperience.AdminStats.Reports.TopPages;
 using Kentico.Xperience.AdminStats.Shared;
 
@@ -68,5 +70,9 @@ internal sealed class AdminStatsWebAdminModule : AdminModule
         services.TryAddTransient<IMembersService, MembersService>();
         services.TryAddTransient<IConsentsRepository, ConsentsRepository>();
         services.TryAddTransient<IConsentsService, ConsentsService>();
+        services.TryAddTransient<IRecipientListsRepository, RecipientListsRepository>();
+        services.TryAddTransient<IRecipientListsService, RecipientListsService>();
+        services.TryAddTransient<IStatsUserIdAccessor, StatsUserIdAccessor>();
+        services.TryAddTransient<IStatsExportEventPublisher, StatsExportEventPublisher>();
     }
 }

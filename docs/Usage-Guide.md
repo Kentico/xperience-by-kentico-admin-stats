@@ -16,6 +16,7 @@ Reports are grouped into sections. Opening the application or a section opens it
 | Section  | Reports                                                                                    |
 | -------- | ------------------------------------------------------------------------------------------ |
 | Contacts | Activity counts, Top pages, New contacts, Form submissions, Member registrations, Consents |
+| Emails   | Recipient lists                                                                            |
 | Content  | Content inventory                                                                          |
 | Commerce | Orders and revenue, Customers                                                              |
 | System   | Event log                                                                                  |
@@ -42,6 +43,7 @@ Sections have no permission of their own. A section is hidden when the role has 
 | Customers            | `Kentico.Xperience.AdminStats.Customers`        |
 | Member registrations | `Kentico.Xperience.AdminStats.Members`          |
 | Consents             | `Kentico.Xperience.AdminStats.Consents`         |
+| Recipient lists      | `Kentico.Xperience.AdminStats.RecipientLists`   |
 | Export               | `Kentico.Xperience.AdminStats.Export`           |
 
 The **Export** permission only hides the buttons. The CSV is built in the browser from the data the report already shows, so a role that can see a report can still copy its numbers. It is not data protection.
@@ -134,6 +136,27 @@ Shows [consent](https://docs.kentico.com/documentation/developers-and-admins/dat
 
 The report reads the stored agreements only and compares consent texts by hash, not by content. Deleting a contact also deletes its consent agreements, also for past days, so numbers can be lower than they were. Revoking can trigger data erasure in projects that handle it. When the consent tables do not exist, the report is empty.
 
+### Recipient lists
+
+Shows [recipient list](https://docs.kentico.com/documentation/business-users/digital-marketing/emails/send-regular-emails-to-subscribers) subscriptions and unsubscriptions over time, subscribers, the current status of list members and all lists compared.
+
+- **Definitions**
+  - **Subscription** / **unsubscription** - one confirmed subscription or one unsubscription (revoked subscription) of a contact in the range. Xperience stores both as subscription confirmation records. Subscribing again counts again.
+  - **Subscribers** (on a day) - contacts who are members of the list now and whose latest subscription or unsubscription of the list on or before that day is a subscription. List membership has no history, so it is applied as it is now. Bounces are current state only, so they are not applied to the time series. With **All lists**, each contact subscribed to at least one list is counted once.
+  - **Receiving**, **Bounced**, **Unsubscribed**, **Not confirmed** - the current status (now, not at the end of the range) of list members, counted like the recipient list overview in the native **Recipient lists** application: receiving = subscribed and the email has not bounced; bounced = subscribed, but the email had a hard bounce or reached the soft bounce limit (`BouncedEmailsGlobalOptions.SoftBounceLimit`, default 5); unsubscribed = the latest action is an unsubscription; not confirmed = a member without a subscription confirmation (double opt-in pending, or added without confirmation; the native overview does not count these). With **All lists**, each contact is counted once per list.
+  - **Unsubscribe rate** - unsubscriptions divided by subscriptions in the range ("–" without subscriptions; the change is in percentage points, "pp").
+- **KPIs** - subscriptions, unsubscriptions, unsubscribe rate and subscribers (on the last day of the range vs the last day of the previous period), each vs the previous period of the same length.
+- **Filters** - date range, grouping and recipient list (all lists or one; no channel).
+- **Tiles**
+  - "Subscriptions and unsubscriptions" - stacked columns per period, or a table.
+  - "Subscribers over time" - subscribers at the end of each period as a line, or a table (no total column; the values are counts on a day and do not add up).
+  - "Subscriber status" - donut chart or table of the current statuses (list filter applied).
+  - "Recipient lists" - all lists (the list filter does not apply, so lists can be compared): current statuses, subscriptions and unsubscriptions in the range, and the subscriber change (subscribers on the last day of the range minus subscribers on the day before the range). The chart shows receiving members per list. Click a list to open it in the native **Recipient lists** application.
+- **Open recipient lists** - opens the native **Recipient lists** application.
+- Each tile has its own CSV export.
+
+The report counts only what Xperience stores as subscription confirmations. Deleting a contact also deletes its subscriptions and list memberships, also for past days, so numbers can be lower than they were; merged contacts keep their subscriptions. Custom code that deletes subscription records and list members on unsubscribe (instead of revoking the subscription) leaves no unsubscription, so those unsubscriptions are not counted. When the recipient list tables do not exist, the report is empty.
+
 ### Content inventory
 
 Shows the current state of content items (no date range, not a trend): items by content type, status, language and age, items waiting in workflow steps, and unused reusable items.
@@ -209,7 +232,74 @@ The event log keeps at most the number of events in **Settings → System → Ev
 
 ### Dates and caching
 
-Time-based reports use the server date. Results of all reports are cached for 5 minutes, so new activities, contacts, submissions, content changes, events, orders, customers, members and consent agreements can take a few minutes to appear. Select **Refresh** to load the latest numbers.
+Time-based reports use the server date. Results of all reports are cached for 5 minutes, so new activities, contacts, submissions, content changes, events, orders, customers, members, consent agreements and recipient list subscriptions can take a few minutes to appear. Select **Refresh** to load the latest numbers.
+
+## Audit CSV exports
+
+After every **Export CSV**, the library raises `AfterExportStatsEvent` (`Kentico.Xperience.AdminStats.Admin`). It works like the product's [`AfterExportListingEvent`](https://docs.kentico.com/documentation/developers-and-admins/customization/extend-the-administration-interface/ui-pages/reference-ui-page-templates/listing-ui-page-template/export-listing-data#run-custom-code-after-an-export): handlers implement `IAsyncEventHandler<AfterExportStatsEvent>` (`CMS.Base`), run as singletons and cannot change or cancel the export.
+
+`asyncEvent.Data` (`StatsExportEventData`) has:
+
+| Property             | Description                                                                                       |
+| -------------------- | ------------------------------------------------------------------------------------------------- |
+| `ReportPageTypeName` | Full type name of the report page, for example `Kentico.Xperience.AdminStats.Admin.ConsentsPage`. |
+| `UserID`             | The administration user who exported, or 0 if unknown.                                            |
+| `Timestamp`          | Time of the export, server local time.                                                            |
+| `ExportName`         | Stable ID of the tile, for example `consents-events`. See the list below.                         |
+| `FileName`           | Name of the downloaded file, for example `consents-events_2026-09-01_2026-09-30_day.csv`.         |
+| `RowCount`           | Data rows in the file, not counting the header.                                                   |
+
+Example handler that writes to the event log:
+
+```csharp
+using CMS.Base;
+
+using Kentico.Xperience.AdminStats.Admin;
+
+using Microsoft.Extensions.Logging;
+
+public class StatsExportAuditHandler(ILogger<StatsExportAuditHandler> logger) : IAsyncEventHandler<AfterExportStatsEvent>
+{
+    public Task HandleAsync(AfterExportStatsEvent asyncEvent, CancellationToken cancellationToken)
+    {
+        var data = asyncEvent.Data;
+        logger.LogInformation(
+            new EventId(0, "EXPORT"),
+            "User {UserID} exported {RowCount} rows of '{ExportName}' ({FileName}) from {ReportPage} at {Timestamp}.",
+            data.UserID, data.RowCount, data.ExportName, data.FileName, data.ReportPageTypeName, data.Timestamp);
+
+        return Task.CompletedTask;
+    }
+}
+```
+
+Register it in `Program.cs`:
+
+```csharp
+builder.Services.AddEventHandler<AfterExportStatsEvent, StatsExportAuditHandler>();
+```
+
+One handler class can implement both `IAsyncEventHandler<AfterExportListingEvent>` and `IAsyncEventHandler<AfterExportStatsEvent>` to audit listing and stats exports in one place. Register it once per event.
+
+A handler exception is logged and does not fail the export. Handlers run one after another; one failing does not stop the others.
+
+**Best effort.** The CSV is built in the browser. After the download starts, the browser reports the export to the server (the `LOG_EXPORT` page command, which needs the **Export** permission and the report permission). The event is an audit signal, not data protection: a user who can see a report can copy its data without exporting, and a modified browser can skip or fake the report. The filter used for the export is not part of the event; `FileName` has the main filter values (dates, grouping, selected IDs).
+
+`ExportName` is the file-name prefix (the part before the first `_`), except `customers-active`, whose file name also has the activity window (for example `customers-active-30d_...`):
+
+| Report               | `ExportName` values                                                                                                                                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Activity counts      | `activity-counts`                                                                                                                                                                                            |
+| Top pages            | `top-pages`                                                                                                                                                                                                  |
+| New contacts         | `new-contacts`, `new-contacts-share`                                                                                                                                                                         |
+| Form submissions     | `form-submissions`, `form-submissions-by-form`                                                                                                                                                               |
+| Member registrations | `members-growth`, `members-sign-in-type`, `members-by-role`                                                                                                                                                  |
+| Consents             | `consents-events`, `consents-agreed-contacts`, `consents`, `consents-text-versions`                                                                                                                          |
+| Recipient lists      | `recipient-lists-events`, `recipient-lists-subscribers`, `recipient-lists`, `recipient-lists-status`                                                                                                         |
+| Content inventory    | `content-inventory-types`, `content-inventory-status`, `content-inventory-age`, `content-inventory-oldest`, `content-inventory-workflow`, `content-inventory-unused-reusable`, `content-inventory-languages` |
+| Orders and revenue   | `orders-revenue`, `orders-by-status`, `orders-top-products`                                                                                                                                                  |
+| Customers            | `customers-growth`, `customers-active`, `customers-by-country`, `customers-top-states`, `customers-top-by-revenue`, `customers-top-by-orders`, `customers-top-by-items`                                      |
+| Event log            | `event-log`, `event-log-sources`, `event-log-sources-xperience`, `event-log-sources-custom`, `event-log-codes`, `event-log-users`                                                                            |
 
 ## Data retention
 

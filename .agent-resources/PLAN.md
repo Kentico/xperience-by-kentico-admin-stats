@@ -44,7 +44,7 @@ Design goals:
 
 **Emails**
 
-- Recipient list growth and unsubscribes over time.
+- Recipient list growth and unsubscribes over time. Spec: `.agent-resources/REPORT-11-RECIPIENT-LISTS.md`.
 
 **Content** (useful for administrators and content leads)
 
@@ -131,6 +131,7 @@ Notes:
     - Each report page checks it server side (`Page.UIPermissionEvaluator` / `IUIPermissionEvaluator.Evaluate(StatsPermissions.EXPORT)`) and sends a `CanExport` flag in its client properties. Put this in one shared place (base page class or helper), not per report.
     - Client: `StatsTile` hides "Export CSV" when `CanExport` is false (shared, e.g. context or prop from each template). No disabled button; just hidden.
     - Caveat: CSV is built client side from data the user can already see, so this is a UI guard, not data protection. Say so in `docs/Usage-Guide.md`. Server-side export (a page command returning CSV with `Permission = EXPORT`) only if we later need real protection.
+    - **Export events** (best effort, user decision 2026-10-01): every export raises `AfterExportStatsEvent` through a shared `LOG_EXPORT` command, for audit handlers. The product `AfterExportListingEvent` cannot be raised by libraries. Spec: `.agent-resources/EXPORT-EVENTS.md`.
     - Tests: flag true/false per page; permission declared on the app. Usage guide permission table gets the row.
   - Reference: [UI page permission checks](https://docs.kentico.com/documentation/developers-and-admins/customization/extend-the-administration-interface/ui-pages/ui-page-permission-checks) (define with `UIPermission` on the `ApplicationPage`, evaluate with `UIEvaluatePermission`, `PageCommand.Permission`, `IUIPermissionEvaluator` for client-side flags).
 

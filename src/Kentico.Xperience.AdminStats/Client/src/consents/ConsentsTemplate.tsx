@@ -6,7 +6,7 @@ import { ComboChart } from '../shared/ComboChart';
 import { ComparisonInfoCard } from '../shared/ComparisonInfoCard';
 import { CoverageBarChart, CoverageCaptions } from '../shared/CoverageBarChart';
 import { CoverageTable } from '../shared/CoverageTable';
-import { downloadCsv, toCoverageCsv, toRankedCsv, toTimeSeriesCsv } from '../shared/csv';
+import { toCoverageCsv, toRankedCsv, toTimeSeriesCsv } from '../shared/csv';
 import { DataRetentionNote } from '../shared/DataRetentionNote';
 import { IdSelect } from '../shared/filterControls';
 import { formatPreviousPeriod } from '../shared/format';
@@ -28,6 +28,7 @@ import {
   StatsValueComparison,
   StatsValueSeries,
 } from '../shared/types';
+import { useCsvExport } from '../shared/useCsvExport';
 import { useStatsCommand } from '../shared/useStatsCommand';
 import '../shared/stats.css';
 
@@ -110,6 +111,7 @@ function toFilter(report: ConsentsResult): ConsentsFilter {
 }
 
 export const ConsentsTemplate = (props: ConsentsTemplateProps) => {
+  const saveCsv = useCsvExport();
   const { data: report, isLoading, hasError, load } = useStatsCommand<ConsentsResult, ConsentsFilter>(props.report);
   const [filter, setFilter] = useState<ConsentsFilter>(() => toFilter(props.report));
 
@@ -165,23 +167,25 @@ export const ConsentsTemplate = (props: ConsentsTemplateProps) => {
   const fileSuffix = `${consentSuffix}_${report.from}_${report.to}`;
 
   const exportEventsCsv = () => {
-    downloadCsv(`consents-events${fileSuffix}_${period}.csv`, toTimeSeriesCsv(periods, eventSeries, { includeTotal: false }));
+    saveCsv('consents-events', `consents-events${fileSuffix}_${period}.csv`, toTimeSeriesCsv(periods, eventSeries, { includeTotal: false }));
   };
 
   const exportAgreedCsv = () => {
     // Point-in-time values per period end; no total column (the values do not add up).
-    downloadCsv(
+    saveCsv(
+      'consents-agreed-contacts',
       `consents-agreed-contacts${fileSuffix}_${period}.csv`,
       toTimeSeriesCsv(periods, agreedTableSeries, { includeTotal: false }),
     );
   };
 
   const exportConsentsCsv = () => {
-    downloadCsv(`consents_${report.from}_${report.to}.csv`, toRankedCsv(byConsent.items, consentCaptions, getConsentHref));
+    saveCsv('consents', `consents_${report.from}_${report.to}.csv`, toRankedCsv(byConsent.items, consentCaptions, getConsentHref));
   };
 
   const exportTextsCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'consents-text-versions',
       `consents-text-versions${consentSuffix}_${report.to}.csv`,
       toCoverageCsv(report.textVersions, { label: 'Consent', covered: textCaptions.covered, missing: textCaptions.missing }),
     );

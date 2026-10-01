@@ -21,7 +21,8 @@ namespace Kentico.Xperience.AdminStats.Admin;
 public sealed class NewContactsPage(
     INewContactsService newContactsService,
     TimeProvider clock,
-    IUIPermissionEvaluator permissionEvaluator) : StatsReportPage<NewContactsClientProperties>(permissionEvaluator)
+    IUIPermissionEvaluator permissionEvaluator,
+    IStatsExportEventPublisher exportEventPublisher) : StatsReportPage<NewContactsClientProperties>(permissionEvaluator, exportEventPublisher)
 {
     public const string TEMPLATE_NAME = "@kentico/xperience-admin-stats/NewContacts";
 

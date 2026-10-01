@@ -22,7 +22,8 @@ public sealed class ActivityCountsPage(
     IActivityCountsService activityCountsService,
     IStatsChannelOptionsProvider channelOptionsProvider,
     TimeProvider clock,
-    IUIPermissionEvaluator permissionEvaluator) : StatsReportPage<ActivityCountsClientProperties>(permissionEvaluator)
+    IUIPermissionEvaluator permissionEvaluator,
+    IStatsExportEventPublisher exportEventPublisher) : StatsReportPage<ActivityCountsClientProperties>(permissionEvaluator, exportEventPublisher)
 {
     public const string TEMPLATE_NAME = "@kentico/xperience-admin-stats/ActivityCounts";
 

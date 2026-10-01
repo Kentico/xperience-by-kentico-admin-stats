@@ -12,6 +12,12 @@ import {
 
 export type CsvValue = string | number | null | undefined;
 
+/** CSV text and its number of data rows (header not counted), so an export can be logged with its row count. */
+export interface CsvData {
+  readonly text: string;
+  readonly rowCount: number;
+}
+
 function escapeCell(value: CsvValue): string {
   if (value === null || value === undefined) {
     return '';
@@ -31,8 +37,11 @@ function escapeCell(value: CsvValue): string {
 export function toCsv(
   header: readonly CsvValue[],
   rows: readonly (readonly CsvValue[])[],
-): string {
-  return [header, ...rows].map((row) => row.map(escapeCell).join(',')).join('\r\n');
+): CsvData {
+  return {
+    text: [header, ...rows].map((row) => row.map(escapeCell).join(',')).join('\r\n'),
+    rowCount: rows.length,
+  };
 }
 
 /**
@@ -44,7 +53,7 @@ export function toRankedCsv(
   items: readonly StatsRankedItem[],
   captions: StatsRankedCaptions,
   getAdminHref?: (item: StatsRankedItem) => string | null,
-): string {
+): CsvData {
   const header: CsvValue[] = [
     'Rank',
     captions.label,
@@ -83,7 +92,7 @@ export function toTimeSeriesCsv(
   periods: readonly StatsPeriod[],
   series: readonly StatsSeries[],
   options: { readonly includeTotal?: boolean } = {},
-): string {
+): CsvData {
   const includeTotal = options.includeTotal ?? true;
   const totals = periodTotals(periods, series);
   return toCsv(
@@ -106,7 +115,7 @@ export function toShareCsv(
   labelCaption: string,
   valueCaption: string,
   secondaryValueCaption?: string,
-): string {
+): CsvData {
   const total = slices.reduce((sum, s) => sum + s.value, 0);
   return toCsv(
     [labelCaption, valueCaption, ...(secondaryValueCaption ? [secondaryValueCaption] : []), 'Share (%)'],
@@ -128,7 +137,7 @@ export function toCoverageCsv(
     readonly covered: string;
     readonly missing: string;
   },
-): string {
+): CsvData {
   return toCsv(
     [
       captions.label,
@@ -164,7 +173,7 @@ export function toAgedCsv(
     readonly days: string;
   },
   getAdminHref?: (item: StatsAgedItem) => string | null,
-): string {
+): CsvData {
   return toCsv(
     [
       captions.label,
@@ -188,8 +197,8 @@ export function toAgedCsv(
 }
 
 /** Starts a browser download of CSV text. Adds a BOM so Excel reads UTF-8. */
-export function downloadCsv(fileName: string, csv: string): void {
-  const blob = new Blob(['﻿', csv], { type: 'text/csv;charset=utf-8' });
+export function downloadCsv(fileName: string, csv: CsvData): void {
+  const blob = new Blob(['﻿', csv.text], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -209,6 +218,6 @@ function toChangeCsv(item: StatsRankedItem): CsvValue {
 }
 
 /** Makes a same-origin path absolute, so CSV links work outside the admin. */
-function toAbsoluteUrl(path: string | null): string | null {
+export function toAbsoluteUrl(path: string | null): string | null {
   return path ? new URL(path, window.location.origin).toString() : null;
 }
