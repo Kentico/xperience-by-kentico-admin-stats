@@ -10,7 +10,7 @@ module.exports = (opts, argv) => {
   const baseConfig = (webpackConfigEnv, webpackArgv) =>
     baseWebpackConfig({
       orgName: "kentico",
-      projectName: "xperience-admin-stats",
+      projectName: "xperience-admin-labs-simple-stats",
       webpackConfigEnv,
       argv: webpackArgv,
     });

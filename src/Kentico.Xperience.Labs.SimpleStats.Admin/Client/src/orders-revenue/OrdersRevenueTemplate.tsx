@@ -186,7 +186,7 @@ export const OrdersRevenueTemplate = (props: OrdersRevenueTemplateProps) => {
   const changeHint = `Change compares with the ${formatPreviousPeriod(totals.orders)} (${totals.orders.previousFrom} – ${totals.orders.previousTo}). "New" means no revenue in that period.`;
 
   return (
-    <div className="AdminStats-root">
+    <div className="SimpleStats-root">
       <StatsFilterBar
         filter={filter.range}
         today={props.today}
@@ -213,7 +213,7 @@ export const OrdersRevenueTemplate = (props: OrdersRevenueTemplateProps) => {
         />
       </StatsFilterBar>
 
-      <div className="AdminStats-kpis">
+      <div className="SimpleStats-kpis">
         <ComparisonInfoCard
           caption="Orders"
           tooltip={`Orders created in the selected range (${rangeText}).${filteredHint}`}
@@ -240,7 +240,7 @@ export const OrdersRevenueTemplate = (props: OrdersRevenueTemplateProps) => {
         />
       </div>
 
-      <div className="AdminStats-tiles">
+      <div className="SimpleStats-tiles">
         <StatsTile
           headline="Orders and revenue over time"
           description={`Orders (columns, left axis) and revenue (line, right axis) per ${report.grouping.toLowerCase()}.${filteredHint}`}

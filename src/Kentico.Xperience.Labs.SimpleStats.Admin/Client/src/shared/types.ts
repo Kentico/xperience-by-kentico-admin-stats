@@ -1,6 +1,6 @@
 import type { Colors } from '@kentico/xperience-admin-components';
 
-/** Mirrors `Kentico.Xperience.AdminStats.Shared.StatsGrouping`. */
+/** Mirrors `Kentico.Xperience.Labs.SimpleStats.Admin.Shared.StatsGrouping`. */
 export type StatsGrouping = 'Day' | 'Week' | 'Month';
 
 /** Mirrors `StatsFilter`. Dates are `yyyy-MM-dd` (server date, no time zone). */

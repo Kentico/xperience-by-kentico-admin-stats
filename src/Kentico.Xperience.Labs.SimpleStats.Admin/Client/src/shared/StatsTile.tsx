@@ -56,12 +56,12 @@ export const StatsTile = ({
   let content: ReactNode;
   if (hasError) {
     content = (
-      <div className="AdminStats-error">
+      <div className="SimpleStats-error">
         The report could not be loaded. Try again or change the filters.
       </div>
     );
   } else if (isEmpty) {
-    content = <div className="AdminStats-empty">{emptyMessage}</div>;
+    content = <div className="SimpleStats-empty">{emptyMessage}</div>;
   } else {
     content = view === 'chart' ? renderChart() : renderTable();
   }
@@ -69,9 +69,9 @@ export const StatsTile = ({
   return (
     <Card
       headline={
-        <div className="AdminStats-tileHeader">
+        <div className="SimpleStats-tileHeader">
           <Headline size={HeadlineSize.M}>{headline}</Headline>
-          <div className="AdminStats-tileActions">
+          <div className="SimpleStats-tileActions">
             {headerControls}
             <IconToggleButtons
               items={viewItems}
@@ -94,11 +94,11 @@ export const StatsTile = ({
       description={description}
     >
       <div
-        className={`AdminStats-tileBody${isLoading ? ' AdminStats-tileBody--loading' : ''}`}
+        className={`SimpleStats-tileBody${isLoading ? ' SimpleStats-tileBody--loading' : ''}`}
         aria-busy={isLoading}
       >
         {isLoading && (
-          <div className="AdminStats-loading">
+          <div className="SimpleStats-loading">
             <Spinner />
           </div>
         )}

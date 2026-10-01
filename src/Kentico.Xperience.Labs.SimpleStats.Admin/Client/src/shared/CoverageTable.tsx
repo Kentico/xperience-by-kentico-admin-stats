@@ -41,7 +41,7 @@ export const CoverageTable = ({ items, labelCaption, captions }: CoverageTablePr
   );
 
   return (
-    <div className="AdminStats-tableScroll">
+    <div className="SimpleStats-tableScroll">
       <Table columns={columns} rows={rows} />
     </div>
   );

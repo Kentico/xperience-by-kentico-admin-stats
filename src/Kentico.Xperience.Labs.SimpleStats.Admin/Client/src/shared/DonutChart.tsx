@@ -137,7 +137,7 @@ export const DonutChart = React.memo(function DonutChart({
       id={chartId}
       role="img"
       aria-label={ariaLabel}
-      className="AdminStats-chart AdminStats-chart--donut"
+      className="SimpleStats-chart SimpleStats-chart--donut"
     />
   );
 });

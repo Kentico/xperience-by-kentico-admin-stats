@@ -5,7 +5,7 @@ import '../shared/stats.css';
 
 /** Shown when the role may open Stats (Labs) but has no permission for any report. */
 export const NoReportsTemplate = () => (
-  <div className="AdminStats-root">
+  <div className="SimpleStats-root">
     <Callout
       type={CalloutType.FriendlyWarning}
       placement={CalloutPlacementType.OnDesk}

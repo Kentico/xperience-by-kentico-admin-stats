@@ -42,7 +42,7 @@ export const SnapshotFilterBar = ({
   isLoading = false,
   updatedAt,
 }: SnapshotFilterBarProps) => (
-  <div className="AdminStats-filterBar">
+  <div className="SimpleStats-filterBar">
     {kinds && (
       <OptionToggle
         label={kinds.label}

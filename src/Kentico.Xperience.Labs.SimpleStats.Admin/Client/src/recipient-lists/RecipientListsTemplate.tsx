@@ -264,7 +264,7 @@ export const RecipientListsTemplate = (props: RecipientListsTemplateProps) => {
   };
 
   return (
-    <div className="AdminStats-root">
+    <div className="SimpleStats-root">
       <StatsFilterBar
         filter={filter.range}
         today={props.today}
@@ -295,7 +295,7 @@ export const RecipientListsTemplate = (props: RecipientListsTemplateProps) => {
         )}
       </StatsFilterBar>
 
-      <div className="AdminStats-kpis">
+      <div className="SimpleStats-kpis">
         <ComparisonInfoCard
           caption="Subscriptions"
           tooltip={`Confirmed subscriptions in the selected range (${rangeText}). Subscribing again counts again.${filteredHint}`}
@@ -322,7 +322,7 @@ export const RecipientListsTemplate = (props: RecipientListsTemplateProps) => {
         />
       </div>
 
-      <div className="AdminStats-tiles">
+      <div className="SimpleStats-tiles">
         <StatsTile
           headline="Subscriptions and unsubscriptions"
           description={`Subscriptions and unsubscriptions per ${period}, stacked. ${eventsHint}${filteredHint}`}

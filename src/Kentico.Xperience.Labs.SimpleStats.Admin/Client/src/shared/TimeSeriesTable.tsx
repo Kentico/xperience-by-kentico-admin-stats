@@ -45,7 +45,7 @@ export const TimeSeriesTable = ({ grouping, periods, series, showTotal = true }:
   }, [periods, series, showTotal]);
 
   return (
-    <div className="AdminStats-tableScroll">
+    <div className="SimpleStats-tableScroll">
       <Table columns={columns} rows={rows} />
     </div>
   );

@@ -192,7 +192,7 @@ export const ConsentsTemplate = (props: ConsentsTemplateProps) => {
   };
 
   return (
-    <div className="AdminStats-root">
+    <div className="SimpleStats-root">
       <StatsFilterBar
         filter={filter.range}
         today={props.today}
@@ -223,7 +223,7 @@ export const ConsentsTemplate = (props: ConsentsTemplateProps) => {
         )}
       </StatsFilterBar>
 
-      <div className="AdminStats-kpis">
+      <div className="SimpleStats-kpis">
         <ComparisonInfoCard
           caption="Agreements"
           tooltip={`Agree actions in the selected range (${rangeText}). Agreeing again counts again.${filteredHint}`}
@@ -250,7 +250,7 @@ export const ConsentsTemplate = (props: ConsentsTemplateProps) => {
         />
       </div>
 
-      <div className="AdminStats-tiles">
+      <div className="SimpleStats-tiles">
         <StatsTile
           headline="Agreements and revocations"
           description={`Agreements and revocations per ${period}, stacked. ${eventsHint}${filteredHint}`}

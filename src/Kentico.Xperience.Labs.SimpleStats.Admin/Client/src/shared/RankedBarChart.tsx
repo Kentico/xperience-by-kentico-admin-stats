@@ -264,7 +264,7 @@ export const RankedBarChart = React.memo(function RankedBarChart({
       id={chartId}
       role="img"
       aria-label={ariaLabel}
-      className="AdminStats-chart AdminStats-chart--ranked"
+      className="SimpleStats-chart SimpleStats-chart--ranked"
       style={{ height }}
     />
   );

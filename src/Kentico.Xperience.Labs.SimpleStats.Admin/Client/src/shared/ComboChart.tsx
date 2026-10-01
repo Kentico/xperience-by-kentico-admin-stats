@@ -245,5 +245,5 @@ export const ComboChart = React.memo(function ComboChart({
     };
   }, [chartId, data, columns, line]);
 
-  return <div id={chartId} role="img" aria-label={ariaLabel} className="AdminStats-chart" />;
+  return <div id={chartId} role="img" aria-label={ariaLabel} className="SimpleStats-chart" />;
 });

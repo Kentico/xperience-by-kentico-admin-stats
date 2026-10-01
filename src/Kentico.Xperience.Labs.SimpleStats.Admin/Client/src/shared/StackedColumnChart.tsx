@@ -159,7 +159,7 @@ export const StackedColumnChart = React.memo(function StackedColumnChart({
       id={chartId}
       role="img"
       aria-label={ariaLabel}
-      className="AdminStats-chart"
+      className="SimpleStats-chart"
     />
   );
 });

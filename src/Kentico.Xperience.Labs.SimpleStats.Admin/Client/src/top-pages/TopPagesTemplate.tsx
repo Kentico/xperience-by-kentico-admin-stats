@@ -68,7 +68,7 @@ export const TopPagesTemplate = (props: TopPagesTemplateProps) => {
   };
 
   return (
-    <div className="AdminStats-root">
+    <div className="SimpleStats-root">
       <StatsFilterBar
         filter={filter}
         today={props.today}
@@ -80,7 +80,7 @@ export const TopPagesTemplate = (props: TopPagesTemplateProps) => {
         showGrouping={false}
       />
 
-      <div className="AdminStats-kpis">
+      <div className="SimpleStats-kpis">
         <InfoCard
           caption="Page visits"
           tooltip="All page visit activities in the selected range and channel."

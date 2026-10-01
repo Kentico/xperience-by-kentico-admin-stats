@@ -355,7 +355,7 @@ export const ContentInventoryTemplate = (props: ContentInventoryTemplateProps) =
   const emptyMessage = 'No content items match the selected filters.';
 
   return (
-    <div className="AdminStats-root">
+    <div className="SimpleStats-root">
       <SnapshotFilterBar
         filter={filter}
         onChange={handleFilterChange}
@@ -366,7 +366,7 @@ export const ContentInventoryTemplate = (props: ContentInventoryTemplateProps) =
         updatedAt={report.updatedAt}
       />
 
-      <div className="AdminStats-kpis">
+      <div className="SimpleStats-kpis">
         <InfoCard
           caption="Content items"
           tooltip="Content items that match the filters. Page folders are not counted. Each item counts once, whatever the number of languages."
@@ -430,7 +430,7 @@ export const ContentInventoryTemplate = (props: ContentInventoryTemplateProps) =
         />
       )}
 
-      <div className="AdminStats-tiles">
+      <div className="SimpleStats-tiles">
         <StatsTile
           headline="Oldest content"
           description={`Language variants with the oldest last change, oldest first. Bars over 12 months are highlighted. Click an item to open it. ${listedText(age.oldest.length, report.totalVariants)}`}
@@ -455,7 +455,7 @@ export const ContentInventoryTemplate = (props: ContentInventoryTemplateProps) =
         />
 
         {/* Charts with a predictable, limited size, stacked beside the longer list. */}
-        <div className="AdminStats-tileColumn">
+        <div className="SimpleStats-tileColumn">
           <StatsTile
             headline="Content age"
             description="Language variants by time since the last change of their latest version."
@@ -539,7 +539,7 @@ export const ContentInventoryTemplate = (props: ContentInventoryTemplateProps) =
               getHref={getAdminHref}
             />
           ) : (
-            <div className="AdminStats-empty">{emptyMessage}</div>
+            <div className="SimpleStats-empty">{emptyMessage}</div>
           )
         }
         renderTable={() => (

@@ -208,7 +208,7 @@ export const CoverageBarChart = React.memo(function CoverageBarChart({ items, ca
       id={chartId}
       role="img"
       aria-label={ariaLabel}
-      className="AdminStats-chart AdminStats-chart--ranked"
+      className="SimpleStats-chart SimpleStats-chart--ranked"
       style={{ height }}
     />
   );

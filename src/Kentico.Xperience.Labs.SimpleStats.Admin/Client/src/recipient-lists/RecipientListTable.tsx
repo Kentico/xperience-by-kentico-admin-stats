@@ -51,7 +51,7 @@ export const RecipientListTable = ({ lists, getAdminHref }: RecipientListTablePr
   );
 
   return (
-    <div className="AdminStats-tableScroll">
+    <div className="SimpleStats-tableScroll">
       <Table columns={columns} rows={rows} />
     </div>
   );

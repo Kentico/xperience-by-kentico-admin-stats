@@ -61,7 +61,7 @@ export const AgedItemTable = ({ items, captions, getAdminHref }: AgedItemTablePr
   );
 
   return (
-    <div className="AdminStats-tableScroll">
+    <div className="SimpleStats-tableScroll">
       <Table columns={columns} rows={rows} />
     </div>
   );

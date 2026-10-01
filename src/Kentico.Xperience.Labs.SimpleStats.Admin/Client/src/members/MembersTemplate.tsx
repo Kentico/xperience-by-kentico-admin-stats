@@ -150,7 +150,7 @@ export const MembersTemplate = (props: MembersTemplateProps) => {
   const externalShare = totals.externalShare.current;
 
   return (
-    <div className="AdminStats-root">
+    <div className="SimpleStats-root">
       <StatsFilterBar
         filter={filter}
         today={props.today}
@@ -171,7 +171,7 @@ export const MembersTemplate = (props: MembersTemplateProps) => {
         }
       />
 
-      <div className="AdminStats-kpis">
+      <div className="SimpleStats-kpis">
         <ComparisonInfoCard
           caption="New members"
           tooltip={`Members created in the selected range (${rangeText}) that still exist.`}
@@ -198,7 +198,7 @@ export const MembersTemplate = (props: MembersTemplateProps) => {
         />
       </div>
 
-      <div className="AdminStats-tiles">
+      <div className="SimpleStats-tiles">
         <StatsTile
           headline="Member growth"
           description={`New members per ${period} (columns, left axis) and total members at the end of each ${period} (line, right axis). The table splits new members into internal and external.`}

@@ -96,9 +96,9 @@ export const StatsFilterBar = ({
   };
 
   return (
-    <div className="AdminStats-filterBar">
-      <div className="AdminStats-filterItem">
-        <span className="AdminStats-label">Date range</span>
+    <div className="SimpleStats-filterBar">
+      <div className="SimpleStats-filterItem">
+        <span className="SimpleStats-label">Date range</span>
         <NameToggleButtons
           items={presetItems}
           selectedItemId={presetId}
@@ -107,8 +107,8 @@ export const StatsFilterBar = ({
       </div>
 
       {showCustom && (
-        <div className="AdminStats-filterItem">
-          <span className="AdminStats-label">From – to</span>
+        <div className="SimpleStats-filterItem">
+          <span className="SimpleStats-label">From – to</span>
           <DateTimeRangeInput
             value={{
               from: parseDateOnly(filter.from),
@@ -122,8 +122,8 @@ export const StatsFilterBar = ({
       )}
 
       {showGrouping && (
-        <div className="AdminStats-filterItem">
-          <span className="AdminStats-label">Group by</span>
+        <div className="SimpleStats-filterItem">
+          <span className="SimpleStats-label">Group by</span>
           <NameToggleButtons
             items={groupingItems}
             selectedItemId={filter.grouping}

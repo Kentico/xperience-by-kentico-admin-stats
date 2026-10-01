@@ -218,7 +218,7 @@ export const EventLogTemplate = (props: EventLogTemplateProps) => {
   const changeHint = `Change compares with the ${formatPreviousPeriod(totalComparison)} (${totalComparison.previousFrom} – ${totalComparison.previousTo}). "New" means none in that period.`;
 
   return (
-    <div className="AdminStats-root">
+    <div className="SimpleStats-root">
       <StatsFilterBar
         filter={filter.range}
         today={props.today}
@@ -246,7 +246,7 @@ export const EventLogTemplate = (props: EventLogTemplateProps) => {
         />
       </StatsFilterBar>
 
-      <div className="AdminStats-kpis">
+      <div className="SimpleStats-kpis">
         <ComparisonInfoCard
           caption="Events"
           tooltip={`All events (every type) in the selected range (${rangeText}).`}

@@ -226,7 +226,7 @@ export const CustomersTemplate = (props: CustomersTemplateProps) => {
   const locationHint = `Location is the ${addressName} address on the customer's most recent order in the range.`;
 
   return (
-    <div className="AdminStats-root">
+    <div className="SimpleStats-root">
       <StatsFilterBar
         filter={filter.range}
         today={props.today}
@@ -261,7 +261,7 @@ export const CustomersTemplate = (props: CustomersTemplateProps) => {
         />
       </StatsFilterBar>
 
-      <div className="AdminStats-kpis">
+      <div className="SimpleStats-kpis">
         <ComparisonInfoCard
           caption="New customers"
           tooltip={`Customers created in the selected range (${rangeText}), with or without orders. The order status filter does not apply.`}
@@ -294,7 +294,7 @@ export const CustomersTemplate = (props: CustomersTemplateProps) => {
         />
       </div>
 
-      <div className="AdminStats-tiles">
+      <div className="SimpleStats-tiles">
         <StatsTile
           headline="Customer growth"
           description={`New customers per ${report.grouping.toLowerCase()} (columns, left axis) and total customers at the end of each ${report.grouping.toLowerCase()} (line, right axis). Customers are counted by the date they were created; the order status filter does not apply.`}

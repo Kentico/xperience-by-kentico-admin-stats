@@ -95,7 +95,7 @@ export const RankedTable = ({ items, captions, getAdminHref, showSecondaryLabel 
   );
 
   return (
-    <div className="AdminStats-tableScroll">
+    <div className="SimpleStats-tableScroll">
       <Table columns={columns} rows={rows} />
     </div>
   );
@@ -132,7 +132,7 @@ export function adminLinkCell(columnName: string, text: string, adminHref: strin
     type: CellType.Component,
     columnName,
     component: () => (
-      <div title={text} className="AdminStats-cellLink">
+      <div title={text} className="SimpleStats-cellLink">
         <Link href={adminHref} text={text} target="_self" ellipsis />
       </div>
     ),

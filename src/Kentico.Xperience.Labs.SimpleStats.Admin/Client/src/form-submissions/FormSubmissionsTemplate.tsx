@@ -120,7 +120,7 @@ export const FormSubmissionsTemplate = (props: FormSubmissionsTemplateProps) => 
   const emptyMessage = 'No forms were submitted in the selected range. Try a longer range.';
 
   return (
-    <div className="AdminStats-root">
+    <div className="SimpleStats-root">
       <StatsFilterBar
         filter={filter}
         today={props.today}
@@ -131,7 +131,7 @@ export const FormSubmissionsTemplate = (props: FormSubmissionsTemplateProps) => 
         showChannel={false}
       />
 
-      <div className="AdminStats-kpis">
+      <div className="SimpleStats-kpis">
         <InfoCard
           caption="Submissions"
           tooltip={`All form submissions in the selected range (${rangeText}). Compared with the previous period of the same length, ${comparison.previousFrom} – ${comparison.previousTo}: ${numberFormat.format(comparison.previous)} submissions. ${sourceHint}`}

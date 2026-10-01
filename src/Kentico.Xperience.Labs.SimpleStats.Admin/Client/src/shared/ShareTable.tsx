@@ -52,7 +52,7 @@ export const ShareTable = ({
   }, [slices, secondaryValueCaption, secondaryValueKind]);
 
   return (
-    <div className="AdminStats-tableScroll">
+    <div className="SimpleStats-tableScroll">
       <Table columns={columns} rows={rows} />
     </div>
   );

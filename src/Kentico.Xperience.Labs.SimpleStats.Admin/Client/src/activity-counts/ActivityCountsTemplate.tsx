@@ -93,7 +93,7 @@ export const ActivityCountsTemplate = (props: ActivityCountsTemplateProps) => {
   };
 
   return (
-    <div className="AdminStats-root">
+    <div className="SimpleStats-root">
       <StatsFilterBar
         filter={filter}
         today={props.today}
@@ -104,7 +104,7 @@ export const ActivityCountsTemplate = (props: ActivityCountsTemplateProps) => {
         updatedAt={report.updatedAt}
       />
 
-      <div className="AdminStats-kpis">
+      <div className="SimpleStats-kpis">
         <InfoCard
           caption="Total activities"
           tooltip="All logged contact activities in the selected range and channel."

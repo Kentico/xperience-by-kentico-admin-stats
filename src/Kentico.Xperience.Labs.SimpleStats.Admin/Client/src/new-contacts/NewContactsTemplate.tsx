@@ -96,7 +96,7 @@ export const NewContactsTemplate = (props: NewContactsTemplateProps) => {
   const emptyMessage = 'No contacts were created in the selected range. Try a longer range.';
 
   return (
-    <div className="AdminStats-root">
+    <div className="SimpleStats-root">
       <StatsFilterBar
         filter={filter}
         today={props.today}
@@ -107,7 +107,7 @@ export const NewContactsTemplate = (props: NewContactsTemplateProps) => {
         showChannel={false}
       />
 
-      <div className="AdminStats-kpis">
+      <div className="SimpleStats-kpis">
         <InfoCard
           caption="New contacts"
           tooltip="Contacts created in the selected range that still exist."
@@ -128,7 +128,7 @@ export const NewContactsTemplate = (props: NewContactsTemplateProps) => {
         />
       </div>
 
-      <div className="AdminStats-tiles">
+      <div className="SimpleStats-tiles">
         <StatsTile
           headline="New contacts over time"
           description={`Contacts created per ${trend.grouping.toLowerCase()}, stacked by identified and anonymous.`}

@@ -79,7 +79,7 @@ export const IdSelect = ({ label, allLabel, options, value, onChange }: IdSelect
   };
 
   return (
-    <div className="AdminStats-filterItem AdminStats-filterItem--channel">
+    <div className="SimpleStats-filterItem SimpleStats-filterItem--channel">
       <Select label={label} value={String(value ?? allIdValue)} onChange={handleChange}>
         <MenuItem primaryLabel={allLabel} value={allIdValue} />
         {options.map((option) => (
@@ -110,8 +110,8 @@ export interface OptionToggleProps {
 
 /** Filter bar item with a labeled option toggle, for example a kind or type filter with an "All" item. */
 export const OptionToggle = ({ label, items, value, onChange }: OptionToggleProps) => (
-  <div className="AdminStats-filterItem">
-    <span className="AdminStats-label">{label}</span>
+  <div className="SimpleStats-filterItem">
+    <span className="SimpleStats-label">{label}</span>
     <NameToggleButtons
       items={[...items]}
       selectedItemId={value ?? allOptionId}
@@ -136,8 +136,8 @@ export const RefreshControl = ({ onRefresh, isLoading, updatedAt, actions }: Ref
   const updatedText = updatedAt ? formatUpdatedAt(updatedAt) : null;
 
   return (
-    <div className="AdminStats-filterItem AdminStats-filterItem--refresh">
-      {updatedText && <span className="AdminStats-updated">Updated {updatedText}</span>}
+    <div className="SimpleStats-filterItem SimpleStats-filterItem--refresh">
+      {updatedText && <span className="SimpleStats-updated">Updated {updatedText}</span>}
       {actions}
       <Button
         label="Refresh"
