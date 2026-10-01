@@ -29,7 +29,7 @@ public class StatsReportPageTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(reportPages, Has.Count.EqualTo(10));
+            Assert.That(reportPages, Has.Count.EqualTo(11));
             Assert.That(reportPages.Where(type => !IsStatsReportPage(type)), Is.Empty);
         });
     }

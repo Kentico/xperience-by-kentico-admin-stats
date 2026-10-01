@@ -31,6 +31,7 @@ namespace Kentico.Xperience.AdminStats.Admin;
 [UIPermission(StatsPermissions.CUSTOMERS, StatsPermissions.CUSTOMERS_DISPLAY_NAME)]
 [UIPermission(StatsPermissions.MEMBERS, StatsPermissions.MEMBERS_DISPLAY_NAME)]
 [UIPermission(StatsPermissions.CONSENTS, StatsPermissions.CONSENTS_DISPLAY_NAME)]
+[UIPermission(StatsPermissions.RECIPIENT_LISTS, StatsPermissions.RECIPIENT_LISTS_DISPLAY_NAME)]
 [UIPermission(StatsPermissions.EXPORT, StatsPermissions.EXPORT_DISPLAY_NAME)]
 public sealed class StatsApplicationPage(IUIPermissionEvaluator permissionEvaluator) : ApplicationPage
 {

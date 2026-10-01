@@ -38,6 +38,9 @@ public static class StatsPermissions
     public const string CONSENTS = PREFIX + "Consents";
     public const string CONSENTS_DISPLAY_NAME = "Consents";
 
+    public const string RECIPIENT_LISTS = PREFIX + "RecipientLists";
+    public const string RECIPIENT_LISTS_DISPLAY_NAME = "Recipient lists";
+
     /// <summary>
     /// Shows "Export CSV" in all reports. Not tied to a report page.
     /// </summary>

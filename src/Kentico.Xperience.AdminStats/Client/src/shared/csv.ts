@@ -218,6 +218,6 @@ function toChangeCsv(item: StatsRankedItem): CsvValue {
 }
 
 /** Makes a same-origin path absolute, so CSV links work outside the admin. */
-function toAbsoluteUrl(path: string | null): string | null {
+export function toAbsoluteUrl(path: string | null): string | null {
   return path ? new URL(path, window.location.origin).toString() : null;
 }
