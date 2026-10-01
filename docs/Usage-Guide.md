@@ -31,20 +31,20 @@ Sections have no permission of their own. A section is hidden when the role has 
   - One permission per report. The role sees only the reports it has a permission for. Other reports are hidden from the navigation and return an error if opened by URL.
   - **Export** - shows the **Export CSV** buttons in all reports the role can see. Without it, the buttons are hidden.
 
-| Permission           | Code name                                             |
-| -------------------- | ----------------------------------------------------- |
-| Activity counts      | `Kentico.Xperience.Labs.SimpleStats.ActivityCounts`   |
-| Top pages            | `Kentico.Xperience.Labs.SimpleStats.TopPages`         |
-| New contacts         | `Kentico.Xperience.Labs.SimpleStats.NewContacts`      |
-| Form submissions     | `Kentico.Xperience.Labs.SimpleStats.FormSubmissions`  |
-| Content inventory    | `Kentico.Xperience.Labs.SimpleStats.ContentInventory` |
-| Event log            | `Kentico.Xperience.Labs.SimpleStats.EventLog`         |
-| Orders and revenue   | `Kentico.Xperience.Labs.SimpleStats.OrdersRevenue`    |
-| Customers            | `Kentico.Xperience.Labs.SimpleStats.Customers`        |
-| Member registrations | `Kentico.Xperience.Labs.SimpleStats.Members`          |
-| Consents             | `Kentico.Xperience.Labs.SimpleStats.Consents`         |
-| Recipient lists      | `Kentico.Xperience.Labs.SimpleStats.RecipientLists`   |
-| Export               | `Kentico.Xperience.Labs.SimpleStats.Export`           |
+| Permission           | Code name                      |
+| -------------------- | ------------------------------ |
+| Activity counts      | `SimpleStats.ActivityCounts`   |
+| Top pages            | `SimpleStats.TopPages`         |
+| New contacts         | `SimpleStats.NewContacts`      |
+| Form submissions     | `SimpleStats.FormSubmissions`  |
+| Content inventory    | `SimpleStats.ContentInventory` |
+| Event log            | `SimpleStats.EventLog`         |
+| Orders and revenue   | `SimpleStats.OrdersRevenue`    |
+| Customers            | `SimpleStats.Customers`        |
+| Member registrations | `SimpleStats.Members`          |
+| Consents             | `SimpleStats.Consents`         |
+| Recipient lists      | `SimpleStats.RecipientLists`   |
+| Export               | `SimpleStats.Export`           |
 
 The **Export** permission only hides the buttons. The CSV is built in the browser from the data the report already shows, so a role that can see a report can still copy its numbers. It is not data protection.
 

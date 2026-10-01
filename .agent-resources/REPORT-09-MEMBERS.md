@@ -21,7 +21,7 @@ Extend `seed-members.sql` (keep it re-runnable) or add `seed-member-roles.sql` r
 
 ### Server
 
-1. **Page** `MembersPage`, slug `members`, name "Member registrations", icon `Icons.UserFrame` (or the enum member matching `xp-user-frame`, verify), template `@kentico/xperience-admin-labs-simple-stats/Members`. Parent: **Contacts** section (`StatsContactsSection`), order after existing Contacts reports. Derive from `StatsReportPage<>` (Export flag). Permission `StatsPermissions.MEMBERS` = `Kentico.Xperience.Labs.SimpleStats.Members`, "Member registrations", same pattern (`UIPermission` on app, `UIEvaluatePermission` on page, `PageCommand.Permission`). Nav filtering in `StatsNavigation` must pick it up without special cases (add to its tests).
+1. **Page** `MembersPage`, slug `members`, name "Member registrations", icon `Icons.UserFrame` (or the enum member matching `xp-user-frame`, verify), template `@kentico/xperience-admin-labs-simple-stats/Members`. Parent: **Contacts** section (`StatsContactsSection`), order after existing Contacts reports. Derive from `StatsReportPage<>` (Export flag). Permission `StatsPermissions.MEMBERS` = `SimpleStats.Members`, "Member registrations", same pattern (`UIPermission` on app, `UIEvaluatePermission` on page, `PageCommand.Permission`). Nav filtering in `StatsNavigation` must pick it up without special cases (add to its tests).
 2. **Filter**: shared `StatsFilter` range + grouping; channel normalized to null (members are global). No extra filters. Do not change other reports' cache keys.
 3. **Definitions** (UI hints + usage guide):
    - *New member*: `MemberCreated` in range.

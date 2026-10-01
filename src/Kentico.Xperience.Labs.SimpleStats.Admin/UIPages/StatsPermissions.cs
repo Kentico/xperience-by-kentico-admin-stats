@@ -6,7 +6,7 @@ namespace Kentico.Xperience.Labs.SimpleStats.Admin.UIPages;
 /// </summary>
 public static class StatsPermissions
 {
-    private const string PREFIX = "Kentico.Xperience.Labs.SimpleStats.";
+    private const string PREFIX = "SimpleStats.";
 
     public const string ACTIVITY_COUNTS = PREFIX + "ActivityCounts";
     public const string ACTIVITY_COUNTS_DISPLAY_NAME = "Activity counts";

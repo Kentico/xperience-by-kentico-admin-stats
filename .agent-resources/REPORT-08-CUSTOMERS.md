@@ -26,7 +26,7 @@ Current seed has too few customers and almost no locations for this report. Upda
 
 ### Server (C#)
 
-1. **Page** `CustomersPage`, slug `customers`, name "Customers", order 800, icon = native commerce Customers application icon (find its `UIApplication` icon in admin assemblies, like reports 06/07). Template `@kentico/xperience-admin-labs-simple-stats/Customers`. Permission `StatsPermissions.CUSTOMERS` = `Kentico.Xperience.Labs.SimpleStats.Customers`, "Customers", same pattern as other pages.
+1. **Page** `CustomersPage`, slug `customers`, name "Customers", order 800, icon = native commerce Customers application icon (find its `UIApplication` icon in admin assemblies, like reports 06/07). Template `@kentico/xperience-admin-labs-simple-stats/Customers`. Permission `StatsPermissions.CUSTOMERS` = `SimpleStats.Customers`, "Customers", same pattern as other pages.
 2. **Filter**: wrap `StatsFilter` (range + grouping) like `OrdersRevenueFilter`, plus:
    - optional **order status** (reuse report 07 status options + normalization; extract a shared piece if copying would be needed),
    - **address type**: Billing (default) or Shipping, used only for the location tiles. Unknown value → Billing.

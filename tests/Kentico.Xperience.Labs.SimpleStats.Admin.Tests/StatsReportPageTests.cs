@@ -15,7 +15,19 @@ public class StatsReportPageTests
 
         Assert.That(
             permissions.Select(p => (p.Name, p.DisplayName)),
-            Does.Contain(("Kentico.Xperience.Labs.SimpleStats.Export", "Export")));
+            Does.Contain(("SimpleStats.Export", "Export")));
+    }
+
+    [Test]
+    public void Application_PermissionNames_FitProductMaxLength()
+    {
+        // The admin rejects application permission names longer than 50 characters at startup.
+        var names = typeof(StatsApplicationPage)
+            .GetCustomAttributes(typeof(UIPermissionAttribute), false)
+            .Cast<UIPermissionAttribute>()
+            .Select(p => p.Name);
+
+        Assert.That(names, Has.All.Length.LessThanOrEqualTo(50));
     }
 
     [Test]

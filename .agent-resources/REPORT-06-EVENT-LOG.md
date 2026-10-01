@@ -12,7 +12,7 @@ DB: `mssql2022` docker, DB `xperience-by-kentico-simple-stats`, creds in `exampl
 
 ## Uncommitted work in progress (keep it)
 
-Per-report permissions are done but uncommitted: `UIPages/StatsPermissions.cs`, `[UIPermission]` on `StatsApplicationPage`, `[UIEvaluatePermission]` + `PageCommand.Permission` on each page, `docs/Usage-Guide.md` permission table. Add `EVENT_LOG` (`Kentico.Xperience.Labs.SimpleStats.EventLog`, "Event log") the same way. Do not revert or rework the other pages.
+Per-report permissions are done but uncommitted: `UIPages/StatsPermissions.cs`, `[UIPermission]` on `StatsApplicationPage`, `[UIEvaluatePermission]` + `PageCommand.Permission` on each page, `docs/Usage-Guide.md` permission table. Add `EVENT_LOG` (`SimpleStats.EventLog`, "Event log") the same way. Do not revert or rework the other pages.
 
 ## Scope
 
