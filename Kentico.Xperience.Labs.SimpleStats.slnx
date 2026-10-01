@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/examples/">
+    <Project Path="examples/DancingGoat/DancingGoat.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Kentico.Xperience.Labs.SimpleStats.Admin/Kentico.Xperience.Labs.SimpleStats.Admin.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Kentico.Xperience.Labs.SimpleStats.Admin.Tests/Kentico.Xperience.Labs.SimpleStats.Admin.Tests.csproj" />
+  </Folder>
+</Solution>
