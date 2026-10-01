@@ -22,7 +22,7 @@ Extend `seed-consent-agreements.sql` (keep it re-runnable) so the "older text" t
 
 ### Server
 
-1. **Page** `ConsentsPage`, slug `consents`, name "Consents", icon matching `xp-doc-user` (verify enum member), template `@kentico/xperience-admin-stats/Consents`. Parent: **Contacts** section, order after Member registrations. Derive from `StatsReportPage<>`. Permission `StatsPermissions.CONSENTS` = `Kentico.Xperience.AdminStats.Consents`, "Consents", same pattern as other pages; covered by `StatsNavigation` tests.
+1. **Page** `ConsentsPage`, slug `consents`, name "Consents", icon matching `xp-doc-user` (verify enum member), template `@kentico/xperience-admin-labs-simple-stats/Consents`. Parent: **Contacts** section, order after Member registrations. Derive from `StatsReportPage<>`. Permission `StatsPermissions.CONSENTS` = `SimpleStats.Consents`, "Consents", same pattern as other pages; covered by `StatsNavigation` tests.
 2. **Filter**: wrap `StatsFilter` (range + grouping) like `OrdersRevenueFilter`, plus optional **consent** (All or one consent ID; options from `CMS_Consent` by display name, sent as filter options; unknown ID → All). Channel normalized to null. Do not change other reports' cache keys.
 3. **Definitions** (UI hints + usage guide):
    - *Agreement* / *revocation*: an agree / revoke event (row) in the range. Re-agreeing (for example to a new text) counts again.

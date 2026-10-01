@@ -4,7 +4,7 @@ Fourth report. Adds shared infra that later reports reuse: **dynamic series** ti
 
 ## Why this report next
 
-Checked the local DancingGoat DB (`mssql2022` docker container, DB `xperience-by-kentico-admin-stats`, creds in `examples/DancingGoat/appsettings.json`; `docker exec mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P ... -d xperience-by-kentico-admin-stats -Q "..."`):
+Checked the local DancingGoat DB (`mssql2022` docker container, DB `xperience-by-kentico-simple-stats`, creds in `examples/DancingGoat/appsettings.json`; `docker exec mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P ... -d xperience-by-kentico-simple-stats -Q "..."`):
 
 - 3 forms (`CMS_Form` → `CMS_Class.ClassTableName`): `Form_DancingGoat_CoffeeSampleList`, `Form_Form_2023_09_12_17_45` (Contact Us), `Form_Form_2023_09_15_10_28` (Subscription). **All form data tables have 0 rows.**
 - `OM_Activity` has 570 `bizformsubmit` rows over the last 30 days (`ActivityItemID` = `CMS_Form.FormID`, `ActivityChannelID` set). Generator writes activities only, not form data.
@@ -20,15 +20,15 @@ For visual testing, **seed the local dev DB only** (never code in `src/`): inser
 
 ## Current repo state (after reports 01–03)
 
-- Server `src/Kentico.Xperience.AdminStats/`: `Admin/` pages (copy `NewContactsPage.cs`), `Shared/` (`StatsFilter`, `StatsGrouping`, `StatsPeriods`, `StatsLoadRequest`, `StatsCache`, `StatsChannelOptions`, `StatsRanked` (`StatsRankedBuilder` drops value <= 0), `StatsTimeSeries` (`StatsTimeSeriesBuilder.BuildFixed`, `StatsDailyCount`, `StatsSeriesDefinition`)), `Reports/<Name>/` Models / Repository / ReportBuilder / Service. DI in `AdminStatsWebAdminModule.cs`.
+- Server `src/Kentico.Xperience.Labs.SimpleStats.Admin/`: `UIPages/` pages (copy `NewContactsPage.cs`), `Shared/` (`StatsFilter`, `StatsGrouping`, `StatsPeriods`, `StatsLoadRequest`, `StatsCache`, `StatsChannelOptions`, `StatsRanked` (`StatsRankedBuilder` drops value <= 0), `StatsTimeSeries` (`StatsTimeSeriesBuilder.BuildFixed`, `StatsDailyCount`, `StatsSeriesDefinition`)), `Reports/<Name>/` Models / Repository / ReportBuilder / Service. DI in `SimpleStatsWebAdminModule.cs`.
 - Client `Client/src/shared/`: `StatsFilterBar` (`showGrouping`, `showChannel`), `StatsTile`, `StackedColumnChart`, `RankedBarChart`, `RankedTable`, `DonutChart`, `ShareTable`, `TimeSeriesTable`, `chartTheme.ts`, `csv.ts`, `table.ts`, `timeSeries.ts`, `format.ts`, `dates.ts`, `types.ts`, `useStatsCommand.ts`, `DataRetentionNote`, `stats.css`. Templates in `activity-counts/`, `top-pages/`, `new-contacts/`; export in `entry.tsx`.
-- Tests: `tests/Kentico.Xperience.AdminStats.Tests` (NUnit), `TestDoubles.cs`.
+- Tests: `tests/Kentico.Xperience.Labs.SimpleStats.Admin.Tests` (NUnit), `TestDoubles.cs`.
 
 ## Scope
 
 ### Server (C#)
 
-1. **Page** `FormSubmissionsPage`, slug `form-submissions`, name "Form submissions", order 400, form-like icon (verify in `Icons`), template `@kentico/xperience-admin-stats/FormSubmissions`. Same permission pattern as other pages. No channel (form tables have none) → normalize channel to null for cache key.
+1. **Page** `FormSubmissionsPage`, slug `form-submissions`, name "Form submissions", order 400, form-like icon (verify in `Icons`), template `@kentico/xperience-admin-labs-simple-stats/FormSubmissions`. Same permission pattern as other pages. No channel (form tables have none) → normalize channel to null for cache key.
 2. **Query** (repository), one DB round trip:
    - Read forms: `CMS_Form` join `CMS_Class` → FormID, FormName, FormDisplayName, ClassTableName. Prefer `IInfoProvider<BizFormInfo>` / `DataClassInfoProvider` if simple; verify names.
    - Build one `UNION ALL` statement: per form `SELECT @formIdN AS FormID, CAST(FormInserted AS date) AS [Date], COUNT(*) FROM <table> WHERE FormInserted >= @from AND FormInserted < @toExclusive GROUP BY CAST(FormInserted AS date)`.
@@ -60,8 +60,8 @@ Shareable across customer projects: nothing DancingGoat-specific in `src/`, no h
 
 ## Done when
 
-- `npm run typecheck` + `npm run build` pass in `src/Kentico.Xperience.AdminStats/Client`.
-- `dotnet build` of `Kentico.Xperience.AdminStats.slnx` + `dotnet test` pass; new tests; reports 01–03 tests still pass.
+- `npm run typecheck` + `npm run build` pass in `src/Kentico.Xperience.Labs.SimpleStats.Admin/Client`.
+- `dotnet build` of `Kentico.Xperience.Labs.SimpleStats.slnx` + `dotnet test` pass; new tests; reports 01–03 tests still pass.
 - DancingGoat admin: nav shows 4 reports; form report renders seeded data; filters, toggles, CSV, admin links work; reports 01–03 unchanged. Admin client uses Proxy mode (port 3009): `npm run watch` in Client must run, or rebuild + restart for client changes. Visual check if the app can be run (`docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say not checked.
 - `docs/Usage-Guide.md` updated briefly.
 - Do not commit. Report: files changed, SQL shape, column findings, admin link approach (or why skipped), seed script, what was / was not visually checked.

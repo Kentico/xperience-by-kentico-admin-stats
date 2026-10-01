@@ -1004,7 +1004,7 @@
           "System.IO.Hashing": "8.0.0"
         }
       },
-      "kentico.xperience.adminstats": {
+      "kentico.xperience.labs.simplestats.admin": {
         "type": "Project",
         "dependencies": {
           "Kentico.Xperience.Admin": "[31.9.0, )"

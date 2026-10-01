@@ -25,7 +25,7 @@
     <DefineConstants>$(DefineConstants);SEPARATED_ADMIN</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Kentico.Xperience.AdminStats\Kentico.Xperience.AdminStats.csproj" />
+    <ProjectReference Include="..\..\src\Kentico.Xperience.Labs.SimpleStats.Admin\Kentico.Xperience.Labs.SimpleStats.Admin.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="kentico.xperience.admin" Condition="'$(SeparatedAdmin)' == 'false'" />

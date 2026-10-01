@@ -6,7 +6,7 @@
 --   Subscription        : copies of bizformsubmit activities (last 30 days) + 120 older rows (31-90 days ago)
 --   Contact Us          : 24 rows, only 61-90 days ago -> 0 in the default 30-day range ("least used")
 --
--- Run: docker exec mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "Pass@12345" -d xperience-by-kentico-admin-stats -i /tmp/seed-form-submissions.sql
+-- Run: docker exec mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "Pass@12345" -d xperience-by-kentico-simple-stats -i /tmp/seed-form-submissions.sql
 -- (copy the file first: docker cp .agent-resources/seed-form-submissions.sql mssql2022:/tmp/seed-form-submissions.sql)
 
 SET NOCOUNT ON;

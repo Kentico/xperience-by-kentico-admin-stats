@@ -11,23 +11,23 @@ Second report. Adds the shared **ranked list** infra (server + client) that late
 
 ## Current repo state (after report 01)
 
-- Server: `src/Kentico.Xperience.AdminStats/`
-  - `Admin/StatsApplicationPage.cs` — app, `SECTION_LAYOUT` template, so each child `UIPage` shows in the left nav.
-  - `Admin/ActivityCountsPage.cs` — page pattern to copy: `ConfigureTemplateProperties` returns default report + channels + today; `LOAD` page command takes `StatsLoadRequest`.
+- Server: `src/Kentico.Xperience.Labs.SimpleStats.Admin/`
+  - `UIPages/StatsApplicationPage.cs` — app, `SECTION_LAYOUT` template, so each child `UIPage` shows in the left nav.
+  - `UIPages/ActivityCountsPage.cs` — page pattern to copy: `ConfigureTemplateProperties` returns default report + channels + today; `LOAD` page command takes `StatsLoadRequest`.
   - `Shared/` — `StatsFilter` (+ `Normalize`), `StatsGrouping`, `StatsPeriods`, `StatsLoadRequest`, `StatsCache` (5 min, no dependencies, refresh drops it), `StatsChannelOptions`.
   - `Reports/ActivityCounts/` — Models, Repository (SQL), ReportBuilder (pure logic), Service (cache). Copy this split.
-  - `AdminStatsWebAdminModule.cs` — DI registration.
-- Client: `src/Kentico.Xperience.AdminStats/Client/src/`
+  - `SimpleStatsWebAdminModule.cs` — DI registration.
+- Client: `src/Kentico.Xperience.Labs.SimpleStats.Admin/Client/src/`
   - `shared/` — `StatsFilterBar`, `StatsTile`, `StackedColumnChart`, `chartTheme.ts`, `csv.ts`, `dates.ts`, `types.ts`, `useStatsCommand.ts`, `DataRetentionNote`, `stats.css`.
   - `activity-counts/ActivityCountsTemplate.tsx` — template pattern to copy.
   - `entry.tsx` — export every template here.
-- Tests: `tests/Kentico.Xperience.AdminStats.Tests` (NUnit) — builder + service + filter tests to copy.
+- Tests: `tests/Kentico.Xperience.Labs.SimpleStats.Admin.Tests` (NUnit) — builder + service + filter tests to copy.
 
 ## Scope
 
 ### Server (C#)
 
-1. **Page** `TopPagesPage` under `StatsApplicationPage`, slug `top-pages`, name "Top pages", order 200, template `@kentico/xperience-admin-stats/TopPages`. `[UIEvaluatePermission(SystemPermissions.VIEW)]`, `LOAD` command with `Permission = SystemPermissions.VIEW`, same as report 01.
+1. **Page** `TopPagesPage` under `StatsApplicationPage`, slug `top-pages`, name "Top pages", order 200, template `@kentico/xperience-admin-labs-simple-stats/TopPages`. `[UIEvaluatePermission(SystemPermissions.VIEW)]`, `LOAD` command with `Permission = SystemPermissions.VIEW`, same as report 01.
 2. **Filter**: reuse `StatsFilter` / `StatsLoadRequest`. Grouping is ignored by this report (range only). Do not fork the filter type. If a `Limit` / top-N is needed, keep it a server constant (e.g. 25) for now, not user input.
 3. **Query** (repository): parameterized SQL only. `WHERE ActivityType = @type AND ActivityCreated >= @from AND ActivityCreated < @toExclusive [AND ActivityChannelID = @channelId]`, `GROUP BY` the URL, `SELECT TOP (@limit)` ordered by visits desc then URL. Columns per row: URL, visits `COUNT(*)`, unique contacts `COUNT(DISTINCT ActivityContactID)`, a page title (e.g. `MAX(ActivityTitle)` — verify what the column holds for page visits; generator writes `Page visit '<title>'`, so show the URL as primary label and do not parse the title unless the product stores a clean title somewhere reliable). Also return the total visit count for the range (all URLs, not just top N) so share % is correct.
    - Verify `OM_Activity` column names and types in the running DB or `ActivityInfo` before writing SQL. `ActivityURL` may be `nvarchar(max)`; check whether grouping on it is OK or needs a cast/hash. Say what you found.
@@ -68,8 +68,8 @@ Shareable across real customer projects: no DancingGoat-specific code in `src/`,
 
 ## Done when
 
-- `npm run typecheck` and `npm run build` pass in `src/Kentico.Xperience.AdminStats/Client`.
-- `dotnet build` of `Kentico.Xperience.AdminStats.slnx` and `dotnet test` pass. New builder + service tests.
-- DancingGoat admin: "Stats (Labs)" shows both "Activity counts" and "Top pages" in the nav; top pages filters reload data; chart/table toggle and CSV work; report 01 unchanged. Visual check if the app can be run (see `docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say it was not checked.
+- `npm run typecheck` and `npm run build` pass in `src/Kentico.Xperience.Labs.SimpleStats.Admin/Client`.
+- `dotnet build` of `Kentico.Xperience.Labs.SimpleStats.slnx` and `dotnet test` pass. New builder + service tests.
+- DancingGoat admin: "Simple Stats (Labs)" shows both "Activity counts" and "Top pages" in the nav; top pages filters reload data; chart/table toggle and CSV work; report 01 unchanged. Visual check if the app can be run (see `docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say it was not checked.
 - `docs/Usage-Guide.md` updated briefly.
 - Do not commit. Report: files changed, SQL used, column findings, what was / was not visually checked, anything skipped (e.g. admin links) and why.

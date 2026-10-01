@@ -4,7 +4,7 @@ Fifth report. First **current-state (snapshot)** report: no date range. Audience
 
 ## Why this report next
 
-Checked local DancingGoat DB (`mssql2022` docker, DB `xperience-by-kentico-admin-stats`, creds in `examples/DancingGoat/appsettings.json`; from Git Bash prefix `MSYS_NO_PATHCONV=1 docker exec mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P ... -d xperience-by-kentico-admin-stats -W -Q "..."`):
+Checked local DancingGoat DB (`mssql2022` docker, DB `xperience-by-kentico-simple-stats`, creds in `examples/DancingGoat/appsettings.json`; from Git Bash prefix `MSYS_NO_PATHCONV=1 docker exec mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P ... -d xperience-by-kentico-simple-stats -W -Q "..."`):
 
 - Remaining first-release reports need seeding before anything shows: `EmailLibrary_EmailStatistics` = 0 rows (email summary), `ActivityURLReferrer` = 3 rows (top referrers).
 - Content has real data now, no seeding: 185 `CMS_ContentItem` rows over 29 content types (`CMS_Class.ClassContentTypeType`: Reusable 111, Website 74 incl. Email 7), 195 `CMS_ContentItemLanguageMetadata` rows, languages `en` (185) and `es` (10) → missing translations are visible right away. Statuses: 182 published, 2 draft, 1 in a workflow step (1 workflow exists). 2 channels (website + email).
@@ -12,15 +12,15 @@ Checked local DancingGoat DB (`mssql2022` docker, DB `xperience-by-kentico-admin
 
 ## Current repo state (after reports 01–04)
 
-- Server `src/Kentico.Xperience.AdminStats/`: `Admin/` pages (copy `NewContactsPage.cs`), `Shared/` (`StatsFilter`/`StatsQuery`, `StatsGrouping`, `StatsPeriods`, `StatsLoadRequest`, `StatsCache`, `StatsChannelOptions`, `StatsRanked` (`StatsRankedBuilder`, opt-in keep zeros), `StatsTimeSeries`, `StatsComparison`, `StatsAdminLinks` (`IStatsAdminLinks.GetPath<TPage>`)), `Reports/<Name>/` Models / Repository / ReportBuilder / Service (+ `FormSubmissionsSql`). DI in `AdminStatsWebAdminModule.cs`.
+- Server `src/Kentico.Xperience.Labs.SimpleStats.Admin/`: `UIPages/` pages (copy `NewContactsPage.cs`), `Shared/` (`StatsFilter`/`StatsQuery`, `StatsGrouping`, `StatsPeriods`, `StatsLoadRequest`, `StatsCache`, `StatsChannelOptions`, `StatsRanked` (`StatsRankedBuilder`, opt-in keep zeros), `StatsTimeSeries`, `StatsComparison`, `StatsAdminLinks` (`IStatsAdminLinks.GetPath<TPage>`)), `Reports/<Name>/` Models / Repository / ReportBuilder / Service (+ `FormSubmissionsSql`). DI in `SimpleStatsWebAdminModule.cs`.
 - Client `Client/src/shared/`: `StatsFilterBar` (`showGrouping`, `showChannel`, refresh, `updatedAt`), `StatsTile`, `StackedColumnChart`, `RankedBarChart`, `RankedTable` (admin links), `DonutChart`, `ShareTable`, `TimeSeriesTable`, `adminLinks.ts`, `chartTheme.ts`, `csv.ts`, `table.ts`, `timeSeries.ts`, `format.ts`, `dates.ts`, `types.ts`, `useStatsCommand.ts`, `DataRetentionNote`, `stats.css`. Templates in `activity-counts/`, `top-pages/`, `new-contacts/`, `form-submissions/`; export each in `entry.tsx`.
-- Tests: `tests/Kentico.Xperience.AdminStats.Tests` (NUnit), `TestDoubles.cs`.
+- Tests: `tests/Kentico.Xperience.Labs.SimpleStats.Admin.Tests` (NUnit), `TestDoubles.cs`.
 
 ## Scope
 
 ### Server (C#)
 
-1. **Page** `ContentInventoryPage`, slug `content-inventory`, name "Content inventory", order 500, content-like icon (verify in `Icons`), template `@kentico/xperience-admin-stats/ContentInventory`. Same permission pattern as other pages.
+1. **Page** `ContentInventoryPage`, slug `content-inventory`, name "Content inventory", order 500, content-like icon (verify in `Icons`), template `@kentico/xperience-admin-labs-simple-stats/ContentInventory`. Same permission pattern as other pages.
 2. **Shared snapshot request** (names are suggestions): a small request/filter for reports without a date range, e.g. `StatsSnapshotFilter { ContentKind? / ChannelId? }` + `StatsSnapshotLoadRequest { Filter, Refresh }`, or reuse `StatsLoadRequest` and ignore range/grouping — pick whichever keeps the cache key clean (range must not split the cache for a snapshot report) and say why. Do not change `StatsFilter` behavior for reports 01–04.
 3. **Filter**: content kind — All / Website / Reusable / Email / Headless (from `ClassContentTypeType`; verify the stored values and the `ClassContentTypeType` constants in the API). Optional channel filter only if it is a cheap join (website items → `CMS_WebPageItem.WebPageItemWebsiteChannelID` → channel; email items → email channel); otherwise skip and say so.
 4. **Queries** (repository), parameterized SQL, one DB round trip (multiple result sets OK):
@@ -62,8 +62,8 @@ Shareable across customer projects: nothing DancingGoat-specific in `src/`, no h
 
 ## Done when
 
-- `npm run typecheck` + `npm run build` pass in `src/Kentico.Xperience.AdminStats/Client`.
-- `dotnet build` of `Kentico.Xperience.AdminStats.slnx` + `dotnet test` pass; new tests; reports 01–04 tests still pass.
+- `npm run typecheck` + `npm run build` pass in `src/Kentico.Xperience.Labs.SimpleStats.Admin/Client`.
+- `dotnet build` of `Kentico.Xperience.Labs.SimpleStats.slnx` + `dotnet test` pass; new tests; reports 01–04 tests still pass.
 - DancingGoat admin: nav shows 5 reports; content report renders real data (no seeding); kind filter, toggles, CSV work; reports 01–04 unchanged. Admin client uses Proxy mode (port 3009): `npm run watch` in Client must run, or rebuild + restart for client changes. Visual check if the app can be run (`docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say not checked.
 - `docs/Usage-Guide.md` updated briefly.
 - Do not commit. Report: files changed, SQL shape, column/enum findings, snapshot request decision, admin link approach (or why skipped), what was / was not visually checked.

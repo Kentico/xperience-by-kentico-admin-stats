@@ -11,15 +11,15 @@ Third report. Adds shared **time series** (server) and **share/donut chart** (cl
 
 ## Current repo state (after reports 01 + 02)
 
-- Server `src/Kentico.Xperience.AdminStats/`: `Admin/` pages (`ActivityCountsPage.cs`, `TopPagesPage.cs` — copy pattern), `Shared/` (`StatsFilter`, `StatsGrouping`, `StatsPeriods`, `StatsLoadRequest`, `StatsCache`, `StatsChannelOptions`, `StatsRanked`), `Reports/<Name>/` split into Models / Repository (SQL) / ReportBuilder (pure) / Service (cache). DI in `AdminStatsWebAdminModule.cs`.
+- Server `src/Kentico.Xperience.Labs.SimpleStats.Admin/`: `UIPages/` pages (`ActivityCountsPage.cs`, `TopPagesPage.cs` — copy pattern), `Shared/` (`StatsFilter`, `StatsGrouping`, `StatsPeriods`, `StatsLoadRequest`, `StatsCache`, `StatsChannelOptions`, `StatsRanked`), `Reports/<Name>/` split into Models / Repository (SQL) / ReportBuilder (pure) / Service (cache). DI in `SimpleStatsWebAdminModule.cs`.
 - Client `Client/src/`: `shared/` (`StatsFilterBar` with `showGrouping`, `StatsTile`, `StackedColumnChart`, `RankedBarChart`, `RankedTable`, `chartTheme.ts`, `csv.ts`, `dates.ts`, `format.ts`, `types.ts` incl. `StatsSeries`, `useStatsCommand.ts`, `DataRetentionNote`, `stats.css`), `activity-counts/`, `top-pages/`, `entry.tsx` (export every template).
-- Tests: `tests/Kentico.Xperience.AdminStats.Tests` (NUnit), `TestDoubles.cs`.
+- Tests: `tests/Kentico.Xperience.Labs.SimpleStats.Admin.Tests` (NUnit), `TestDoubles.cs`.
 
 ## Scope
 
 ### Server (C#)
 
-1. **Page** `NewContactsPage` under `StatsApplicationPage`, slug `new-contacts`, name "New contacts", order 300, icon fitting contacts (e.g. `Icons.UserFrame` / verify name in `Icons`), template `@kentico/xperience-admin-stats/NewContacts`. Same permission pattern as report 01 (`[UIEvaluatePermission(SystemPermissions.VIEW)]`, `LOAD` command with `Permission = SystemPermissions.VIEW`). No channel options in client props.
+1. **Page** `NewContactsPage` under `StatsApplicationPage`, slug `new-contacts`, name "New contacts", order 300, icon fitting contacts (e.g. `Icons.UserFrame` / verify name in `Icons`), template `@kentico/xperience-admin-labs-simple-stats/NewContacts`. Same permission pattern as report 01 (`[UIEvaluatePermission(SystemPermissions.VIEW)]`, `LOAD` command with `Permission = SystemPermissions.VIEW`). No channel options in client props.
 2. **Filter**: reuse `StatsFilter` / `StatsLoadRequest`. Channel ignored (normalize it to null for this report so the cache key does not split on it).
 3. **Query** (repository): parameterized SQL only, one aggregate:
    `SELECT CAST(ContactCreated AS date) AS [Date], SUM(CASE WHEN identified THEN 1 ELSE 0 END), SUM(CASE WHEN NOT identified ...) FROM OM_Contact WHERE ContactCreated >= @from AND ContactCreated < @toExclusive GROUP BY CAST(ContactCreated AS date)`.
@@ -65,8 +65,8 @@ Shareable across real customer projects: no DancingGoat-specific code in `src/`,
 
 ## Done when
 
-- `npm run typecheck` and `npm run build` pass in `src/Kentico.Xperience.AdminStats/Client`.
-- `dotnet build` of `Kentico.Xperience.AdminStats.slnx` and `dotnet test` pass. New builder + service tests; report 01/02 tests still pass.
-- DancingGoat admin: "Stats (Labs)" nav shows Activity counts, Top pages, New contacts; filters reload; toggles and CSV work; reports 01/02 unchanged. Admin client runs in Proxy mode (port 3009): `npm run watch` in Client must run, or rebuild + restart the app for client changes. Visual check if the app can be run (see `docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say it was not checked.
+- `npm run typecheck` and `npm run build` pass in `src/Kentico.Xperience.Labs.SimpleStats.Admin/Client`.
+- `dotnet build` of `Kentico.Xperience.Labs.SimpleStats.slnx` and `dotnet test` pass. New builder + service tests; report 01/02 tests still pass.
+- DancingGoat admin: "Simple Stats (Labs)" nav shows Activity counts, Top pages, New contacts; filters reload; toggles and CSV work; reports 01/02 unchanged. Admin client runs in Proxy mode (port 3009): `npm run watch` in Client must run, or rebuild + restart the app for client changes. Visual check if the app can be run (see `docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say it was not checked.
 - `docs/Usage-Guide.md` updated briefly.
 - Do not commit. Report: files changed, SQL used, column findings, whether report 01 builder was refactored, what was / was not visually checked, anything skipped and why.

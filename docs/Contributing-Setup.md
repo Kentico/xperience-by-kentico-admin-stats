@@ -15,7 +15,7 @@ The requirements to setup, develop, and build this project are listed below.
 
 - [Node.js](https://nodejs.org/en/download) LTS or newer
 - [NVM for Windows](https://github.com/coreybutler/nvm-windows) or [NVM for macOS](https://github.com/nvm-sh/nvm) to manage multiple installed versions of Node.js
-- Node.js 24 or newer; see `engines` in `src/Kentico.Xperience.AdminStats/Client/package.json`
+- Node.js 24 or newer; see `engines` in `src/Kentico.Xperience.Labs.SimpleStats.Admin/Client/package.json`
 
 ### C# Editor
 
@@ -47,11 +47,11 @@ documentation on [creating a new database](https://docs.kentico.com/documentatio
 
 ### Admin Customization
 
-`examples/DancingGoat/appsettings.Development.json` runs the Admin customization in Proxy mode, so the admin loads the client from the `npm: watch - Admin/Client` dev server. Keep that task running while DancingGoat runs, or the Stats (Labs) pages will not load. To use the built `Client/dist` bundle instead, remove this section (a rebuild and restart of DancingGoat is then needed to see client changes).
+`examples/DancingGoat/appsettings.Development.json` runs the Admin customization in Proxy mode, so the admin loads the client from the `npm: watch - Admin/Client` dev server. Keep that task running while DancingGoat runs, or the Simple Stats (Labs) pages will not load. To use the built `Client/dist` bundle instead, remove this section (a rebuild and restart of DancingGoat is then needed to see client changes).
 
 ```json
 "CMSAdminClientModuleSettings": {
-  "kentico-xperience-admin-stats": {
+  "kentico-xperience-admin-labs-simple-stats": {
     "Mode": "Proxy",
     "Port": 3009,
     "UseSSL": true
@@ -76,7 +76,7 @@ docker run -d --name mailpit --restart unless-stopped -p 1025:1025 -p 8025:8025 
    - `refactor/` - for restructuring of existing features
    - `fix/` - for bugfixes
 
-1. Run `dotnet format` against the `Kentico.Xperience.AdminStats` solution
+1. Run `dotnet format` against the `Kentico.Xperience.Labs.SimpleStats` solution
 
    > use `dotnet: format` VS Code task.
 

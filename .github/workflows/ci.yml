@@ -23,10 +23,10 @@ jobs:
           global-json-file: global.json
 
       - name: Restore dependencies
-        run: dotnet restore Kentico.Xperience.AdminStats.slnx --locked-mode
+        run: dotnet restore Kentico.Xperience.Labs.SimpleStats.slnx --locked-mode
 
       - name: Run dotnet format
-        run: dotnet format Kentico.Xperience.AdminStats.slnx --exclude ./examples/ --no-restore --verify-no-changes
+        run: dotnet format Kentico.Xperience.Labs.SimpleStats.slnx --exclude ./examples/ --no-restore --verify-no-changes
 
   build_and_test:
     name: Build and Test
@@ -55,7 +55,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: src/Kentico.Xperience.AdminStats/Client/package-lock.json
+          cache-dependency-path: src/Kentico.Xperience.Labs.SimpleStats.Admin/Client/package-lock.json
 
       - name: Install dependencies
         run: |
@@ -69,7 +69,7 @@ jobs:
             --no-restore
 
       - name: Type-check Admin client
-        working-directory: src/Kentico.Xperience.AdminStats/Client
+        working-directory: src/Kentico.Xperience.Labs.SimpleStats.Admin/Client
         run: npm run typecheck
 
       - name: Test Solution
