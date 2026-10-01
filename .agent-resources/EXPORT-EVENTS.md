@@ -25,7 +25,7 @@ The CSV is built and downloaded in the browser only:
 ### Server
 
 1. **Event**: `AfterExportStatsEvent : AsyncEvent<StatsExportEventData>` (public, sealed) in the library's root or `Admin` namespace (pick one, and match the namespace the docs use). Library code can construct it, so give it a public constructor that takes the data. Copy the product's shape so one handler class can handle both events:
-   - `ReportPageTypeName` (string): full type name of the report page, for example `Kentico.Xperience.AdminStats.Admin.ConsentsPage` (like `ListingPageTypeName`).
+   - `ReportPageTypeName` (string): full type name of the report page, for example `Kentico.Xperience.Labs.SimpleStats.Admin.UIPages.ConsentsPage` (like `ListingPageTypeName`).
    - `UserID` (int): the current admin user, or 0 if unknown. Use the same source the product uses (`IAuthenticatedUserAccessor`; verify it is public, else use a public alternative).
    - `Timestamp` (DateTime): server local time, from `TimeProvider` (already injected in pages).
    - `ExportName` (string): a stable ID of the tile / file, for example `consents-events`. The client sends it. Validate it as a short slug (max length, `[a-z0-9-]`) and reject anything else.
@@ -58,7 +58,7 @@ The CSV is built and downloaded in the browser only:
 ## Done when
 
 - `npm run typecheck` and `npm run build` pass in `Client`.
-- `dotnet build` and `dotnet test` pass on `Kentico.Xperience.AdminStats.slnx`, with the new tests.
+- `dotnet build` and `dotnet test` pass on `Kentico.Xperience.Labs.SimpleStats.slnx`, with the new tests.
 - `dotnet format --verify-no-changes` passes. An uncovered switch case throws `ArgumentOutOfRangeException` or returns a handled error state, never a silent default.
 - DancingGoat check, if the app can run: add a temporary handler in `examples/DancingGoat` only (or keep a small sample handler there if it helps developers, and say so) that logs to the event log. Export from 2–3 reports and confirm the event log rows. DancingGoat uses Proxy mode (3009): `npm run watch` must run, else rebuild + restart. If it can't run, say "not checked".
 - Nothing DancingGoat-specific in `src/`. Do not commit.

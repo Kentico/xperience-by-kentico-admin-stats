@@ -27,7 +27,7 @@
 --
 -- Run (Git Bash):
 --   MSYS_NO_PATHCONV=1 docker exec -i mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P '<password>' \
---     -d xperience-by-kentico-admin-stats -b < .agent-resources/seed-recipient-lists.sql
+--     -d xperience-by-kentico-simple-stats -b < .agent-resources/seed-recipient-lists.sql
 
 SET NOCOUNT ON;
 SET QUOTED_IDENTIFIER ON;
@@ -43,7 +43,7 @@ BEGIN TRANSACTION;
 IF NOT EXISTS (SELECT 1 FROM [OM_ContactGroup] WHERE [ContactGroupGUID] = @SeedListGuid)
     INSERT INTO [OM_ContactGroup] ([ContactGroupName], [ContactGroupDisplayName], [ContactGroupDescription], [ContactGroupEnabled],
         [ContactGroupLastModified], [ContactGroupGUID], [ContactGroupIsRecipientList], [ContactGroupIsSegment])
-    VALUES (N'SeedProductNews', N'Product news (seed)', N'SEED recipient list for the admin stats report.', 1, @Now, @SeedListGuid, 1, 0);
+    VALUES (N'SeedProductNews', N'Product news (seed)', N'SEED recipient list for the simple stats report.', 1, @Now, @SeedListGuid, 1, 0);
 
 IF NOT EXISTS (SELECT 1 FROM [EmailLibrary_RecipientListSettings] WHERE [RecipientListSettingsGUID] = @SeedSettingsGuid)
     INSERT INTO [EmailLibrary_RecipientListSettings] ([RecipientListSettingsRecipientListID], [RecipientListSettingsSendUnsubscriptionConfirmationEmail],

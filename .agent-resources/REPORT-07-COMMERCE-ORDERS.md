@@ -4,7 +4,7 @@ Seventh report. Audience: marketers, store managers. PLAN "Later candidates → 
 
 ## Local data (checked 2026-09-30)
 
-DB: `mssql2022` docker, DB `xperience-by-kentico-admin-stats`, creds in `examples/DancingGoat/appsettings.json`. From Git Bash: `MSYS_NO_PATHCONV=1 docker exec mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P ... -d xperience-by-kentico-admin-stats -W -Q "..."`. Package version 31.9.0.
+DB: `mssql2022` docker, DB `xperience-by-kentico-simple-stats`, creds in `examples/DancingGoat/appsettings.json`. From Git Bash: `MSYS_NO_PATHCONV=1 docker exec mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P ... -d xperience-by-kentico-simple-stats -W -Q "..."`. Package version 31.9.0.
 
 - `Commerce_Order`: **0 rows**. Columns: `OrderID`, `OrderGUID`, `OrderNumber` nvarchar, `OrderCreatedWhen` datetime2 NOT NULL, `OrderModifiedWhen`, `OrderOrderStatusID` int NOT NULL, `OrderTotalPrice`/`OrderTotalShipping`/`OrderTotalTax`/`OrderGrandTotal` decimal NULL, `OrderCustomerID` int NOT NULL, `OrderPaymentMethodID` NULL, `OrderPaymentMethodDisplayName`, `OrderShippingMethodID` NULL, `OrderShippingMethodDisplayName`, `OrderShippingMethodPrice` decimal NOT NULL.
 - `Commerce_OrderItem`: 0 rows. `OrderItemOrderID`, `OrderItemSKU`, `OrderItemName` (snapshots, nullable), `OrderItemQuantity`/`OrderItemUnitPrice`/`OrderItemTotalPrice` decimal NULL, `OrderItemTotalTax`, `OrderItemTaxRate` NOT NULL.
@@ -27,7 +27,7 @@ Save as `.agent-resources/seed-commerce-orders.sql`, re-runnable (delete previou
 
 ### Server (C#)
 
-1. **Page** `OrdersRevenuePage` (name suggestion), slug `orders-revenue`, name "Orders and revenue", order 700, icon same as the native commerce Orders application (find its `UIApplication` icon in the admin assemblies, like report 06 did for Event log). Template `@kentico/xperience-admin-stats/OrdersRevenue`. Permission `StatsPermissions.ORDERS_REVENUE` = `Kentico.Xperience.AdminStats.OrdersRevenue`, "Orders and revenue", same pattern as other pages (`UIPermission` on app, `UIEvaluatePermission` on page, `PageCommand.Permission`).
+1. **Page** `OrdersRevenuePage` (name suggestion), slug `orders-revenue`, name "Orders and revenue", order 700, icon same as the native commerce Orders application (find its `UIApplication` icon in the admin assemblies, like report 06 did for Event log). Template `@kentico/xperience-admin-labs-simple-stats/OrdersRevenue`. Permission `StatsPermissions.ORDERS_REVENUE` = `Kentico.Xperience.Labs.SimpleStats.OrdersRevenue`, "Orders and revenue", same pattern as other pages (`UIPermission` on app, `UIEvaluatePermission` on page, `PageCommand.Permission`).
 2. **Filter**: `StatsFilter` range + grouping + optional **order status** (All, or one status ID). Status options come from `Commerce_OrderStatus` sorted by `OrderStatusOrder` (sent to the client as filter options, like channel options). Unknown ID → All. Same wrapping approach as report 06's event type filter (reuse the pattern; do not change 01–06 cache keys).
 3. **Queries** (repository), parameterized, aggregate in SQL, one round trip, current + previous period (`StatsComparison.GetPreviousRange`), range by `OrderCreatedWhen`:
    - Daily orders count + daily revenue (`SUM(ISNULL(OrderGrandTotal,0))`).
@@ -66,8 +66,8 @@ Shareable across customer projects: nothing DancingGoat-specific in `src/`, no h
 
 ## Done when
 
-- `npm run typecheck` + `npm run build` pass in `src/Kentico.Xperience.AdminStats/Client`.
-- `dotnet build` of `Kentico.Xperience.AdminStats.slnx` + `dotnet test` pass; new tests.
+- `npm run typecheck` + `npm run build` pass in `src/Kentico.Xperience.Labs.SimpleStats.Admin/Client`.
+- `dotnet build` of `Kentico.Xperience.Labs.SimpleStats.slnx` + `dotnet test` pass; new tests.
 - DancingGoat admin: nav shows 7 reports; report renders seeded data; status filter, toggles, CSV, links work; reports 01–06 unchanged. Admin client uses Proxy mode (port 3009): `npm run watch` in Client must run, or rebuild + restart for client changes. Visual check if the app can be run (`docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say not checked.
 - `docs/Usage-Guide.md`: report section + permission table row.
 - Do not commit. Report: files changed, SQL shape, commerce API/table stability findings, decimal infra decision, filter decision, admin link approach (or why skipped), seeding done, what was / was not visually checked.

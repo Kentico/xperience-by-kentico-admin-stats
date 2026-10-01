@@ -5,7 +5,7 @@
 --
 -- Run from Git Bash:
 --   docker cp .agent-resources/seed-content-age.sql mssql2022:/tmp/seed-content-age.sql
---   MSYS_NO_PATHCONV=1 docker exec mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P '<password>' -d xperience-by-kentico-admin-stats -i /tmp/seed-content-age.sql
+--   MSYS_NO_PATHCONV=1 docker exec mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P '<password>' -d xperience-by-kentico-simple-stats -i /tmp/seed-content-age.sql
 
 SET NOCOUNT ON;
 

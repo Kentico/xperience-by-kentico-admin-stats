@@ -31,7 +31,7 @@ stages:
             value: true
 
           - name: slnPath
-            value: src/Kentico.Xperience.AdminStats.Libs.slnx
+            value: src/Kentico.Xperience.Labs.SimpleStats.Libs.slnx
 
         steps:
           - task: UseDotNet@2
@@ -43,7 +43,7 @@ stages:
             inputs:
               targetType: inline
               script: |
-                $fileContent = Get-Content -Path 'src/Kentico.Xperience.AdminStats/Client/package.json' -Raw
+                $fileContent = Get-Content -Path 'src/Kentico.Xperience.Labs.SimpleStats.Admin/Client/package.json' -Raw
                 $jsonObject = ConvertFrom-Json -InputObject $fileContent
 
                 # Get the value of engines.node
@@ -96,15 +96,15 @@ stages:
             inputs:
               command: custom
               customCommand: run typecheck
-              workingDir: src/Kentico.Xperience.AdminStats/Client
+              workingDir: src/Kentico.Xperience.Labs.SimpleStats.Admin/Client
 
           - template: steps.yml
             parameters:
               Configuration: $(Configuration)
               artifacts:
                 - Core:
-                  artifactName: "Kentico.Xperience.AdminStats"
-                  projectPath: "src/Kentico.Xperience.AdminStats"
+                  artifactName: "Kentico.Xperience.Labs.SimpleStats.Admin"
+                  projectPath: "src/Kentico.Xperience.Labs.SimpleStats.Admin"
 
   - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
       - stage: PublishNuGetPackages

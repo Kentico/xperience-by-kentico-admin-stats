@@ -4,16 +4,16 @@
 -- Copies existing (not seeded) events to the 120 days before the latest real event day:
 -- uneven daily volume, a few days with no events, error spikes on some days,
 -- system events (no user) and user events kept as in the copied rows.
--- Seeded rows are marked with EventMachineName = 'admin-stats-seed', so re-running replaces them.
+-- Seeded rows are marked with EventMachineName = 'simple-stats-seed', so re-running replaces them.
 -- Stays well under the "Event log size" setting (CMSLogSize), so the product does not trim the log.
 --
 -- Run (Git Bash):
 --   MSYS_NO_PATHCONV=1 docker exec -i mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P '<password>' \
---     -d xperience-by-kentico-admin-stats < .agent-resources/seed-event-log.sql
+--     -d xperience-by-kentico-simple-stats < .agent-resources/seed-event-log.sql
 
 SET NOCOUNT ON;
 
-DECLARE @Marker nvarchar(100) = N'admin-stats-seed';
+DECLARE @Marker nvarchar(100) = N'simple-stats-seed';
 
 DELETE FROM [CMS_EventLog] WHERE [EventMachineName] = @Marker;
 

@@ -4,7 +4,7 @@ Sixth report. Audience: administrators and developers (PLAN "Later candidates �
 
 ## Local data (checked 2026-09-29)
 
-DB: `mssql2022` docker, DB `xperience-by-kentico-admin-stats`, creds in `examples/DancingGoat/appsettings.json`. From Git Bash: `MSYS_NO_PATHCONV=1 docker exec mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P ... -d xperience-by-kentico-admin-stats -W -Q "..."`.
+DB: `mssql2022` docker, DB `xperience-by-kentico-simple-stats`, creds in `examples/DancingGoat/appsettings.json`. From Git Bash: `MSYS_NO_PATHCONV=1 docker exec mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P ... -d xperience-by-kentico-simple-stats -W -Q "..."`.
 
 - `CMS_EventLog`: 918 rows, all on 2026-09-29 (I 832, W 74, E 12). ~28 sources, ~24 codes, 2 users. Top source `CMS.ContentEngine.ContentItemAssetVariantCacheCleaner`.
 - Setting `CMSLogSize` = 10000 (event log size limit; verify meaning = max rows kept, and whether 0 = unlimited, via kentico-docs MCP). Use it in the retention note (read the value, don't hardcode).
@@ -12,13 +12,13 @@ DB: `mssql2022` docker, DB `xperience-by-kentico-admin-stats`, creds in `example
 
 ## Uncommitted work in progress (keep it)
 
-Per-report permissions are done but uncommitted: `Admin/StatsPermissions.cs`, `[UIPermission]` on `StatsApplicationPage`, `[UIEvaluatePermission]` + `PageCommand.Permission` on each page, `docs/Usage-Guide.md` permission table. Add `EVENT_LOG` (`Kentico.Xperience.AdminStats.EventLog`, "Event log") the same way. Do not revert or rework the other pages.
+Per-report permissions are done but uncommitted: `UIPages/StatsPermissions.cs`, `[UIPermission]` on `StatsApplicationPage`, `[UIEvaluatePermission]` + `PageCommand.Permission` on each page, `docs/Usage-Guide.md` permission table. Add `EVENT_LOG` (`Kentico.Xperience.Labs.SimpleStats.EventLog`, "Event log") the same way. Do not revert or rework the other pages.
 
 ## Scope
 
 ### Server (C#)
 
-1. **Page** `EventLogPage`, slug `event-log`, name "Event log", order 600, icon (verify in `Icons`), template `@kentico/xperience-admin-stats/EventLog`. Permission `StatsPermissions.EVENT_LOG`. No channel → normalize channel to null for the cache key.
+1. **Page** `EventLogPage`, slug `event-log`, name "Event log", order 600, icon (verify in `Icons`), template `@kentico/xperience-admin-labs-simple-stats/EventLog`. Permission `StatsPermissions.EVENT_LOG`. No channel → normalize channel to null for the cache key.
 2. **Filter**: reuse `StatsFilter` range + grouping. Add event type filter (All / Information / Warning / Error). Pick the cleanest way without changing reports 01–05 behavior or cache keys: e.g. an `EventLogFilter`/load request that wraps `StatsFilter` + `EventType?`, normalized (unknown → all). Say why.
 3. **Queries** (repository), parameterized SQL, aggregate in SQL, one round trip (multiple result sets OK), current + previous period (`StatsComparison.GetPreviousRange`):
    - Daily counts by `EventType` in range → time series (fixed series I/W/E in stable order, stable colors: error/warning/info). Reuse `StatsTimeSeriesBuilder.BuildFixed` / shared time series.
@@ -53,8 +53,8 @@ Shareable across customer projects: nothing DancingGoat-specific in `src/`, no h
 
 ## Done when
 
-- `npm run typecheck` + `npm run build` pass in `src/Kentico.Xperience.AdminStats/Client`.
-- `dotnet build` of `Kentico.Xperience.AdminStats.slnx` + `dotnet test` pass; new tests.
+- `npm run typecheck` + `npm run build` pass in `src/Kentico.Xperience.Labs.SimpleStats.Admin/Client`.
+- `dotnet build` of `Kentico.Xperience.Labs.SimpleStats.slnx` + `dotnet test` pass; new tests.
 - DancingGoat admin: nav shows 6 reports; event log report renders seeded data; type filter, toggles, CSV, links work; reports 01–05 unchanged. Admin client uses Proxy mode (port 3009): `npm run watch` in Client must run, or rebuild + restart for client changes. Visual check if the app can be run (`docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say not checked.
 - `docs/Usage-Guide.md`: report section + permission table row.
 - Do not commit. Report: files changed, SQL shape, column/constant findings, filter/request decision, ranked-change approach, admin link approach (or why skipped), seeding done, what was / was not visually checked.

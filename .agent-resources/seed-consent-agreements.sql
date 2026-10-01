@@ -21,7 +21,7 @@
 --
 -- Run (Git Bash):
 --   MSYS_NO_PATHCONV=1 docker exec -i mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P '<password>' \
---     -d xperience-by-kentico-admin-stats -b < .agent-resources/seed-consent-agreements.sql
+--     -d xperience-by-kentico-simple-stats -b < .agent-resources/seed-consent-agreements.sql
 
 SET NOCOUNT ON;
 SET QUOTED_IDENTIFIER ON;

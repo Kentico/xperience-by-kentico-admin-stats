@@ -2,7 +2,7 @@
 
 ## Setup
 
-1. Install the `Kentico.Xperience.AdminStats` NuGet package in your Xperience by Kentico web project.
+1. Install the `Kentico.Xperience.Labs.SimpleStats.Admin` NuGet package in your Xperience by Kentico web project.
 2. Run the application. No service registration is needed; the library registers its services and admin UI automatically.
 
 ## Application
@@ -31,20 +31,20 @@ Sections have no permission of their own. A section is hidden when the role has 
   - One permission per report. The role sees only the reports it has a permission for. Other reports are hidden from the navigation and return an error if opened by URL.
   - **Export** - shows the **Export CSV** buttons in all reports the role can see. Without it, the buttons are hidden.
 
-| Permission           | Code name                                       |
-| -------------------- | ----------------------------------------------- |
-| Activity counts      | `Kentico.Xperience.AdminStats.ActivityCounts`   |
-| Top pages            | `Kentico.Xperience.AdminStats.TopPages`         |
-| New contacts         | `Kentico.Xperience.AdminStats.NewContacts`      |
-| Form submissions     | `Kentico.Xperience.AdminStats.FormSubmissions`  |
-| Content inventory    | `Kentico.Xperience.AdminStats.ContentInventory` |
-| Event log            | `Kentico.Xperience.AdminStats.EventLog`         |
-| Orders and revenue   | `Kentico.Xperience.AdminStats.OrdersRevenue`    |
-| Customers            | `Kentico.Xperience.AdminStats.Customers`        |
-| Member registrations | `Kentico.Xperience.AdminStats.Members`          |
-| Consents             | `Kentico.Xperience.AdminStats.Consents`         |
-| Recipient lists      | `Kentico.Xperience.AdminStats.RecipientLists`   |
-| Export               | `Kentico.Xperience.AdminStats.Export`           |
+| Permission           | Code name                                             |
+| -------------------- | ----------------------------------------------------- |
+| Activity counts      | `Kentico.Xperience.Labs.SimpleStats.ActivityCounts`   |
+| Top pages            | `Kentico.Xperience.Labs.SimpleStats.TopPages`         |
+| New contacts         | `Kentico.Xperience.Labs.SimpleStats.NewContacts`      |
+| Form submissions     | `Kentico.Xperience.Labs.SimpleStats.FormSubmissions`  |
+| Content inventory    | `Kentico.Xperience.Labs.SimpleStats.ContentInventory` |
+| Event log            | `Kentico.Xperience.Labs.SimpleStats.EventLog`         |
+| Orders and revenue   | `Kentico.Xperience.Labs.SimpleStats.OrdersRevenue`    |
+| Customers            | `Kentico.Xperience.Labs.SimpleStats.Customers`        |
+| Member registrations | `Kentico.Xperience.Labs.SimpleStats.Members`          |
+| Consents             | `Kentico.Xperience.Labs.SimpleStats.Consents`         |
+| Recipient lists      | `Kentico.Xperience.Labs.SimpleStats.RecipientLists`   |
+| Export               | `Kentico.Xperience.Labs.SimpleStats.Export`           |
 
 The **Export** permission only hides the buttons. The CSV is built in the browser from the data the report already shows, so a role that can see a report can still copy its numbers. It is not data protection.
 
@@ -236,25 +236,25 @@ Time-based reports use the server date. Results of all reports are cached for 5 
 
 ## Audit CSV exports
 
-After every **Export CSV**, the library raises `AfterExportStatsEvent` (`Kentico.Xperience.AdminStats.Admin`). It works like the product's [`AfterExportListingEvent`](https://docs.kentico.com/documentation/developers-and-admins/customization/extend-the-administration-interface/ui-pages/reference-ui-page-templates/listing-ui-page-template/export-listing-data#run-custom-code-after-an-export): handlers implement `IAsyncEventHandler<AfterExportStatsEvent>` (`CMS.Base`), run as singletons and cannot change or cancel the export.
+After every **Export CSV**, the library raises `AfterExportStatsEvent` (`Kentico.Xperience.Labs.SimpleStats.Admin.UIPages`). It works like the product's [`AfterExportListingEvent`](https://docs.kentico.com/documentation/developers-and-admins/customization/extend-the-administration-interface/ui-pages/reference-ui-page-templates/listing-ui-page-template/export-listing-data#run-custom-code-after-an-export): handlers implement `IAsyncEventHandler<AfterExportStatsEvent>` (`CMS.Base`), run as singletons and cannot change or cancel the export.
 
 `asyncEvent.Data` (`StatsExportEventData`) has:
 
-| Property             | Description                                                                                       |
-| -------------------- | ------------------------------------------------------------------------------------------------- |
-| `ReportPageTypeName` | Full type name of the report page, for example `Kentico.Xperience.AdminStats.Admin.ConsentsPage`. |
-| `UserID`             | The administration user who exported, or 0 if unknown.                                            |
-| `Timestamp`          | Time of the export, server local time.                                                            |
-| `ExportName`         | Stable ID of the tile, for example `consents-events`. See the list below.                         |
-| `FileName`           | Name of the downloaded file, for example `consents-events_2026-09-01_2026-09-30_day.csv`.         |
-| `RowCount`           | Data rows in the file, not counting the header.                                                   |
+| Property             | Description                                                                                                     |
+| -------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `ReportPageTypeName` | Full type name of the report page, for example `Kentico.Xperience.Labs.SimpleStats.Admin.UIPages.ConsentsPage`. |
+| `UserID`             | The administration user who exported, or 0 if unknown.                                                          |
+| `Timestamp`          | Time of the export, server local time.                                                                          |
+| `ExportName`         | Stable ID of the tile, for example `consents-events`. See the list below.                                       |
+| `FileName`           | Name of the downloaded file, for example `consents-events_2026-09-01_2026-09-30_day.csv`.                       |
+| `RowCount`           | Data rows in the file, not counting the header.                                                                 |
 
 Example handler that writes to the event log:
 
 ```csharp
 using CMS.Base;
 
-using Kentico.Xperience.AdminStats.Admin;
+using Kentico.Xperience.Labs.SimpleStats.Admin.UIPages;
 
 using Microsoft.Extensions.Logging;
 

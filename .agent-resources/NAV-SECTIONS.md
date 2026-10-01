@@ -33,12 +33,12 @@ Section icons: pick fitting `Icons.*` (e.g. match the native app categories); se
 
 ## Requirements
 
-- New section pages in `src/Kentico.Xperience.AdminStats/Admin/` (e.g. `StatsContactsSection`, ... or one file `StatsSections.cs` — follow existing one-page-per-file style). Report pages change `parentType` only; slugs, names, templates, permissions unchanged.
+- New section pages in `src/Kentico.Xperience.Labs.SimpleStats.Admin/UIPages/` (e.g. `StatsContactsSection`, ... or one file `StatsSections.cs` — follow existing one-page-per-file style). Report pages change `parentType` only; slugs, names, templates, permissions unchanged.
 - The application page's default route should land on the first section → its first report (verify it works two levels deep).
 - **Permissions**: sections have no permission of their own; per-report permissions unchanged. Verify in the app/by reading the product code:
   1. Role with only e.g. `Customers` permission: nav shows only Commerce > Customers; opening the app / Commerce section lands on Customers, not a 403 on Orders and revenue. If `GetDefaultRoute` receives unfiltered routes, override in a shared base section class that picks the first route the user may open (`IUIPermissionEvaluator`), no hardcoded slugs.
   2. Sections whose children are all denied are hidden (or explain what the product does).
-- Links: all internal links must still resolve — `IStatsAdminLinks`, `IPageLinkGenerator.GetPath<T>()`, client `PagePath`, any hardcoded `admin-stats/...` paths in client, tests or docs. Grep for them.
+- Links: all internal links must still resolve — `IStatsAdminLinks`, `IPageLinkGenerator.GetPath<T>()`, client `PagePath`, any hardcoded `simple-stats/...` paths in client, tests or docs. Grep for them.
 - Tests: update any tests touching page registration/paths; add tests for any permission-aware default route logic.
 - `docs/Usage-Guide.md`: describe sections + which report is where. README if it mentions nav.
 - Follow `dotnet format`. If it inserts a throw into a switch, a case is uncovered: keep a throw (`ArgumentOutOfRangeException`, see `Shared/StatsPeriods.cs`) or return a handled error state — never a silent default.

@@ -1,12 +1,12 @@
-# Xperience by Kentico Labs: Admin Stats
+# Xperience by Kentico Labs: Simple Stats
 
 Planning notes for a Kentico Labs extension that shows basic charts and tables about Xperience by Kentico data in the administration UI.
 
 ## Naming
 
-- **Title:** Xperience by Kentico Labs: Admin Stats
-- **Repo:** `xperience-by-kentico-admin-stats`
-- **NuGet package:** `Kentico.Xperience.AdminStats` (follows `Kentico.Xperience.ContentModelGraph`)
+- **Title:** Xperience by Kentico Labs: Simple Stats
+- **Repo:** `xperience-by-kentico-simple-stats`
+- **NuGet package:** `Kentico.Xperience.Labs.SimpleStats.Admin`
 - **Admin application name:** Stats (Labs)
 
 ## Scope
@@ -119,15 +119,15 @@ Notes:
 - Reference: the Community Portal reporting admin UI (`CommunityStatsLayoutTemplate.tsx` in the `Kentico/community-portal` repo), linked from the Admin Design Components README.
 - Stats should have their own application permissions to help administrators limit who has access to the information
 - **Permission per report page.** Today `StatsApplicationPage` declares only `SystemPermissions.VIEW`, and every report page checks VIEW. Change to one custom permission per report page:
-  - Declare each permission on the application page with `[UIPermission("<name>", "<display name>")]`, for example `Kentico.Xperience.AdminStats.ActivityCounts` / "Activity counts". These show up in **Role management** for the Stats (Labs) application.
+  - Declare each permission on the application page with `[UIPermission("<name>", "<display name>")]`, for example `Kentico.Xperience.Labs.SimpleStats.ActivityCounts` / "Activity counts". These show up in **Role management** for the Stats (Labs) application.
   - Keep `[UIPermission(SystemPermissions.VIEW)]` for access to the application itself.
   - Restrict each report page with `[UIEvaluatePermission("<name>")]`. It must be one of the permissions declared on the application, or it cannot be assigned to roles.
   - Set the same permission on each page's `LOAD` command (`[PageCommand(Permission = "<name>")]`) so the data can't be read without it.
-  - Keep permission names as constants in one class (e.g. `StatsPermissions`), with a stable `Kentico.Xperience.AdminStats.` prefix.
+  - Keep permission names as constants in one class (e.g. `StatsPermissions`), with a stable `Kentico.Xperience.Labs.SimpleStats.` prefix.
   - Verify: roles without a report permission get 403 on that page. Reports are grouped in section pages (Contacts, Content, Commerce, System; `.agent-resources/NAV-SECTIONS.md`). Decompiled 31.9 code shows the product does not filter nav or default routes by permission, so `StatsNavigation` hides denied reports and empty sections and lands on the first allowed report, or on the hidden "No reports available" page. Verified in DancingGoat 2026-09-30 with test users: View only; View + New contacts; View + New contacts + Customers. Opening a denied report by URL shows the product's "Access Denied" page. Export permission hides "Export CSV" in all reports (verified same day).
   - Update `docs/Usage-Guide.md` with the permission list and how to assign them in Role management.
   - **Export permission.** One app-wide permission guards "Export CSV" in every report, separate from the report permissions:
-    - `StatsPermissions.EXPORT` = `Kentico.Xperience.AdminStats.Export`, "Export", declared on `StatsApplicationPage` with `[UIPermission]`.
+    - `StatsPermissions.EXPORT` = `Kentico.Xperience.Labs.SimpleStats.Export`, "Export", declared on `StatsApplicationPage` with `[UIPermission]`.
     - Each report page checks it server side (`Page.UIPermissionEvaluator` / `IUIPermissionEvaluator.Evaluate(StatsPermissions.EXPORT)`) and sends a `CanExport` flag in its client properties. Put this in one shared place (base page class or helper), not per report.
     - Client: `StatsTile` hides "Export CSV" when `CanExport` is false (shared, e.g. context or prop from each template). No disabled button; just hidden.
     - Caveat: CSV is built client side from data the user can already see, so this is a UI guard, not data protection. Say so in `docs/Usage-Guide.md`. Server-side export (a page command returning CSV with `Permission = EXPORT`) only if we later need real protection.

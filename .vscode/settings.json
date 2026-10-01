@@ -31,11 +31,11 @@
     "editor.defaultFormatter": "ms-dotnettools.csharp"
   },
 
-  "dotnet.defaultSolution": "Kentico.Xperience.AdminStats.slnx",
-  "dotnet.solution.autoOpen": "Kentico.Xperience.AdminStats.slnx",
+  "dotnet.defaultSolution": "Kentico.Xperience.Labs.SimpleStats.slnx",
+  "dotnet.solution.autoOpen": "Kentico.Xperience.Labs.SimpleStats.slnx",
 
   "eslint.workingDirectories": [
-    "./src/Kentico.Xperience.AdminStats/Client"
+    "./src/Kentico.Xperience.Labs.SimpleStats.Admin/Client"
   ],
 
   "files.associations": {

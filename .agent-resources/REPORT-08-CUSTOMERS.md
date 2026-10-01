@@ -4,7 +4,7 @@ Eighth report. Audience: marketers, store managers. PLAN "Later candidates → O
 
 ## Local data (checked 2026-09-30)
 
-DB: `mssql2022` docker, DB `xperience-by-kentico-admin-stats`, creds in `examples/DancingGoat/appsettings.json`. From Git Bash: `MSYS_NO_PATHCONV=1 docker exec -i mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P '<password>' -d xperience-by-kentico-admin-stats -W < file.sql`. Package version 31.9.0.
+DB: `mssql2022` docker, DB `xperience-by-kentico-simple-stats`, creds in `examples/DancingGoat/appsettings.json`. From Git Bash: `MSYS_NO_PATHCONV=1 docker exec -i mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P '<password>' -d xperience-by-kentico-simple-stats -W < file.sql`. Package version 31.9.0.
 
 - `Commerce_Customer` (26 rows, seeded by `seed-commerce-orders.sql`): `CustomerID`, `CustomerGUID`, `CustomerMemberID` NULL, `CustomerCreatedWhen` datetime2 NOT NULL, `CustomerFirstName`/`LastName`/`Email`/`Phone` NULL.
 - `Commerce_CustomerAddress` (1 row): saved addresses per customer, `CustomerAddressCountryID`/`StateID` NULL. Not a reliable location source.
@@ -26,7 +26,7 @@ Current seed has too few customers and almost no locations for this report. Upda
 
 ### Server (C#)
 
-1. **Page** `CustomersPage`, slug `customers`, name "Customers", order 800, icon = native commerce Customers application icon (find its `UIApplication` icon in admin assemblies, like reports 06/07). Template `@kentico/xperience-admin-stats/Customers`. Permission `StatsPermissions.CUSTOMERS` = `Kentico.Xperience.AdminStats.Customers`, "Customers", same pattern as other pages.
+1. **Page** `CustomersPage`, slug `customers`, name "Customers", order 800, icon = native commerce Customers application icon (find its `UIApplication` icon in admin assemblies, like reports 06/07). Template `@kentico/xperience-admin-labs-simple-stats/Customers`. Permission `StatsPermissions.CUSTOMERS` = `Kentico.Xperience.Labs.SimpleStats.Customers`, "Customers", same pattern as other pages.
 2. **Filter**: wrap `StatsFilter` (range + grouping) like `OrdersRevenueFilter`, plus:
    - optional **order status** (reuse report 07 status options + normalization; extract a shared piece if copying would be needed),
    - **address type**: Billing (default) or Shipping, used only for the location tiles. Unknown value → Billing.
@@ -72,8 +72,8 @@ Shareable across customer projects: nothing DancingGoat-specific in `src/`, no h
 
 ## Done when
 
-- `npm run typecheck` + `npm run build` pass in `src/Kentico.Xperience.AdminStats/Client`.
-- `dotnet build` of `Kentico.Xperience.AdminStats.slnx` + `dotnet test` pass; new tests. Run `dotnet format` on changed projects.
+- `npm run typecheck` + `npm run build` pass in `src/Kentico.Xperience.Labs.SimpleStats.Admin/Client`.
+- `dotnet build` of `Kentico.Xperience.Labs.SimpleStats.slnx` + `dotnet test` pass; new tests. Run `dotnet format` on changed projects.
 - DancingGoat admin: nav shows 8 reports; report renders seeded data; filters, rank-by switch, toggles, CSV, links work; reports 01–07 unchanged. Admin client uses Proxy mode (port 3009): `npm run watch` in Client must run, or rebuild + restart for client changes. Visual check if the app can be run (`docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say not checked.
 - `docs/Usage-Guide.md`: report section + permission table row. README report list if it has one.
 - Do not commit. Report back (concise): files changed, SQL shape, definitions chosen, shared infra added/changed, admin link approach (or why skipped), seeding done, what was / was not visually checked, open questions.

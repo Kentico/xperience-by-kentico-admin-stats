@@ -4,7 +4,7 @@ Ninth report. Audience: marketers, site owners with member areas. PLAN "Later ca
 
 ## Local data (checked 2026-09-30)
 
-DB: `mssql2022` docker, DB `xperience-by-kentico-admin-stats`, creds in `examples/DancingGoat/appsettings.json`. Run SQL from Git Bash: `MSYS_NO_PATHCONV=1 docker exec -i mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P '<password>' -d xperience-by-kentico-admin-stats -W < file.sql`. Package 31.9.0.
+DB: `mssql2022` docker, DB `xperience-by-kentico-simple-stats`, creds in `examples/DancingGoat/appsettings.json`. Run SQL from Git Bash: `MSYS_NO_PATHCONV=1 docker exec -i mssql2022 /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P '<password>' -d xperience-by-kentico-simple-stats -W < file.sql`. Package 31.9.0.
 
 - `CMS_Member` (147 rows, seeded by `.agent-resources/seed-members.sql`, re-runnable): `MemberID`, `MemberEmail` (unique, NULL), `MemberName` (unique, NULL), `MemberEnabled` bit, `MemberCreated` datetime2 NOT NULL, `MemberGuid`, `MemberIsExternal` bit, `MemberPassword`, `MemberSecurityStamp`. Created Jul 5 – Sep 29; 12 disabled, 17 external.
 - `CMS_MemberRole` / `CMS_MemberRoleMember`: 0 rows (see Seeding).
@@ -21,7 +21,7 @@ Extend `seed-members.sql` (keep it re-runnable) or add `seed-member-roles.sql` r
 
 ### Server
 
-1. **Page** `MembersPage`, slug `members`, name "Member registrations", icon `Icons.UserFrame` (or the enum member matching `xp-user-frame`, verify), template `@kentico/xperience-admin-stats/Members`. Parent: **Contacts** section (`StatsContactsSection`), order after existing Contacts reports. Derive from `StatsReportPage<>` (Export flag). Permission `StatsPermissions.MEMBERS` = `Kentico.Xperience.AdminStats.Members`, "Member registrations", same pattern (`UIPermission` on app, `UIEvaluatePermission` on page, `PageCommand.Permission`). Nav filtering in `StatsNavigation` must pick it up without special cases (add to its tests).
+1. **Page** `MembersPage`, slug `members`, name "Member registrations", icon `Icons.UserFrame` (or the enum member matching `xp-user-frame`, verify), template `@kentico/xperience-admin-labs-simple-stats/Members`. Parent: **Contacts** section (`StatsContactsSection`), order after existing Contacts reports. Derive from `StatsReportPage<>` (Export flag). Permission `StatsPermissions.MEMBERS` = `Kentico.Xperience.Labs.SimpleStats.Members`, "Member registrations", same pattern (`UIPermission` on app, `UIEvaluatePermission` on page, `PageCommand.Permission`). Nav filtering in `StatsNavigation` must pick it up without special cases (add to its tests).
 2. **Filter**: shared `StatsFilter` range + grouping; channel normalized to null (members are global). No extra filters. Do not change other reports' cache keys.
 3. **Definitions** (UI hints + usage guide):
    - *New member*: `MemberCreated` in range.

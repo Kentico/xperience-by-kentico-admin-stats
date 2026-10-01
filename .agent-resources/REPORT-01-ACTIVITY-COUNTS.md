@@ -11,12 +11,12 @@ First report. Also builds the shared server + client infrastructure that later r
 
 ## Current repo state
 
-- `src/Kentico.Xperience.AdminStats/` — `AdminStatsWebAdminModule.cs` registers client module `kentico` / `xperience-admin-stats`. Template names will be `@kentico/xperience-admin-stats/<Name>` (React export `<Name>Template`).
+- `src/Kentico.Xperience.Labs.SimpleStats.Admin/` — `SimpleStatsWebAdminModule.cs` registers client module `kentico` / `xperience-admin-labs-simple-stats`. Template names will be `@kentico/xperience-admin-labs-simple-stats/<Name>` (React export `<Name>Template`).
 - `Client/src/entry.tsx` — empty; every template must be exported here.
 - Client deps: `@kentico/xperience-admin-base` + `-components` 31.9.0. `@amcharts/amcharts5` 5.20.6 is already installed transitively (dep of admin-components). Add it as an explicit dependency at that same version.
 - **amCharts is NOT a webpack external** (`@kentico/xperience-webpack-config` externals: `@kentico/xperience-admin-*`, react, react-dom, react-router*, i18next). So it gets bundled. PLAN.md's "no extra bundle size" claim is wrong. Just import only the modules you need (`amcharts5`, `amcharts5/xy`).
 - `examples/DancingGoat` already has a project reference to the library. `.vscode/tasks.json` has npm build/watch + dotnet watch DancingGoat tasks.
-- Tests: `tests/Kentico.Xperience.AdminStats.Tests` (NUnit).
+- Tests: `tests/Kentico.Xperience.Labs.SimpleStats.Admin.Tests` (NUnit).
 
 ## Scope
 
@@ -67,7 +67,7 @@ Shareable across real customer projects: no DancingGoat-specific code in `src/`,
 
 ## Done when
 
-- `npm run typecheck` and `npm run build` pass in `src/Kentico.Xperience.AdminStats/Client`.
-- `dotnet build` of `Kentico.Xperience.AdminStats.slnx` and `dotnet test` pass.
+- `npm run typecheck` and `npm run build` pass in `src/Kentico.Xperience.Labs.SimpleStats.Admin/Client`.
+- `dotnet build` of `Kentico.Xperience.Labs.SimpleStats.slnx` and `dotnet test` pass.
 - DancingGoat admin shows "Stats (Labs)" app with the report; filters reload data; chart/table toggle and CSV work. Visual check if the app can be run (see `docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say it was not checked.
 - `docs/Usage-Guide.md` updated briefly.
