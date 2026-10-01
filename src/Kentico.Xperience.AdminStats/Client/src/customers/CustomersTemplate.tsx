@@ -10,7 +10,7 @@ import {
   rawAmountNote,
 } from '../shared/commerce';
 import { ComparisonInfoCard } from '../shared/ComparisonInfoCard';
-import { downloadCsv, toRankedCsv, toTimeSeriesCsv } from '../shared/csv';
+import { toRankedCsv, toTimeSeriesCsv } from '../shared/csv';
 import { DataRetentionNote } from '../shared/DataRetentionNote';
 import { OptionToggle } from '../shared/filterControls';
 import { formatPreviousPeriod } from '../shared/format';
@@ -30,6 +30,7 @@ import {
   StatsValueComparison,
   StatsValueSeries,
 } from '../shared/types';
+import { useCsvExport } from '../shared/useCsvExport';
 import { useStatsCommand } from '../shared/useStatsCommand';
 import { TopCustomersRankBy, TopCustomersTile } from './TopCustomersTile';
 import '../shared/stats.css';
@@ -130,6 +131,7 @@ function toLocationCaptions(label: string, previousPeriod: string): StatsRankedC
 }
 
 export const CustomersTemplate = (props: CustomersTemplateProps) => {
+  const saveCsv = useCsvExport();
   const { data: report, isLoading, hasError, load } = useStatsCommand<CustomersResult, CustomersFilter>(
     props.report,
   );
@@ -175,7 +177,8 @@ export const CustomersTemplate = (props: CustomersTemplateProps) => {
   const fileSuffix = `${statusSuffix}_${addressName}_${report.from}_${report.to}`;
 
   const exportGrowthCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'customers-growth',
       `customers-growth_${report.from}_${report.to}_${report.grouping.toLowerCase()}.csv`,
       toTimeSeriesCsv(periods, growthSeries, { includeTotal: false }),
     );
@@ -183,24 +186,26 @@ export const CustomersTemplate = (props: CustomersTemplateProps) => {
 
   const exportActiveCsv = () => {
     // Point-in-time values per period end; no total column (the values do not add up).
-    downloadCsv(
+    saveCsv(
+      'customers-active',
       `customers-active-${report.activityWindowDays}d${statusSuffix}_${report.from}_${report.to}_${report.grouping.toLowerCase()}.csv`,
       toTimeSeriesCsv(periods, activeTableSeries, { includeTotal: false }),
     );
   };
 
   const exportCountriesCsv = () => {
-    downloadCsv(`customers-by-country${fileSuffix}.csv`, toRankedCsv(byCountry.items, countryCaptions));
+    saveCsv('customers-by-country', `customers-by-country${fileSuffix}.csv`, toRankedCsv(byCountry.items, countryCaptions));
   };
 
   const exportStatesCsv = () => {
-    downloadCsv(`customers-top-states${fileSuffix}.csv`, toRankedCsv(topStates.items, stateCaptions));
+    saveCsv('customers-top-states', `customers-top-states${fileSuffix}.csv`, toRankedCsv(topStates.items, stateCaptions));
   };
 
   const exportTopCustomersCsv = (rankBy: TopCustomersRankBy, result: StatsRankedResult, captions: StatsRankedCaptions) => {
     const raw = (caption: string | undefined, kind: string | undefined) =>
       caption && kind === 'Amount' ? `${caption} ${rawAmountNote}` : caption;
-    downloadCsv(
+    saveCsv(
+      `customers-top-by-${rankBy}`,
       `customers-top-by-${rankBy}${statusSuffix}_${result.from}_${result.to}.csv`,
       toRankedCsv(
         result.items,

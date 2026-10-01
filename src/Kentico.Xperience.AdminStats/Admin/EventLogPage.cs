@@ -21,7 +21,8 @@ public sealed class EventLogPage(
     IEventLogReportService eventLogReportService,
     IPageLinkGenerator pageLinkGenerator,
     TimeProvider clock,
-    IUIPermissionEvaluator permissionEvaluator) : StatsReportPage<EventLogClientProperties>(permissionEvaluator)
+    IUIPermissionEvaluator permissionEvaluator,
+    IStatsExportEventPublisher exportEventPublisher) : StatsReportPage<EventLogClientProperties>(permissionEvaluator, exportEventPublisher)
 {
     public const string TEMPLATE_NAME = "@kentico/xperience-admin-stats/EventLog";
 

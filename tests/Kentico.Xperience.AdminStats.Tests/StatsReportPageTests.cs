@@ -1,5 +1,6 @@
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.AdminStats.Admin;
+using Kentico.Xperience.AdminStats.Shared;
 
 namespace Kentico.Xperience.AdminStats.Tests;
 
@@ -75,13 +76,19 @@ public class StatsReportPageTests
         }
     }
 
+    private sealed class NoOpExportEventPublisher : IStatsExportEventPublisher
+    {
+        public Task<bool> Publish(Type reportPageType, StatsExportLogRequest? request, CancellationToken cancellationToken) =>
+            Task.FromResult(true);
+    }
+
     private sealed class TestClientProperties : StatsReportClientProperties
     {
         public bool ReportConfigured { get; set; }
     }
 
     private sealed class TestReportPage(IUIPermissionEvaluator permissionEvaluator)
-        : StatsReportPage<TestClientProperties>(permissionEvaluator)
+        : StatsReportPage<TestClientProperties>(permissionEvaluator, new NoOpExportEventPublisher())
     {
         protected override Task<TestClientProperties> ConfigureReportProperties(TestClientProperties properties)
         {

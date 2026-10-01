@@ -1,7 +1,7 @@
 import { InfoCard } from '@kentico/xperience-admin-components';
 import React, { useState } from 'react';
 
-import { downloadCsv, toRankedCsv } from '../shared/csv';
+import { toRankedCsv } from '../shared/csv';
 import { DataRetentionNote } from '../shared/DataRetentionNote';
 import { formatShare, numberFormat } from '../shared/format';
 import { RankedBarChart } from '../shared/RankedBarChart';
@@ -14,6 +14,7 @@ import {
   StatsRankedCaptions,
   StatsRankedResult,
 } from '../shared/types';
+import { useCsvExport } from '../shared/useCsvExport';
 import { useStatsCommand } from '../shared/useStatsCommand';
 import '../shared/stats.css';
 
@@ -37,6 +38,7 @@ function toFilter(report: StatsRankedResult): StatsFilter {
 }
 
 export const TopPagesTemplate = (props: TopPagesTemplateProps) => {
+  const saveCsv = useCsvExport();
   const { data: report, isLoading, hasError, load } =
     useStatsCommand<StatsRankedResult>(props.report);
   const [filter, setFilter] = useState<StatsFilter>(() => toFilter(props.report));
@@ -58,7 +60,8 @@ export const TopPagesTemplate = (props: TopPagesTemplateProps) => {
       : 'Pages by visits.';
 
   const exportCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'top-pages',
       `top-pages_${report.from}_${report.to}.csv`,
       toRankedCsv(report.items, captions),
     );

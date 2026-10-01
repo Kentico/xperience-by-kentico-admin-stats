@@ -21,7 +21,8 @@ public sealed class OrdersRevenuePage(
     IOrdersRevenueService ordersRevenueService,
     IPageLinkGenerator pageLinkGenerator,
     TimeProvider clock,
-    IUIPermissionEvaluator permissionEvaluator) : StatsReportPage<OrdersRevenueClientProperties>(permissionEvaluator)
+    IUIPermissionEvaluator permissionEvaluator,
+    IStatsExportEventPublisher exportEventPublisher) : StatsReportPage<OrdersRevenueClientProperties>(permissionEvaluator, exportEventPublisher)
 {
     public const string TEMPLATE_NAME = "@kentico/xperience-admin-stats/OrdersRevenue";
 

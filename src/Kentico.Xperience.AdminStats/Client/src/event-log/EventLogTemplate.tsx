@@ -8,7 +8,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { toAdminHref } from '../shared/adminLinks';
 import { ComparisonInfoCard } from '../shared/ComparisonInfoCard';
-import { downloadCsv, toRankedCsv, toTimeSeriesCsv } from '../shared/csv';
+import { toRankedCsv, toTimeSeriesCsv } from '../shared/csv';
 import { DataRetentionNote } from '../shared/DataRetentionNote';
 import { allOptionId, OptionToggle } from '../shared/filterControls';
 import { formatPreviousPeriod, numberFormat } from '../shared/format';
@@ -28,6 +28,7 @@ import {
   StatsSeries,
   StatsTimeSeriesResult,
 } from '../shared/types';
+import { useCsvExport } from '../shared/useCsvExport';
 import { useStatsCommand } from '../shared/useStatsCommand';
 import { TopSourcesTile } from './TopSourcesTile';
 import '../shared/stats.css';
@@ -132,6 +133,7 @@ function retentionMessage(limit: number | null): string {
 }
 
 export const EventLogTemplate = (props: EventLogTemplateProps) => {
+  const saveCsv = useCsvExport();
   const { data: report, isLoading, hasError, load } = useStatsCommand<
     EventLogResult,
     EventLogFilter
@@ -190,7 +192,8 @@ export const EventLogTemplate = (props: EventLogTemplateProps) => {
   const totalFor = (type: string) => report.totals.find((t) => t.eventType === type);
 
   const exportTrendCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'event-log',
       `event-log${typeSuffix}_${trend.from}_${trend.to}_${trend.grouping.toLowerCase()}.csv`,
       toTimeSeriesCsv(trend.periods, series),
     );
@@ -202,7 +205,8 @@ export const EventLogTemplate = (props: EventLogTemplateProps) => {
     captions: StatsRankedCaptions,
     getHref?: (item: StatsRankedItem) => string | null,
   ) => {
-    downloadCsv(
+    saveCsv(
+      `event-log-${name}`,
       `event-log-${name}${typeSuffix}_${result.from}_${result.to}.csv`,
       toRankedCsv(result.items, captions, getHref),
     );

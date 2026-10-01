@@ -24,7 +24,8 @@ public sealed class TopPagesPage(
     ITopPagesService topPagesService,
     IStatsChannelOptionsProvider channelOptionsProvider,
     TimeProvider clock,
-    IUIPermissionEvaluator permissionEvaluator) : StatsReportPage<TopPagesClientProperties>(permissionEvaluator)
+    IUIPermissionEvaluator permissionEvaluator,
+    IStatsExportEventPublisher exportEventPublisher) : StatsReportPage<TopPagesClientProperties>(permissionEvaluator, exportEventPublisher)
 {
     public const string TEMPLATE_NAME = "@kentico/xperience-admin-stats/TopPages";
 

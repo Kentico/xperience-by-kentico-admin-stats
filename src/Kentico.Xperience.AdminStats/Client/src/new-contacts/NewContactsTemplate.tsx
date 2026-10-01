@@ -1,7 +1,7 @@
 import { InfoCard } from '@kentico/xperience-admin-components';
 import React, { useMemo, useState } from 'react';
 
-import { downloadCsv, toShareCsv, toTimeSeriesCsv } from '../shared/csv';
+import { toShareCsv, toTimeSeriesCsv } from '../shared/csv';
 import { DataRetentionNote } from '../shared/DataRetentionNote';
 import { DonutChart } from '../shared/DonutChart';
 import { formatShare, numberFormat } from '../shared/format';
@@ -17,6 +17,7 @@ import {
   StatsShareSlice,
   StatsTimeSeriesResult,
 } from '../shared/types';
+import { useCsvExport } from '../shared/useCsvExport';
 import { useStatsCommand } from '../shared/useStatsCommand';
 import '../shared/stats.css';
 
@@ -49,6 +50,7 @@ function toFilter(report: NewContactsResult): StatsFilter {
 }
 
 export const NewContactsTemplate = (props: NewContactsTemplateProps) => {
+  const saveCsv = useCsvExport();
   const { data: report, isLoading, hasError, load } =
     useStatsCommand<NewContactsResult>(props.report);
   const [filter, setFilter] = useState<StatsFilter>(() => toFilter(props.report));
@@ -76,14 +78,16 @@ export const NewContactsTemplate = (props: NewContactsTemplateProps) => {
   );
 
   const exportTrendCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'new-contacts',
       `new-contacts_${trend.from}_${trend.to}_${trend.grouping.toLowerCase()}.csv`,
       toTimeSeriesCsv(trend.periods, series),
     );
   };
 
   const exportShareCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'new-contacts-share',
       `new-contacts-share_${trend.from}_${trend.to}.csv`,
       toShareCsv(slices, 'Segment', 'Contacts'),
     );

@@ -12,7 +12,6 @@ import { AgedItemCaptions, AgedItemTable, toDaysRankedItems } from '../shared/Ag
 import { CoverageBarChart, CoverageCaptions } from '../shared/CoverageBarChart';
 import { CoverageTable } from '../shared/CoverageTable';
 import {
-  downloadCsv,
   toAgedCsv,
   toCoverageCsv,
   toRankedCsv,
@@ -35,6 +34,7 @@ import {
   StatsShareSlice,
   StatsSnapshotFilter,
 } from '../shared/types';
+import { useCsvExport } from '../shared/useCsvExport';
 import { useStatsCommand } from '../shared/useStatsCommand';
 import '../shared/stats.css';
 
@@ -209,6 +209,7 @@ function statusValue(report: ContentInventoryResult, key: string): number {
 }
 
 export const ContentInventoryTemplate = (props: ContentInventoryTemplateProps) => {
+  const saveCsv = useCsvExport();
   const { data: report, isLoading, hasError, load } = useStatsCommand<
     ContentInventoryResult,
     StatsSnapshotFilter
@@ -292,35 +293,40 @@ export const ContentInventoryTemplate = (props: ContentInventoryTemplateProps) =
   const fileSuffix = `${(report.kind ?? 'all').toLowerCase()}${report.channelId ? `_channel-${report.channelId}` : ''}`;
 
   const exportContentTypesCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'content-inventory-types',
       `content-inventory-types_${fileSuffix}.csv`,
       toRankedCsv(contentTypes, contentTypeCaptions, getAdminHref),
     );
   };
 
   const exportStatusCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'content-inventory-status',
       `content-inventory-status_${fileSuffix}.csv`,
       toShareCsv(statusSlices, 'Status', 'Language variants'),
     );
   };
 
   const exportAgeCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'content-inventory-age',
       `content-inventory-age_${fileSuffix}.csv`,
       toShareCsv(ageSlices, ageCaptions.label, ageCaptions.value),
     );
   };
 
   const exportOldestCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'content-inventory-oldest',
       `content-inventory-oldest_${fileSuffix}.csv`,
       toAgedCsv(age.oldest, oldestCaptions, getAgedHref),
     );
   };
 
   const exportWorkflowCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'content-inventory-workflow',
       `content-inventory-workflow_${fileSuffix}.csv`,
       toAgedCsv(workflow.items, workflowCaptions, getAgedHref),
     );
@@ -328,12 +334,13 @@ export const ContentInventoryTemplate = (props: ContentInventoryTemplateProps) =
 
   const exportUnusedCsv = () => {
     if (unused) {
-      downloadCsv(`content-inventory-unused-reusable.csv`, toAgedCsv(unused.items, unusedCaptions, getAgedHref));
+      saveCsv('content-inventory-unused-reusable', `content-inventory-unused-reusable.csv`, toAgedCsv(unused.items, unusedCaptions, getAgedHref));
     }
   };
 
   const exportCoverageCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'content-inventory-languages',
       `content-inventory-languages_${fileSuffix}.csv`,
       toCoverageCsv(report.languageCoverage, {
         label: 'Language',

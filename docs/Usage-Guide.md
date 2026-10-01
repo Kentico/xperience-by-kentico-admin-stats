@@ -211,6 +211,72 @@ The event log keeps at most the number of events in **Settings → System → Ev
 
 Time-based reports use the server date. Results of all reports are cached for 5 minutes, so new activities, contacts, submissions, content changes, events, orders, customers, members and consent agreements can take a few minutes to appear. Select **Refresh** to load the latest numbers.
 
+## Audit CSV exports
+
+After every **Export CSV**, the library raises `AfterExportStatsEvent` (`Kentico.Xperience.AdminStats.Admin`). It works like the product's [`AfterExportListingEvent`](https://docs.kentico.com/documentation/developers-and-admins/customization/extend-the-administration-interface/ui-pages/reference-ui-page-templates/listing-ui-page-template/export-listing-data#run-custom-code-after-an-export): handlers implement `IAsyncEventHandler<AfterExportStatsEvent>` (`CMS.Base`), run as singletons and cannot change or cancel the export.
+
+`asyncEvent.Data` (`StatsExportEventData`) has:
+
+| Property             | Description                                                                                       |
+| -------------------- | ------------------------------------------------------------------------------------------------- |
+| `ReportPageTypeName` | Full type name of the report page, for example `Kentico.Xperience.AdminStats.Admin.ConsentsPage`. |
+| `UserID`             | The administration user who exported, or 0 if unknown.                                            |
+| `Timestamp`          | Time of the export, server local time.                                                            |
+| `ExportName`         | Stable ID of the tile, for example `consents-events`. See the list below.                         |
+| `FileName`           | Name of the downloaded file, for example `consents-events_2026-09-01_2026-09-30_day.csv`.         |
+| `RowCount`           | Data rows in the file, not counting the header.                                                   |
+
+Example handler that writes to the event log:
+
+```csharp
+using CMS.Base;
+
+using Kentico.Xperience.AdminStats.Admin;
+
+using Microsoft.Extensions.Logging;
+
+public class StatsExportAuditHandler(ILogger<StatsExportAuditHandler> logger) : IAsyncEventHandler<AfterExportStatsEvent>
+{
+    public Task HandleAsync(AfterExportStatsEvent asyncEvent, CancellationToken cancellationToken)
+    {
+        var data = asyncEvent.Data;
+        logger.LogInformation(
+            new EventId(0, "EXPORT"),
+            "User {UserID} exported {RowCount} rows of '{ExportName}' ({FileName}) from {ReportPage} at {Timestamp}.",
+            data.UserID, data.RowCount, data.ExportName, data.FileName, data.ReportPageTypeName, data.Timestamp);
+
+        return Task.CompletedTask;
+    }
+}
+```
+
+Register it in `Program.cs`:
+
+```csharp
+builder.Services.AddEventHandler<AfterExportStatsEvent, StatsExportAuditHandler>();
+```
+
+One handler class can implement both `IAsyncEventHandler<AfterExportListingEvent>` and `IAsyncEventHandler<AfterExportStatsEvent>` to audit listing and stats exports in one place. Register it once per event.
+
+A handler exception is logged and does not fail the export. Handlers run one after another; one failing does not stop the others.
+
+**Best effort.** The CSV is built in the browser. After the download starts, the browser reports the export to the server (the `LOG_EXPORT` page command, which needs the **Export** permission and the report permission). The event is an audit signal, not data protection: a user who can see a report can copy its data without exporting, and a modified browser can skip or fake the report. The filter used for the export is not part of the event; `FileName` has the main filter values (dates, grouping, selected IDs).
+
+`ExportName` is the file-name prefix (the part before the first `_`), except `customers-active`, whose file name also has the activity window (for example `customers-active-30d_...`):
+
+| Report               | `ExportName` values                                                                                                                                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Activity counts      | `activity-counts`                                                                                                                                                                                            |
+| Top pages            | `top-pages`                                                                                                                                                                                                  |
+| New contacts         | `new-contacts`, `new-contacts-share`                                                                                                                                                                         |
+| Form submissions     | `form-submissions`, `form-submissions-by-form`                                                                                                                                                               |
+| Member registrations | `members-growth`, `members-sign-in-type`, `members-by-role`                                                                                                                                                  |
+| Consents             | `consents-events`, `consents-agreed-contacts`, `consents`, `consents-text-versions`                                                                                                                          |
+| Content inventory    | `content-inventory-types`, `content-inventory-status`, `content-inventory-age`, `content-inventory-oldest`, `content-inventory-workflow`, `content-inventory-unused-reusable`, `content-inventory-languages` |
+| Orders and revenue   | `orders-revenue`, `orders-by-status`, `orders-top-products`                                                                                                                                                  |
+| Customers            | `customers-growth`, `customers-active`, `customers-by-country`, `customers-top-states`, `customers-top-by-revenue`, `customers-top-by-orders`, `customers-top-by-items`                                      |
+| Event log            | `event-log`, `event-log-sources`, `event-log-sources-xperience`, `event-log-sources-custom`, `event-log-codes`, `event-log-users`                                                                            |
+
 ## Data retention
 
 Contact and activity cleanup (configured in **Settings**) deletes old data. A drop in older periods can mean data was deleted, not that activity went down.

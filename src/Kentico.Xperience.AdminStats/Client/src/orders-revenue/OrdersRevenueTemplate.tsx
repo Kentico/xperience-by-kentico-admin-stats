@@ -11,7 +11,7 @@ import {
   toRawCsvSeries,
 } from '../shared/commerce';
 import { ComparisonInfoCard } from '../shared/ComparisonInfoCard';
-import { downloadCsv, toRankedCsv, toShareCsv, toTimeSeriesCsv } from '../shared/csv';
+import { toRankedCsv, toShareCsv, toTimeSeriesCsv } from '../shared/csv';
 import { DataRetentionNote } from '../shared/DataRetentionNote';
 import { DonutChart } from '../shared/DonutChart';
 
@@ -33,6 +33,7 @@ import {
   StatsValueComparison,
   StatsValueSeries,
 } from '../shared/types';
+import { useCsvExport } from '../shared/useCsvExport';
 import { useStatsCommand } from '../shared/useStatsCommand';
 import '../shared/stats.css';
 
@@ -96,6 +97,7 @@ function toFilter(report: OrdersRevenueResult): OrdersRevenueFilter {
 
 
 export const OrdersRevenueTemplate = (props: OrdersRevenueTemplateProps) => {
+  const saveCsv = useCsvExport();
   const { data: report, isLoading, hasError, load } = useStatsCommand<
     OrdersRevenueResult,
     OrdersRevenueFilter
@@ -153,21 +155,24 @@ export const OrdersRevenueTemplate = (props: OrdersRevenueTemplateProps) => {
   );
 
   const exportTrendCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'orders-revenue',
       `orders-revenue${statusSuffix}_${report.from}_${report.to}_${report.grouping.toLowerCase()}.csv`,
       toTimeSeriesCsv(periods, trendSeries.map(toRawCsvSeries), { includeTotal: false }),
     );
   };
 
   const exportStatusCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'orders-by-status',
       `orders-by-status_${report.from}_${report.to}.csv`,
       toShareCsv(slices, 'Status', 'Orders', `Revenue ${rawAmountNote}`),
     );
   };
 
   const exportProductsCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'orders-top-products',
       `orders-top-products${statusSuffix}_${topProducts.from}_${topProducts.to}.csv`,
       toRankedCsv(topProducts.items, {
         ...productCaptions,

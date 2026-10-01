@@ -1,7 +1,7 @@
 import { InfoCard } from '@kentico/xperience-admin-components';
 import React, { useMemo, useState } from 'react';
 
-import { downloadCsv, toTimeSeriesCsv } from '../shared/csv';
+import { toTimeSeriesCsv } from '../shared/csv';
 import { DataRetentionNote } from '../shared/DataRetentionNote';
 import { numberFormat } from '../shared/format';
 import { StackedColumnChart } from '../shared/StackedColumnChart';
@@ -15,6 +15,7 @@ import {
   StatsPeriod,
   StatsSeries,
 } from '../shared/types';
+import { useCsvExport } from '../shared/useCsvExport';
 import { useStatsCommand } from '../shared/useStatsCommand';
 import '../shared/stats.css';
 
@@ -56,6 +57,7 @@ function toFilter(report: ActivityCountsResult): StatsFilter {
 }
 
 export const ActivityCountsTemplate = (props: ActivityCountsTemplateProps) => {
+  const saveCsv = useCsvExport();
   const { data: report, isLoading, hasError, load } =
     useStatsCommand<ActivityCountsResult>(props.report);
   const [filter, setFilter] = useState<StatsFilter>(() => toFilter(props.report));
@@ -83,7 +85,8 @@ export const ActivityCountsTemplate = (props: ActivityCountsTemplateProps) => {
   const rangeText = `${report.from} – ${report.to}`;
 
   const exportCsv = () => {
-    downloadCsv(
+    saveCsv(
+      'activity-counts',
       `activity-counts_${report.from}_${report.to}_${report.grouping.toLowerCase()}.csv`,
       toTimeSeriesCsv(report.periods, chartSeries),
     );
