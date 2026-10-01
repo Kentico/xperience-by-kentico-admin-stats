@@ -4,7 +4,9 @@
 
 ## Description
 
-This project is a Kentico Labs example that shows basic charts about your Xperience by Kentico data in the administration.
+Admin Stats gives administrators and marketers a focused view of what’s happening across their Xperience by Kentico application. It brings predefined charts and summaries for contacts, emails, content, commerce, and system events into the administration, making trends easier to spot without building reports from scratch.
+
+This is a Kentico Labs project design to bring helpful, targeted, lightweight reporting, not a fully featured reporting solution.
 
 ### Screenshots
 
