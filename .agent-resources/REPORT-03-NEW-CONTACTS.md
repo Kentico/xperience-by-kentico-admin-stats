@@ -67,6 +67,6 @@ Shareable across real customer projects: no DancingGoat-specific code in `src/`,
 
 - `npm run typecheck` and `npm run build` pass in `src/Kentico.Xperience.Labs.SimpleStats.Admin/Client`.
 - `dotnet build` of `Kentico.Xperience.Labs.SimpleStats.slnx` and `dotnet test` pass. New builder + service tests; report 01/02 tests still pass.
-- DancingGoat admin: "Stats (Labs)" nav shows Activity counts, Top pages, New contacts; filters reload; toggles and CSV work; reports 01/02 unchanged. Admin client runs in Proxy mode (port 3009): `npm run watch` in Client must run, or rebuild + restart the app for client changes. Visual check if the app can be run (see `docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say it was not checked.
+- DancingGoat admin: "Simple Stats (Labs)" nav shows Activity counts, Top pages, New contacts; filters reload; toggles and CSV work; reports 01/02 unchanged. Admin client runs in Proxy mode (port 3009): `npm run watch` in Client must run, or rebuild + restart the app for client changes. Visual check if the app can be run (see `docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say it was not checked.
 - `docs/Usage-Guide.md` updated briefly.
 - Do not commit. Report: files changed, SQL used, column findings, whether report 01 builder was refactored, what was / was not visually checked, anything skipped and why.

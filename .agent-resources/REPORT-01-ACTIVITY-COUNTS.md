@@ -22,7 +22,7 @@ First report. Also builds the shared server + client infrastructure that later r
 
 ### Server (C#)
 
-1. **Admin application** "Stats (Labs)" (`UIApplication`), own category or `BaseApplicationCategories.DIGITAL_MARKETING`, icon `Icons.Graph` or similar. Declare app permissions with standard `UIPermission` / `SystemPermissions.VIEW` so admins can limit who sees it (PLAN: "Stats should have their own application permissions").
+1. **Admin application** "Simple Stats (Labs)" (`UIApplication`), own category or `BaseApplicationCategories.DIGITAL_MARKETING`, icon `Icons.Graph` or similar. Declare app permissions with standard `UIPermission` / `SystemPermissions.VIEW` so admins can limit who sees it (PLAN: "Stats should have their own application permissions").
 2. **Page** for this report under the app (use a single dashboard page for now; later reports become more pages or tiles). `Page<TClientProperties>` with custom template.
 3. **Shared query model**: `StatsFilter { DateTime From; DateTime To; Grouping (Day|Week|Month); int? ChannelId }`. Default: last 30 days, grouping Day.
 4. **Page command** `LOAD` taking `StatsFilter`, returning the report data. `ConfigureTemplateProperties` returns the default result + channel options (website + email channels from `ChannelInfo`) + activity type display names (`ActivityTypeInfo`).
@@ -69,5 +69,5 @@ Shareable across real customer projects: no DancingGoat-specific code in `src/`,
 
 - `npm run typecheck` and `npm run build` pass in `src/Kentico.Xperience.Labs.SimpleStats.Admin/Client`.
 - `dotnet build` of `Kentico.Xperience.Labs.SimpleStats.slnx` and `dotnet test` pass.
-- DancingGoat admin shows "Stats (Labs)" app with the report; filters reload data; chart/table toggle and CSV work. Visual check if the app can be run (see `docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say it was not checked.
+- DancingGoat admin shows "Simple Stats (Labs)" app with the report; filters reload data; chart/table toggle and CSV work. Visual check if the app can be run (see `docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say it was not checked.
 - `docs/Usage-Guide.md` updated briefly.

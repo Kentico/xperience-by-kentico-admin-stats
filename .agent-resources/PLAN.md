@@ -7,7 +7,7 @@ Planning notes for a Kentico Labs extension that shows basic charts and tables a
 - **Title:** Xperience by Kentico Labs: Simple Stats
 - **Repo:** `xperience-by-kentico-simple-stats`
 - **NuGet package:** `Kentico.Xperience.Labs.SimpleStats.Admin`
-- **Admin application name:** Stats (Labs)
+- **Admin application name:** Simple Stats (Labs)
 
 ## Scope
 
@@ -119,7 +119,7 @@ Notes:
 - Reference: the Community Portal reporting admin UI (`CommunityStatsLayoutTemplate.tsx` in the `Kentico/community-portal` repo), linked from the Admin Design Components README.
 - Stats should have their own application permissions to help administrators limit who has access to the information
 - **Permission per report page.** Today `StatsApplicationPage` declares only `SystemPermissions.VIEW`, and every report page checks VIEW. Change to one custom permission per report page:
-  - Declare each permission on the application page with `[UIPermission("<name>", "<display name>")]`, for example `SimpleStats.ActivityCounts` / "Activity counts". These show up in **Role management** for the Stats (Labs) application.
+  - Declare each permission on the application page with `[UIPermission("<name>", "<display name>")]`, for example `SimpleStats.ActivityCounts` / "Activity counts". These show up in **Role management** for the Simple Stats (Labs) application.
   - Keep `[UIPermission(SystemPermissions.VIEW)]` for access to the application itself.
   - Restrict each report page with `[UIEvaluatePermission("<name>")]`. It must be one of the permissions declared on the application, or it cannot be assigned to roles.
   - Set the same permission on each page's `LOAD` command (`[PageCommand(Permission = "<name>")]`) so the data can't be read without it.

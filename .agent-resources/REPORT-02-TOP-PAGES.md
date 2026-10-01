@@ -70,6 +70,6 @@ Shareable across real customer projects: no DancingGoat-specific code in `src/`,
 
 - `npm run typecheck` and `npm run build` pass in `src/Kentico.Xperience.Labs.SimpleStats.Admin/Client`.
 - `dotnet build` of `Kentico.Xperience.Labs.SimpleStats.slnx` and `dotnet test` pass. New builder + service tests.
-- DancingGoat admin: "Stats (Labs)" shows both "Activity counts" and "Top pages" in the nav; top pages filters reload data; chart/table toggle and CSV work; report 01 unchanged. Visual check if the app can be run (see `docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say it was not checked.
+- DancingGoat admin: "Simple Stats (Labs)" shows both "Activity counts" and "Top pages" in the nav; top pages filters reload data; chart/table toggle and CSV work; report 01 unchanged. Visual check if the app can be run (see `docs/Contributing-Setup.md`, `.vscode/tasks.json`); otherwise say it was not checked.
 - `docs/Usage-Guide.md` updated briefly.
 - Do not commit. Report: files changed, SQL used, column findings, what was / was not visually checked, anything skipped (e.g. admin links) and why.

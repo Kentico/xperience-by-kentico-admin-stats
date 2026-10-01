@@ -3,7 +3,7 @@ using Kentico.Xperience.Admin.Base;
 namespace Kentico.Xperience.Labs.SimpleStats.Admin.UIPages;
 
 /// <summary>
-/// Section of the "Stats (Labs)" application that groups reports. Shown in the application navigation,
+/// Section of the "Simple Stats (Labs)" application that groups reports. Shown in the application navigation,
 /// opens its first report the user may open, and hides the reports the user has no permission for.
 /// Sections have no permission of their own. A section without an allowed report redirects to <see cref="StatsNoReportsPage"/>.
 /// </summary>

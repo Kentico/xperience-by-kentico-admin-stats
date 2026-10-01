@@ -4,7 +4,7 @@ using Kentico.Xperience.Labs.SimpleStats.Admin.Shared;
 namespace Kentico.Xperience.Labs.SimpleStats.Admin.UIPages;
 
 /// <summary>
-/// Base of the "Stats (Labs)" report pages. Sends the permissions shared by all reports to the client and logs CSV exports.
+/// Base of the "Simple Stats (Labs)" report pages. Sends the permissions shared by all reports to the client and logs CSV exports.
 /// </summary>
 public abstract class StatsReportPage<TClientProperties>(
     IUIPermissionEvaluator permissionEvaluator,

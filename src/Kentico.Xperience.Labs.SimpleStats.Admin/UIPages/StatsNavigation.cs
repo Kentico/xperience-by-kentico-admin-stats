@@ -6,7 +6,7 @@ using Kentico.Xperience.Admin.Base;
 namespace Kentico.Xperience.Labs.SimpleStats.Admin.UIPages;
 
 /// <summary>
-/// Hides the Stats (Labs) pages the current user may not open.
+/// Hides the Simple Stats (Labs) pages the current user may not open.
 /// The product builds child routes and navigation items without evaluating permissions, and its default route
 /// is the first child route, so a role with only some report permissions would see denied reports and land on a 403.
 /// </summary>

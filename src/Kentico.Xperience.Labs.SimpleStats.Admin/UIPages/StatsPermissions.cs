@@ -1,7 +1,7 @@
 namespace Kentico.Xperience.Labs.SimpleStats.Admin.UIPages;
 
 /// <summary>
-/// Custom permissions of the "Stats (Labs)" application: one per report page, plus <see cref="EXPORT"/>.
+/// Custom permissions of the "Simple Stats (Labs)" application: one per report page, plus <see cref="EXPORT"/>.
 /// Names are stored in role assignments, so do not change them.
 /// </summary>
 public static class StatsPermissions

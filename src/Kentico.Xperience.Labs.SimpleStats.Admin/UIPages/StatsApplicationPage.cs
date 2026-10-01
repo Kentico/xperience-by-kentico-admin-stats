@@ -8,7 +8,7 @@ using Kentico.Xperience.Labs.SimpleStats.Admin.UIPages;
     identifier: StatsApplicationPage.IDENTIFIER,
     type: typeof(StatsApplicationPage),
     slug: "simple-stats",
-    name: "Stats (Labs)",
+    name: "Simple Stats (Labs)",
     category: BaseApplicationCategories.DIGITAL_MARKETING,
     icon: Icons.Graph,
     templateName: TemplateNames.SECTION_LAYOUT)]
@@ -16,7 +16,7 @@ using Kentico.Xperience.Labs.SimpleStats.Admin.UIPages;
 namespace Kentico.Xperience.Labs.SimpleStats.Admin.UIPages;
 
 /// <summary>
-/// "Stats (Labs)" admin application. Reports are grouped into <see cref="StatsSectionPage"/> sections.
+/// "Simple Stats (Labs)" admin application. Reports are grouped into <see cref="StatsSectionPage"/> sections.
 /// Assign the View permission to roles that may open the application,
 /// plus one <see cref="StatsPermissions"/> permission per report the role may see, and optionally <see cref="StatsPermissions.EXPORT"/>.
 /// </summary>

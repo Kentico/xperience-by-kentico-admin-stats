@@ -3,7 +3,7 @@ import React from 'react';
 
 import '../shared/stats.css';
 
-/** Shown when the role may open Stats (Labs) but has no permission for any report. */
+/** Shown when the role may open Simple Stats (Labs) but has no permission for any report. */
 export const NoReportsTemplate = () => (
   <div className="SimpleStats-root">
     <Callout
@@ -12,7 +12,7 @@ export const NoReportsTemplate = () => (
       headline="No reports available"
     >
       <p>
-        Your role has no permission for any Stats (Labs) report. Ask an administrator to add a report
+        Your role has no permission for any Simple Stats (Labs) report. Ask an administrator to add a report
         permission to your role in Role management.
       </p>
     </Callout>

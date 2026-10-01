@@ -7,7 +7,7 @@
 
 ## Application
 
-The library adds the **Stats (Labs)** application to the **Digital marketing** category.
+The library adds the **Simple Stats (Labs)** application to the **Digital marketing** category.
 
 ## Navigation
 
@@ -26,7 +26,7 @@ Sections have no permission of their own. A section is hidden when the role has 
 ## Permissions
 
 - Administrators see the application and all reports by default.
-- For other roles, open **Role management**, select the role, and edit its permissions for **Stats (Labs)**:
+- For other roles, open **Role management**, select the role, and edit its permissions for **Simple Stats (Labs)**:
   - **View** - opens the application.
   - One permission per report. The role sees only the reports it has a permission for. Other reports are hidden from the navigation and return an error if opened by URL.
   - **Export** - shows the **Export CSV** buttons in all reports the role can see. Without it, the buttons are hidden.

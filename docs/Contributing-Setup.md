@@ -47,7 +47,7 @@ documentation on [creating a new database](https://docs.kentico.com/documentatio
 
 ### Admin Customization
 
-`examples/DancingGoat/appsettings.Development.json` runs the Admin customization in Proxy mode, so the admin loads the client from the `npm: watch - Admin/Client` dev server. Keep that task running while DancingGoat runs, or the Stats (Labs) pages will not load. To use the built `Client/dist` bundle instead, remove this section (a rebuild and restart of DancingGoat is then needed to see client changes).
+`examples/DancingGoat/appsettings.Development.json` runs the Admin customization in Proxy mode, so the admin loads the client from the `npm: watch - Admin/Client` dev server. Keep that task running while DancingGoat runs, or the Simple Stats (Labs) pages will not load. To use the built `Client/dist` bundle instead, remove this section (a rebuild and restart of DancingGoat is then needed to see client changes).
 
 ```json
 "CMSAdminClientModuleSettings": {

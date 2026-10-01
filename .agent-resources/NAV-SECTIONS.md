@@ -1,6 +1,6 @@
 # Navigation sections
 
-8 reports now sit flat under the Stats (Labs) application. Group them into section pages with nested navigation, like the native Content types app ("Content types > Asset configurations > Mass asset upload").
+8 reports now sit flat under the Simple Stats (Labs) application. Group them into section pages with nested navigation, like the native Content types app ("Content types > Asset configurations > Mass asset upload").
 
 ## Product pattern (decompiled `Kentico.Xperience.Admin.Base` 31.9, verified)
 
