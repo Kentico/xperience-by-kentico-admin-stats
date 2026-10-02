@@ -16,7 +16,7 @@ Reports are grouped into sections. Opening the application or a section opens it
 | Section  | Reports                                                                                    |
 | -------- | ------------------------------------------------------------------------------------------ |
 | Contacts | Activity counts, Top pages, New contacts, Form submissions, Member registrations, Consents |
-| Emails   | Recipient lists                                                                            |
+| Emails   | Email summary, Recipient lists                                                             |
 | Content  | Content inventory                                                                          |
 | Commerce | Orders and revenue, Customers                                                              |
 | System   | Event log                                                                                  |
@@ -43,6 +43,7 @@ Sections have no permission of their own. A section is hidden when the role has 
 | Customers            | `SimpleStats.Customers`        |
 | Member registrations | `SimpleStats.Members`          |
 | Consents             | `SimpleStats.Consents`         |
+| Email summary        | `SimpleStats.EmailSummary`     |
 | Recipient lists      | `SimpleStats.RecipientLists`   |
 | Export               | `SimpleStats.Export`           |
 
@@ -135,6 +136,32 @@ Shows [consent](https://docs.kentico.com/documentation/developers-and-admins/dat
 - Each tile has its own CSV export.
 
 The report reads the stored agreements only and compares consent texts by hash, not by content. Deleting a contact also deletes its consent agreements, also for past days, so numbers can be lower than they were. Revoking can trigger data erasure in projects that handle it. When the consent tables do not exist, the report is empty.
+
+### Email summary
+
+Shows the [email statistics](https://docs.kentico.com/documentation/business-users/digital-marketing/emails/track-email-statistics) of regular emails sent in a date range: totals, each email, top and bottom performers, email activity over time and automated emails.
+
+- **Definitions**
+  - **Sent in range** - regular emails whose send date (the **Send date** of the native email list) is in the range and that are sent or sending. Drafts and scheduled emails are left out. This sets the scope of the KPIs, the email table and the top and bottom performers.
+  - **Email numbers** - the lifetime totals of the email statistics, the same numbers as the email's **Statistics** tab. Opens and clicks that come after the range still count for an email sent in the range. The statistics are recalculated by a scheduled task (or **Refresh** on the Statistics tab), so the newest opens and clicks can be missing.
+  - **Open rate** / **click rate** - unique opens or clicks divided by delivered, like the Statistics tab. The native email list divides by sent, so it can show a slightly lower rate. A click counts as an open. Rates can be over 100% when recipients open or click without a recorded send; the report shows them as they are.
+  - **Delivery rate** - delivered divided by sent. **Unsubscribe rate**, bounces and spam reports are divided by sent, like the Statistics tab.
+  - **Range totals** - sums of the emails' numbers; rates are sums divided by sums (for example all unique opens divided by all delivered), not averages of the email rates. A rate is "–" when its denominator is 0. Rate changes are in percentage points ("pp").
+  - **Bounces and spam reports** - read from the email statistics, which the delivery provider fills (for example SendGrid). They are "–" when the provider does not track them, left out of the sums, and the KPI or column is hidden when no email has them.
+  - **Email activity over time** - from the raw statistics records of all emails (regular and automated), by when recipients acted, not by send date: sent emails, and recipients with at least one open (or click), click or unsubscribe in the period. A recipient who acts in two periods counts in both.
+  - **Top and bottom performers** - the 5 regular emails sent in the range with the highest and the 5 with the lowest open rate or click rate. Emails with fewer than 10 delivered are left out. With fewer than 10 emails, the bottom list leaves out the emails already in the top list.
+  - **Automated emails** - emails of every other purpose (automation, form autoresponders, confirmations, commerce) with statistics. Their numbers are lifetime totals, not limited to the range; only **Sent in range** counts sends in the range.
+- **KPIs** - emails sent, sent, open rate, click rate; delivery rate, hard bounces, unsubscribe rate and spam reports. Each vs the regular emails sent in the previous period of the same length.
+- **Filters** - date range, grouping and email channel (shown with more than one email channel).
+- **Tiles**
+  - "Email activity over time" - columns per period (sent, unique opens, unique clicks, unsubscribes), or a table.
+  - "Emails sent in range" - each email with send date, sent, delivered, open rate, click rate, hard bounces and unsubscribes, or a bar chart of open rates. Click an email to open its native **Statistics** tab.
+  - "Top and bottom performers" - open rate / click rate switch.
+  - "Automated emails" - lifetime table with a link to each email's Statistics tab.
+- **Open emails** - opens the native email list of the email channel (shown when one channel is selected or there is only one).
+- Each tile has its own CSV export.
+
+Deleting an email deletes its statistics. When the email tables do not exist, the report is empty. The activity series reads the statistics records by time; on sites with a very large number of sends, long ranges take longer.
 
 ### Recipient lists
 
@@ -295,6 +322,7 @@ A handler exception is logged and does not fail the export. Handlers run one aft
 | Form submissions     | `form-submissions`, `form-submissions-by-form`                                                                                                                                                               |
 | Member registrations | `members-growth`, `members-sign-in-type`, `members-by-role`                                                                                                                                                  |
 | Consents             | `consents-events`, `consents-agreed-contacts`, `consents`, `consents-text-versions`                                                                                                                          |
+| Email summary        | `email-summary-activity`, `email-summary-emails`, `email-summary-performers`, `email-summary-automated`                                                                                                      |
 | Recipient lists      | `recipient-lists-events`, `recipient-lists-subscribers`, `recipient-lists`, `recipient-lists-status`                                                                                                         |
 | Content inventory    | `content-inventory-types`, `content-inventory-status`, `content-inventory-age`, `content-inventory-oldest`, `content-inventory-workflow`, `content-inventory-unused-reusable`, `content-inventory-languages` |
 | Orders and revenue   | `orders-revenue`, `orders-by-status`, `orders-top-products`                                                                                                                                                  |

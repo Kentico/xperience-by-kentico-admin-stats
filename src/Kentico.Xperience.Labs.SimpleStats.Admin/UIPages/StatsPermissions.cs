@@ -38,6 +38,9 @@ public static class StatsPermissions
     public const string CONSENTS = PREFIX + "Consents";
     public const string CONSENTS_DISPLAY_NAME = "Consents";
 
+    public const string EMAIL_SUMMARY = PREFIX + "EmailSummary";
+    public const string EMAIL_SUMMARY_DISPLAY_NAME = "Email summary";
+
     public const string RECIPIENT_LISTS = PREFIX + "RecipientLists";
     public const string RECIPIENT_LISTS_DISPLAY_NAME = "Recipient lists";
 

@@ -26,16 +26,24 @@ export interface RankedTableProps {
    * Default `false`: the secondary label shows only in chart tooltips and CSV.
    */
   readonly showSecondaryLabel?: boolean;
+  /** Shows the share column. Hide it when values do not add up (for example rates). Default `true`. */
+  readonly showShare?: boolean;
 }
 
 /**
  * Ranked list as a native admin table: rank, label (link when the item has a URL or admin link),
- * optional secondary label, value, optional secondary and third value, optional previous period value and change, and share.
+ * optional secondary label, value, optional secondary and third value, optional previous period value and change, and optional share.
  * Uses the same cell types as the other report tables (string cells, plus the admin link cell),
  * so rows keep the native single-line layout. The admin table has no column alignment option,
  * so numbers are left aligned like in other admin listings.
  */
-export const RankedTable = ({ items, captions, getAdminHref, showSecondaryLabel = false }: RankedTableProps) => {
+export const RankedTable = ({
+  items,
+  captions,
+  getAdminHref,
+  showSecondaryLabel = false,
+  showShare = true,
+}: RankedTableProps) => {
   const showSecondaryLabelColumn = showSecondaryLabel && Boolean(captions.secondaryLabel);
   const showSecondaryValue = Boolean(captions.secondaryValue);
   const showTertiaryValue = Boolean(captions.tertiaryValue);
@@ -52,9 +60,9 @@ export const RankedTable = ({ items, captions, getAdminHref, showSecondaryLabel 
       ...(showTertiaryValue ? [column('tertiaryValue', captions.tertiaryValue ?? '', 10, 16)] : []),
       ...(showPreviousValue ? [column('previousValue', captions.previousValue ?? '', 12, 20)] : []),
       ...(showChange ? [column('change', captions.change ?? '', 10, 14)] : []),
-      column('share', 'Share', 10, 14),
+      ...(showShare ? [column('share', 'Share', 10, 14)] : []),
     ],
-    [captions, showSecondaryLabelColumn, showSecondaryValue, showTertiaryValue, showPreviousValue, showChange],
+    [captions, showSecondaryLabelColumn, showSecondaryValue, showTertiaryValue, showPreviousValue, showChange, showShare],
   );
 
   const rows = useMemo<TableRow[]>(
@@ -77,7 +85,7 @@ export const RankedTable = ({ items, captions, getAdminHref, showSecondaryLabel 
             ? [stringCell('previousValue', formatValue(item.previousValue, captions.valueKind, item.previousValueText))]
             : []),
           ...(showChange ? [stringCell('change', formatItemChange(item))] : []),
-          stringCell('share', formatShare(item.share)),
+          ...(showShare ? [stringCell('share', formatShare(item.share))] : []),
         ],
       })),
     [
@@ -90,6 +98,7 @@ export const RankedTable = ({ items, captions, getAdminHref, showSecondaryLabel 
       showTertiaryValue,
       showPreviousValue,
       showChange,
+      showShare,
       getAdminHref,
     ],
   );

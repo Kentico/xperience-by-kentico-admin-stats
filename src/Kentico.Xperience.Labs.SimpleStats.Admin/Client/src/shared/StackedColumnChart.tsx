@@ -11,18 +11,24 @@ export interface StackedColumnChartProps {
   readonly series: readonly StatsSeries[];
   /** Accessible name for the chart. */
   readonly ariaLabel: string;
+  /**
+   * Stacks the series (default). With `false`, the series stand side by side in each period, for series that overlap
+   * (for example sent emails, opens and clicks).
+   */
+  readonly stacked?: boolean;
 }
 
 type ChartRow = Record<string, string | number>;
 
 /**
- * Stacked column chart (amCharts 5): one column per period, one stack segment per series.
+ * Column chart (amCharts 5): one column per period, one stack segment per series (or one column per series side by side, see `stacked`).
  * The root is created in `useLayoutEffect` and disposed on unmount or data change.
  */
 export const StackedColumnChart = React.memo(function StackedColumnChart({
   periods,
   series: seriesProp,
   ariaLabel,
+  stacked = true,
 }: StackedColumnChartProps) {
   const series = useStableValue(seriesProp);
   const chartId = `stats-chart-${useId().replace(/:/g, '')}`;
@@ -114,7 +120,7 @@ export const StackedColumnChart = React.memo(function StackedColumnChart({
           name: item.name,
           xAxis,
           yAxis,
-          stacked: true,
+          stacked,
           categoryXField: 'category',
           valueYField: `s${index}`,
           tooltip,
@@ -152,7 +158,7 @@ export const StackedColumnChart = React.memo(function StackedColumnChart({
     return () => {
       root.dispose();
     };
-  }, [chartId, data, series]);
+  }, [chartId, data, series, stacked]);
 
   return (
     <div

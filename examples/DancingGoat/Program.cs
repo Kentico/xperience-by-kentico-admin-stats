@@ -81,6 +81,8 @@ if (builder.Environment.IsDevelopment())
 
     // System emails (admin user invitations, password resets) go to a local SMTP catcher, see docs/Contributing-Setup.md
     builder.Services.AddXperienceSystemSmtp(options => builder.Configuration.GetSection("SystemSmtpOptions").Bind(options));
+    // Email channel sends go to the same catcher, so local sends log real statistics hits
+    builder.Services.AddXperienceChannelSmtp("DancingGoatEmails", options => builder.Configuration.GetSection("SystemSmtpOptions").Bind(options));
     builder.Services.Configure<SystemEmailOptions>(builder.Configuration.GetSection("SystemEmailOptions"));
 }
 
