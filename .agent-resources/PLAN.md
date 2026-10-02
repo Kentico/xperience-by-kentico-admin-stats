@@ -34,7 +34,7 @@ Design goals:
 | Top referrers                       | Contact activities (referrer field) | Only where a referrer was recorded                                             |
 | New contacts over time              | Contacts (created date)             | Include the ratio of identified contacts (with email) to anonymous contacts    |
 | Form submissions per form over time | Form data tables                    | One query per form; ranked list of most and least used forms                   |
-| Email summary across all emails     | Email statistics                    | Sends, open rate, click rate, bounces, unsubscribes; top and bottom performers |
+| Email summary across all emails     | Email statistics                    | Sends, open rate, click rate, bounces, unsubscribes; top and bottom performers. Spec: `.agent-resources/REPORT-12-EMAIL-SUMMARY.md` |
 
 ### Later candidates
 

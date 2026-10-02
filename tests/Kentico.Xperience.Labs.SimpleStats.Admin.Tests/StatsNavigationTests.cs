@@ -17,6 +17,7 @@ public class StatsNavigationTests
         StatsPermissions.CUSTOMERS,
         StatsPermissions.MEMBERS,
         StatsPermissions.CONSENTS,
+        StatsPermissions.EMAIL_SUMMARY,
         StatsPermissions.RECIPIENT_LISTS,
     ];
 
@@ -35,7 +36,7 @@ public class StatsNavigationTests
     }
 
     [TestCase(typeof(StatsContactsSection), new[] { "activity-counts", "top-pages", "new-contacts", "form-submissions", "members", "consents" })]
-    [TestCase(typeof(StatsEmailsSection), new[] { "recipient-lists" })]
+    [TestCase(typeof(StatsEmailsSection), new[] { "email-summary", "recipient-lists" })]
     [TestCase(typeof(StatsContentSection), new[] { "content-inventory" })]
     [TestCase(typeof(StatsCommerceSection), new[] { "orders-revenue", "customers" })]
     [TestCase(typeof(StatsSystemSection), new[] { "event-log" })]
@@ -125,18 +126,49 @@ public class StatsNavigationTests
         Assert.Multiple(() =>
         {
             Assert.That(deniedSections, Is.EquivalentTo(new[] { "contacts", "content", "commerce", "system" }));
-            Assert.That(deniedReports, Is.Empty);
+            Assert.That(deniedReports, Is.EquivalentTo(new[] { "email-summary" }));
             Assert.That(StatsNavigation.GetDefaultRoute(ChildRoutes(typeof(StatsApplicationPage)), deniedSections)?.Path, Is.EqualTo("emails"));
             Assert.That(StatsNavigation.GetDefaultRoute(ChildRoutes(typeof(StatsEmailsSection)), deniedReports)?.Path, Is.EqualTo("recipient-lists"));
         });
     }
 
     [Test]
-    public async Task WithoutRecipientLists_HidesEmailsSection()
+    public async Task OnlyEmailSummary_ShowsOnlyEmailsSection_AndOpensEmailSummary()
+    {
+        var isGranted = Granted(StatsPermissions.EMAIL_SUMMARY);
+
+        var deniedSections = await StatsNavigation.GetDeniedChildSlugs(typeof(StatsApplicationPage), isGranted);
+        var deniedReports = await StatsNavigation.GetDeniedChildSlugs(typeof(StatsEmailsSection), isGranted);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(deniedSections, Is.EquivalentTo(new[] { "contacts", "content", "commerce", "system" }));
+            Assert.That(deniedReports, Is.EquivalentTo(new[] { "recipient-lists" }));
+            Assert.That(StatsNavigation.GetDefaultRoute(ChildRoutes(typeof(StatsApplicationPage)), deniedSections)?.Path, Is.EqualTo("emails"));
+            Assert.That(StatsNavigation.GetDefaultRoute(ChildRoutes(typeof(StatsEmailsSection)), deniedReports)?.Path, Is.EqualTo("email-summary"));
+        });
+    }
+
+    [Test]
+    public async Task BothEmailReports_OpensEmailSummaryFirst()
+    {
+        var isGranted = Granted(StatsPermissions.EMAIL_SUMMARY, StatsPermissions.RECIPIENT_LISTS);
+
+        var deniedReports = await StatsNavigation.GetDeniedChildSlugs(typeof(StatsEmailsSection), isGranted);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(deniedReports, Is.Empty);
+            Assert.That(StatsNavigation.GetDefaultRoute(ChildRoutes(typeof(StatsEmailsSection)), deniedReports)?.Path, Is.EqualTo("email-summary"));
+        });
+    }
+
+    [Test]
+    public async Task WithoutEmailReports_HidesEmailsSection()
     {
         var denied = await StatsNavigation.GetDeniedChildSlugs(
             typeof(StatsApplicationPage),
-            Granted([.. allPermissions.Where(p => p != StatsPermissions.RECIPIENT_LISTS)]));
+            Granted([.. allPermissions.Where(p => p is not StatsPermissions.RECIPIENT_LISTS and not StatsPermissions.EMAIL_SUMMARY)]));
 
         Assert.That(denied, Is.EquivalentTo(new[] { "emails" }));
     }

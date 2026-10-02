@@ -5,6 +5,7 @@ using Kentico.Xperience.Labs.SimpleStats.Admin.Reports.ActivityCounts;
 using Kentico.Xperience.Labs.SimpleStats.Admin.Reports.Consents;
 using Kentico.Xperience.Labs.SimpleStats.Admin.Reports.ContentInventory;
 using Kentico.Xperience.Labs.SimpleStats.Admin.Reports.Customers;
+using Kentico.Xperience.Labs.SimpleStats.Admin.Reports.EmailSummary;
 using Kentico.Xperience.Labs.SimpleStats.Admin.Reports.EventLog;
 using Kentico.Xperience.Labs.SimpleStats.Admin.Reports.FormSubmissions;
 using Kentico.Xperience.Labs.SimpleStats.Admin.Reports.Members;
@@ -72,6 +73,8 @@ internal sealed class SimpleStatsWebAdminModule : AdminModule
         services.TryAddTransient<IConsentsService, ConsentsService>();
         services.TryAddTransient<IRecipientListsRepository, RecipientListsRepository>();
         services.TryAddTransient<IRecipientListsService, RecipientListsService>();
+        services.TryAddTransient<IEmailSummaryRepository, EmailSummaryRepository>();
+        services.TryAddTransient<IEmailSummaryService, EmailSummaryService>();
         services.TryAddTransient<IStatsUserIdAccessor, StatsUserIdAccessor>();
         services.TryAddTransient<IStatsExportEventPublisher, StatsExportEventPublisher>();
     }

@@ -40,6 +40,9 @@ const minHeight = 160;
 const labelWidthRatio = 0.4;
 const minLabelWidth = 120;
 
+/** Tick step of the value axis for ratios (20%). */
+const ratioStep = 0.2;
+
 /** amCharts reads `[...]` as text formatting; double the brackets so data shows as typed. */
 function escapeChartText(text: string): string {
   return text.replace(/\[/g, '[[').replace(/\]/g, ']]');
@@ -102,6 +105,7 @@ export const RankedBarChart = React.memo(function RankedBarChart({
     // Value labels at the bar ends and axis labels, formatted by the value kind (counts as before).
     root.numberFormatter.set('numberFormat', captions.valueKind ? chartNumberFormat(captions.valueKind) : '#,###');
 
+    const isRatio = captions.valueKind === 'Ratio';
     const tokens = getChartTokens();
     const barColor = getSeriesPalette()[0];
     const highlightValue = resolveToken(Colors.AlertBackgroundHighEmphasis);
@@ -115,7 +119,8 @@ export const RankedBarChart = React.memo(function RankedBarChart({
         wheelY: 'none',
         layout: root.verticalLayout,
         paddingLeft: 0,
-        paddingRight: 0,
+        // Room for the last value axis label (centered on the right edge) and, for ratios, a bar-end label near the end of the fixed scale.
+        paddingRight: isRatio ? 44 : 24,
       }),
     );
     chart.zoomOutButton.set('forceHidden', true);
@@ -174,15 +179,42 @@ export const RankedBarChart = React.memo(function RankedBarChart({
     xRenderer.labels.template.setAll({ fill: tokens.textLow, fontSize: 12 });
     xRenderer.grid.template.setAll({ stroke: tokens.grid, strokeOpacity: 1 });
 
+    // Ratios use a fixed 0-100% scale (more when a rate is over 100%) with a tick every 20%.
+    const ratioMax = isRatio
+      ? Math.max(1, Math.ceil(Math.max(0, ...data.map((row) => row.value)) / ratioStep - 1e-9) * ratioStep)
+      : 0;
+    if (isRatio) {
+      // The axis's own grid would pick its own steps; ticks are drawn as axis ranges below.
+      xRenderer.labels.template.set('forceHidden', true);
+      xRenderer.grid.template.set('forceHidden', true);
+    }
+
     const xAxis = chart.xAxes.push(
       am5xy.ValueAxis.new(root, {
         min: 0,
-        maxPrecision: 0,
-        // Room for the value labels at the bar ends.
-        extraMax: 0.12,
+        ...(isRatio
+          ? { max: ratioMax, strictMinMax: true }
+          : {
+              maxPrecision: 0,
+              // Room for the value labels at the bar ends.
+              extraMax: 0.12,
+            }),
         renderer: xRenderer,
       }),
     );
+
+    if (isRatio) {
+      for (let step = 0; step * ratioStep <= ratioMax + 1e-9; step++) {
+        const range = xAxis.createAxisRange(xAxis.makeDataItem({ value: step * ratioStep }));
+        range.get('grid')?.setAll({ stroke: tokens.grid, strokeOpacity: 1, forceHidden: false });
+        range.get('label')?.setAll({
+          text: `${Math.round(step * ratioStep * 100)}%`,
+          fill: tokens.textLow,
+          fontSize: 12,
+          forceHidden: false,
+        });
+      }
+    }
 
     const series = chart.series.push(
       am5xy.ColumnSeries.new(root, {
@@ -191,6 +223,8 @@ export const RankedBarChart = React.memo(function RankedBarChart({
         yAxis,
         categoryYField: 'key',
         valueXField: 'value',
+        // The fixed ratio scale has no extra room, so bar-end labels may draw past the plot area.
+        maskBullets: !isRatio,
         tooltip: createTooltip(),
       }),
     );

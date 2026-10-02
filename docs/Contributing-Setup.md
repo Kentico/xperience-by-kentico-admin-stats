@@ -69,6 +69,8 @@ docker run -d --name mailpit --restart unless-stopped -p 1025:1025 -p 8025:8025 
 
 `SystemEmailOptions.ServiceDomain` is `localhost:48896` (required for invitations; the request host fallback is not used while `AllowedHosts` is `*`). Check delivery in **Email queue → Send test email**.
 
+Emails from the `DancingGoatEmails` channel (newsletters, autoresponders) go to the same catcher, so local sends log real email statistics for the Email summary report.
+
 ## Development Workflow
 
 1. Create a new branch with one of the following prefixes

@@ -3,6 +3,7 @@ import { ActivityCountsTemplate as ActivityCounts } from './activity-counts/Acti
 import { ConsentsTemplate as Consents } from './consents/ConsentsTemplate';
 import { ContentInventoryTemplate as ContentInventory } from './content-inventory/ContentInventoryTemplate';
 import { CustomersTemplate as Customers } from './customers/CustomersTemplate';
+import { EmailSummaryTemplate as EmailSummary } from './email-summary/EmailSummaryTemplate';
 import { EventLogTemplate as EventLog } from './event-log/EventLogTemplate';
 import { FormSubmissionsTemplate as FormSubmissions } from './form-submissions/FormSubmissionsTemplate';
 import { MembersTemplate as Members } from './members/MembersTemplate';
@@ -23,6 +24,7 @@ export const OrdersRevenueTemplate = withExportPermission(OrdersRevenue);
 export const CustomersTemplate = withExportPermission(Customers);
 export const MembersTemplate = withExportPermission(Members);
 export const ConsentsTemplate = withExportPermission(Consents);
+export const EmailSummaryTemplate = withExportPermission(EmailSummary);
 export const RecipientListsTemplate = withExportPermission(RecipientLists);
 
 export { NoReportsTemplate } from './no-reports/NoReportsTemplate';

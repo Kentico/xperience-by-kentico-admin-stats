@@ -13,7 +13,7 @@ using Kentico.Xperience.Labs.SimpleStats.Admin.UIPages;
 namespace Kentico.Xperience.Labs.SimpleStats.Admin.UIPages;
 
 /// <summary>
-/// Email marketing reports: recipient lists.
+/// Email marketing reports: email summary and recipient lists.
 /// </summary>
 public sealed class StatsEmailsSection(
     IUIPermissionEvaluator permissionEvaluator,
